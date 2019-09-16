@@ -22,6 +22,7 @@ class DatastoreTests: XCTestCase {
             }
         }
     }
+    
     func testCreation() {
         let loaded = expectation(description: "loaded")
         loadAndCheck { (datastore) in
@@ -31,16 +32,57 @@ class DatastoreTests: XCTestCase {
     }
 
     func testEntityCreation() {
-        let loaded = expectation(description: "loaded")
+        let created = expectation(description: "loaded")
         loadAndCheck { (datastore) in
             datastore.getEntities(ofType: "Person", names: ["Person 1"]) { (people) in
                 XCTAssertEqual(people.count, 1)
                 let person = people[0]
                 XCTAssertEqual(person.name, "Person 1")
-                loaded.fulfill()
+                created.fulfill()
             }
         }
-        wait(for: [loaded], timeout: 1.0)
+        wait(for: [created], timeout: 1.0)
     }
     
+    func testGetProperties() {
+        let done = expectation(description: "loaded")
+        loadAndCheck { (datastore) in
+            datastore.getEntities(ofType: "Person", names: ["Person 1"]) { (people) in
+                let person = people[0]
+                
+                let context = datastore.container.viewContext
+                let label = Label.named("foo", in: context)
+                let property = StringProperty(context: context)
+                property.value = "bar"
+                property.label = label
+                property.owner = person
+                
+                datastore.getProperties(ofEntities: [person], withNames: ["foo"]) { (results) in
+                    XCTAssertEqual(results.count, 1)
+                    let properties = results[0]
+                    XCTAssertEqual(properties["foo"] as? String, "bar")
+                }
+                done.fulfill()
+            }
+        }
+        wait(for: [done], timeout: 1.0)
+    }
+
+    func testAddProperties() {
+        let done = expectation(description: "loaded")
+        loadAndCheck { (datastore) in
+            datastore.getEntities(ofType: "Person", names: ["Person 1"]) { (people) in
+                let person = people[0]
+                datastore.add(properties: [person:["foo": "bar"]]) { () in
+                    datastore.getProperties(ofEntities: [person], withNames: ["foo"]) { (results) in
+                        XCTAssertEqual(results.count, 1)
+                        let properties = results[0]
+                        XCTAssertEqual(properties["foo"] as? String, "bar")
+                    }
+                }
+                done.fulfill()
+            }
+        }
+        wait(for: [done], timeout: 1.0)
+    }
 }

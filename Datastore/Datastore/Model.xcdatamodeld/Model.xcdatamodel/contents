@@ -5,7 +5,7 @@
         <attribute name="modified" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="name" optional="YES" attributeType="String"/>
         <attribute name="uuid" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
-        <relationship name="strings" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="StringProperty" inverseName="owner" inverseEntity="StringProperty"/>
+        <relationship name="strings" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="StringProperty" inverseName="owner" inverseEntity="StringProperty"/>
         <relationship name="type" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Label" inverseName="entities" inverseEntity="Label"/>
     </entity>
     <entity name="Label" representedClassName=".Label" syncable="YES" codeGenerationType="class">
@@ -15,18 +15,13 @@
         <relationship name="strings" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="StringProperty" inverseName="label" inverseEntity="StringProperty"/>
     </entity>
     <entity name="StringProperty" representedClassName=".StringProperty" syncable="YES" codeGenerationType="class">
-        <relationship name="label" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Label" inverseName="strings" inverseEntity="Label"/>
-        <relationship name="owner" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Entity" inverseName="strings" inverseEntity="Entity"/>
-        <relationship name="value" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="StringValue" inverseName="property" inverseEntity="StringValue"/>
-    </entity>
-    <entity name="StringValue" representedClassName=".StringValue" syncable="YES" codeGenerationType="class">
-        <attribute name="value" attributeType="String"/>
-        <relationship name="property" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="StringProperty" inverseName="value" inverseEntity="StringProperty"/>
+        <attribute name="value" attributeType="String" defaultValueString=""/>
+        <relationship name="label" maxCount="1" deletionRule="Nullify" destinationEntity="Label" inverseName="strings" inverseEntity="Label"/>
+        <relationship name="owner" maxCount="1" deletionRule="Nullify" destinationEntity="Entity" inverseName="strings" inverseEntity="Entity"/>
     </entity>
     <elements>
         <element name="Entity" positionX="-63" positionY="-18" width="128" height="133"/>
         <element name="Label" positionX="-54" positionY="-9" width="128" height="103"/>
-        <element name="StringValue" positionX="-27" positionY="54" width="128" height="73"/>
         <element name="StringProperty" positionX="-9" positionY="63" width="128" height="88"/>
     </elements>
 </model>

@@ -86,6 +86,42 @@ public class Datastore {
         getEntities(ofType: getLabel(type), names: names, createIfMissing: createIfMissing, completion: completion)
     }
 
+    public func getProperties(ofEntities entities: [Entity], withNames names: Set<String>, completion: @escaping ([[String:Any]]) -> Void) {
+        let context = container.viewContext
+        context.perform {
+            var result: [[String:Any]] = []
+            for entity in entities {
+                var values: [String:Any] = [:]
+                if let strings = entity.strings as? Set<StringProperty> {
+                    for property in strings {
+                        if let name = property.label?.name, names.contains(name) {
+                            values[name] = property.value
+                        }
+                    }
+                }
+                result.append(values)
+            }
+            completion(result)
+        }
+    }
+
+    public func add(properties: [Entity: [String:Any]], completion: @escaping () -> Void) {
+        let context = container.viewContext
+        context.perform {
+            for (entity, values) in properties {
+                for (key, value) in values {
+                    if let string = value as? String {
+                        let property = StringProperty(context: context)
+                        property.value = string
+                        property.label = Label.named(key, in: context)
+                        property.owner = entity
+                    }
+                }
+            }
+            completion()
+        }
+    }
+    
     public class func model(bundle: Bundle = Bundle(for: Datastore.self), cached: Bool = true) -> NSManagedObjectModel? {
         if cached && (cachedModel != nil) {
             return cachedModel
