@@ -19,9 +19,20 @@ class DatastoreTests: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
 
-    func testExample() {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
+    func testCreation() {
+        let loaded = expectation(description: "loaded")
+        Datastore.load(name: "Test") { (result) in
+            switch result {
+            case .failure(let error):
+                XCTFail("\(error)")
+            
+            case .success(let store):
+                loaded.fulfill()
+//                let person = store.getEntity(named: "Test", kind: "Person")
+            }
+        }
+
+        wait(for: [loaded], timeout: 1.0)
     }
 
     func testPerformanceExample() {

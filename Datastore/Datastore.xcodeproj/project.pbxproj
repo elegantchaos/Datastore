@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -11,6 +11,12 @@
 		8BFF2E6F232F85E200D40D31 /* DatastoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFF2E6E232F85E200D40D31 /* DatastoreTests.swift */; };
 		8BFF2E71232F85E200D40D31 /* Datastore.h in Headers */ = {isa = PBXBuildFile; fileRef = 8BFF2E63232F85E200D40D31 /* Datastore.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		8BFF2E7C232F864200D40D31 /* Model.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 8BFF2E7A232F864200D40D31 /* Model.xcdatamodeld */; };
+		8BFF2E7E232F8A1D00D40D31 /* Datastore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFF2E7D232F8A1D00D40D31 /* Datastore.swift */; };
+		8BFF2E82232F8B2B00D40D31 /* NSManagedObjectExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFF2E7F232F8B2B00D40D31 /* NSManagedObjectExtensions.swift */; };
+		8BFF2E83232F8B2B00D40D31 /* NSEntityDescriptionExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFF2E80232F8B2B00D40D31 /* NSEntityDescriptionExtensions.swift */; };
+		8BFF2E84232F8B2B00D40D31 /* NSManagedObjectContextExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFF2E81232F8B2B00D40D31 /* NSManagedObjectContextExtensions.swift */; };
+		8BFF2E86232F8CD200D40D31 /* Entity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFF2E85232F8CD200D40D31 /* Entity.swift */; };
+		8BFF2E89232F90EF00D40D31 /* Logger in Frameworks */ = {isa = PBXBuildFile; productRef = 8BFF2E88232F90EF00D40D31 /* Logger */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -31,6 +37,11 @@
 		8BFF2E6E232F85E200D40D31 /* DatastoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatastoreTests.swift; sourceTree = "<group>"; };
 		8BFF2E70232F85E200D40D31 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8BFF2E7B232F864200D40D31 /* Model.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Model.xcdatamodel; sourceTree = "<group>"; };
+		8BFF2E7D232F8A1D00D40D31 /* Datastore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Datastore.swift; sourceTree = "<group>"; };
+		8BFF2E7F232F8B2B00D40D31 /* NSManagedObjectExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSManagedObjectExtensions.swift; sourceTree = "<group>"; };
+		8BFF2E80232F8B2B00D40D31 /* NSEntityDescriptionExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSEntityDescriptionExtensions.swift; sourceTree = "<group>"; };
+		8BFF2E81232F8B2B00D40D31 /* NSManagedObjectContextExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSManagedObjectContextExtensions.swift; sourceTree = "<group>"; };
+		8BFF2E85232F8CD200D40D31 /* Entity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Entity.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -38,6 +49,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8BFF2E89232F90EF00D40D31 /* Logger in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -74,8 +86,13 @@
 			isa = PBXGroup;
 			children = (
 				8BFF2E63232F85E200D40D31 /* Datastore.h */,
+				8BFF2E7D232F8A1D00D40D31 /* Datastore.swift */,
+				8BFF2E85232F8CD200D40D31 /* Entity.swift */,
 				8BFF2E7A232F864200D40D31 /* Model.xcdatamodeld */,
 				8BFF2E64232F85E200D40D31 /* Info.plist */,
+				8BFF2E80232F8B2B00D40D31 /* NSEntityDescriptionExtensions.swift */,
+				8BFF2E81232F8B2B00D40D31 /* NSManagedObjectContextExtensions.swift */,
+				8BFF2E7F232F8B2B00D40D31 /* NSManagedObjectExtensions.swift */,
 			);
 			path = Datastore;
 			sourceTree = "<group>";
@@ -117,6 +134,9 @@
 			dependencies = (
 			);
 			name = Datastore;
+			packageProductDependencies = (
+				8BFF2E88232F90EF00D40D31 /* Logger */,
+			);
 			productName = Datastore;
 			productReference = 8BFF2E60232F85E200D40D31 /* Datastore.framework */;
 			productType = "com.apple.product-type.framework";
@@ -151,6 +171,7 @@
 				TargetAttributes = {
 					8BFF2E5F232F85E200D40D31 = {
 						CreatedOnToolsVersion = 11.0;
+						LastSwiftMigration = 1100;
 					};
 					8BFF2E68232F85E200D40D31 = {
 						CreatedOnToolsVersion = 11.0;
@@ -166,6 +187,9 @@
 				Base,
 			);
 			mainGroup = 8BFF2E56232F85E200D40D31;
+			packageReferences = (
+				8BFF2E87232F90EF00D40D31 /* XCRemoteSwiftPackageReference "Logger" */,
+			);
 			productRefGroup = 8BFF2E61232F85E200D40D31 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -198,7 +222,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8BFF2E83232F8B2B00D40D31 /* NSEntityDescriptionExtensions.swift in Sources */,
+				8BFF2E82232F8B2B00D40D31 /* NSManagedObjectExtensions.swift in Sources */,
+				8BFF2E86232F8CD200D40D31 /* Entity.swift in Sources */,
 				8BFF2E7C232F864200D40D31 /* Model.xcdatamodeld in Sources */,
+				8BFF2E7E232F8A1D00D40D31 /* Datastore.swift in Sources */,
+				8BFF2E84232F8B2B00D40D31 /* NSManagedObjectContextExtensions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -344,6 +373,7 @@
 		8BFF2E75232F85E200D40D31 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 2H48644JM2;
@@ -360,6 +390,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.elegantchaos.Datastore;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -368,6 +399,7 @@
 		8BFF2E76232F85E200D40D31 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 2H48644JM2;
@@ -392,6 +424,7 @@
 		8BFF2E78232F85E200D40D31 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 2H48644JM2;
 				INFOPLIST_FILE = DatastoreTests/Info.plist;
@@ -410,6 +443,7 @@
 		8BFF2E79232F85E200D40D31 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 2H48644JM2;
 				INFOPLIST_FILE = DatastoreTests/Info.plist;
@@ -456,6 +490,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		8BFF2E87232F90EF00D40D31 /* XCRemoteSwiftPackageReference "Logger" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "git@github.com:elegantchaos/Logger.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.3.7;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		8BFF2E88232F90EF00D40D31 /* Logger */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8BFF2E87232F90EF00D40D31 /* XCRemoteSwiftPackageReference "Logger" */;
+			productName = Logger;
+		};
+/* End XCSwiftPackageProductDependency section */
 
 /* Begin XCVersionGroup section */
 		8BFF2E7A232F864200D40D31 /* Model.xcdatamodeld */ = {
