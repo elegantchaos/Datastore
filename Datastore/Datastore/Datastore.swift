@@ -75,6 +75,10 @@ public class Datastore {
                     let entity = Entity(context: context)
                     entity.name = name
                     entity.type = type
+                    let now = Date()
+                    entity.created = now
+                    entity.modified = now
+                    entity.uuid = UUID()
                     result.append(entity)
                 }
             }
@@ -119,6 +123,25 @@ public class Datastore {
                 }
             }
             completion()
+        }
+    }
+    
+    public func interchange(completion: @escaping ([[String:Any]]) -> Void) {
+        var result: [[String:Any]] = []
+        let context = container.viewContext
+        context.perform {
+            let request: NSFetchRequest<Entity> = Entity.fetcher(in: context)
+            if let results = try? context.fetch(request) {
+                for entity in results {
+                    var record: [String:Any] = [:]
+                    record["name"] = entity.name
+                    record["created"] = entity.created
+                    record["modified"] = entity.modified
+                    record["uuid"] = entity.uuid?.uuidString
+                    result.append(record)
+                }
+            }
+            completion(result)
         }
     }
     

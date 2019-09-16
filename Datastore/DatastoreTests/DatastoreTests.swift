@@ -78,9 +78,30 @@ class DatastoreTests: XCTestCase {
                         XCTAssertEqual(results.count, 1)
                         let properties = results[0]
                         XCTAssertEqual(properties["foo"] as? String, "bar")
+                        done.fulfill()
                     }
                 }
-                done.fulfill()
+            }
+        }
+        wait(for: [done], timeout: 1.0)
+    }
+    
+    func testWriteInterchange() {
+        let done = expectation(description: "loaded")
+        loadAndCheck { (datastore) in
+            let names = Set<String>(["Person 1", "Person 2"])
+            datastore.getEntities(ofType: "Person", names: names) { (people) in
+                let person = people[0]
+                datastore.add(properties: [person:["foo": "bar"]]) { () in
+                    datastore.interchange() { interchange in
+                        
+                        for item in interchange {
+                            XCTAssertTrue(names.contains(item["name"] as! String))
+                        }
+
+                        done.fulfill()
+                    }
+                }
             }
         }
         wait(for: [done], timeout: 1.0)
