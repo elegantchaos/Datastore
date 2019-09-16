@@ -6,6 +6,7 @@
 import Foundation
 import CoreData
 import Logger
+import Combine
 
 let datastoreChannel = Channel("com.elegantchaos.datastore")
 
@@ -20,6 +21,28 @@ public class Datastore {
     struct InvalidJSONError: Error { }
     
     public typealias ApplyResult = Result<Void, Error>
+    
+    struct Publisher: Combine.Publisher {
+        typealias Output = Datastore
+        typealias Failure = Error
+        init(url: URL? = nil) {
+            
+        }
+        func receive<S>(subscriber: S) where S : Subscriber, Error == S.Failure, Datastore == S.Input {
+            
+        }
+        
+    }
+    
+    class func loadCombine(name: String, url: URL? = nil) -> Future<Datastore, Error> {
+        let future = Future<Datastore, Error>() { promise in
+            load(name: name, url: url) { result in
+                promise(result)
+            }
+        }        
+        
+        return future
+    }
     
     class func load(name: String, url: URL? = nil, completion: @escaping LoadCompletion) {
         guard let model = Datastore.model() else {
