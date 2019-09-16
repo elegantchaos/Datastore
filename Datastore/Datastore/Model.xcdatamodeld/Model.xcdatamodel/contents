@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="14903" systemVersion="19A536g" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
-    <entity name="Entity" representedClassName="Entity" syncable="YES" codeGenerationType="category">
+    <entity name="Entity" representedClassName=".Entity" syncable="YES" codeGenerationType="category">
         <attribute name="created" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="modified" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="name" optional="YES" attributeType="String"/>
         <attribute name="uuid" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
-        <relationship name="kind" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Label" inverseName="entities" inverseEntity="Label"/>
         <relationship name="strings" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="StringProperty" inverseName="owner" inverseEntity="StringProperty"/>
+        <relationship name="type" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Label" inverseName="entities" inverseEntity="Label"/>
     </entity>
-    <entity name="Label" representedClassName="Label" syncable="YES" codeGenerationType="class">
+    <entity name="Label" representedClassName=".Label" syncable="YES" codeGenerationType="class">
         <attribute name="name" optional="YES" attributeType="String"/>
         <attribute name="uuid" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
-        <relationship name="entities" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Entity" inverseName="kind" inverseEntity="Entity"/>
+        <relationship name="entities" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Entity" inverseName="type" inverseEntity="Entity"/>
         <relationship name="strings" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="StringProperty" inverseName="label" inverseEntity="StringProperty"/>
     </entity>
-    <entity name="StringProperty" representedClassName="StringProperty" syncable="YES" codeGenerationType="class">
+    <entity name="StringProperty" representedClassName=".StringProperty" syncable="YES" codeGenerationType="class">
         <relationship name="label" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Label" inverseName="strings" inverseEntity="Label"/>
         <relationship name="owner" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Entity" inverseName="strings" inverseEntity="Entity"/>
         <relationship name="value" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="StringValue" inverseName="property" inverseEntity="StringValue"/>
     </entity>
-    <entity name="StringValue" representedClassName="StringValue" syncable="YES" codeGenerationType="class">
+    <entity name="StringValue" representedClassName=".StringValue" syncable="YES" codeGenerationType="class">
         <attribute name="value" attributeType="String"/>
         <relationship name="property" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="StringProperty" inverseName="value" inverseEntity="StringProperty"/>
     </entity>

@@ -15,15 +15,16 @@ public class Datastore {
     
     typealias LoadResult = Result<Datastore, Error>
 
-    struct LocatingModelError: Error {
-    }
-    
     struct LoadingModelError: Error {
         
     }
 
     class func load(name: String, url: URL? = nil, completion: @escaping (LoadResult) -> Void) {
-        let model = Datastore.model()
+        guard let model = Datastore.model() else {
+            completion(.failure(LoadingModelError()))
+            return
+        }
+        
         let container = NSPersistentContainer(name: name, managedObjectModel: model)
         let description = container.persistentStoreDescriptions[0]
         description.setOption(true as NSValue, forKey: NSMigratePersistentStoresAutomaticallyOption)
@@ -52,33 +53,52 @@ public class Datastore {
     }
     
     public func getLabel(_ name: String) -> Label {
-        return Label()
+        let label = getNamed(name, type: Label.self, in: container.viewContext, createIfMissing: true)!
+        return label
     }
     
-    public func getEntity(named name: Label, kind: Label) -> Entity {
-        return Entity()
-    }
-    
-    public func getEntity(named name: String, kind: String) -> Entity {
-        return getEntity(named: getLabel(name), kind: getLabel(kind))
-    }
-    
-    public class func modelURL(bundle: Bundle = Bundle(for: Datastore.self)) -> URL {
-        guard let url = bundle.url(forResource: "Model", withExtension: "momd") else {
-            datastoreChannel.fatal(LocatingModelError())
+    public func getEntities(ofType type: Label, names: Set<String>, createIfMissing: Bool, completion: @escaping ([Entity]) -> Void) {
+        let context = container.viewContext
+        context.perform {
+            var result: [Entity] = []
+            var create: Set<String> = names
+            if let entities = type.entities as? Set<Entity> {
+                for entity in entities {
+                    if let name = entity.name, names.contains(name) {
+                        result.append(entity)
+                        create.remove(name)
+                    }
+                }
+            }
+            if createIfMissing {
+                for name in create {
+                    let entity = Entity(context: context)
+                    entity.name = name
+                    entity.type = type
+                    result.append(entity)
+                }
+            }
+            completion(result)
         }
-        
-        return url
+    }
+    
+    public func getEntities(ofType type: String, names: Set<String>, createIfMissing: Bool = true, completion: @escaping ([Entity]) -> Void) {
+        getEntities(ofType: getLabel(type), names: names, createIfMissing: createIfMissing, completion: completion)
     }
 
-    public class func model(bundle: Bundle = Bundle(for: Datastore.self), cached: Bool = true) -> NSManagedObjectModel {
+    public class func model(bundle: Bundle = Bundle(for: Datastore.self), cached: Bool = true) -> NSManagedObjectModel? {
         if cached && (cachedModel != nil) {
             return cachedModel
         }
 
-        let url = Datastore.modelURL(bundle: bundle)
+        guard let url = bundle.url(forResource: "Model", withExtension: "momd") else {
+            datastoreChannel.debug("failed to locate model")
+            return nil
+        }
+        
         guard let model = NSManagedObjectModel(contentsOf: url) else {
-            datastoreChannel.fatal(LoadingModelError())
+            datastoreChannel.debug("failed to load model")
+            return nil
         }
 
         datastoreChannel.debug("loaded collection model")
