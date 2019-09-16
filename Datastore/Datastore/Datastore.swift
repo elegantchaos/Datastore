@@ -13,13 +13,15 @@ public class Datastore {
     static var cachedModel: NSManagedObjectModel!
     let container: NSPersistentContainer
     
-    typealias LoadResult = Result<Datastore, Error>
-
-    struct LoadingModelError: Error {
-        
-    }
-
-    class func load(name: String, url: URL? = nil, completion: @escaping (LoadResult) -> Void) {
+    public typealias LoadResult = Result<Datastore, Error>
+    public typealias LoadCompletion = (LoadResult) -> Void
+    
+    struct LoadingModelError: Error { }
+    struct InvalidJSONError: Error { }
+    
+    public typealias ApplyResult = Result<Void, Error>
+    
+    class func load(name: String, url: URL? = nil, completion: @escaping LoadCompletion) {
         guard let model = Datastore.model() else {
             completion(.failure(LoadingModelError()))
             return
@@ -44,6 +46,20 @@ public class Datastore {
             } else {
                 let store = Datastore(container: container)
                 completion(.success(store))
+            }
+        }
+    }
+    
+    class func load(name: String, json: String, completion: @escaping LoadCompletion) {
+        load(name: name) { (result) in
+            switch result {
+            case .success(let store):
+                store.apply(json: json) { result in
+                    completion(result)
+                }
+            
+            default:
+                completion(result)
             }
         }
     }
@@ -89,7 +105,7 @@ public class Datastore {
     public func getEntities(ofType type: String, names: Set<String>, createIfMissing: Bool = true, completion: @escaping ([Entity]) -> Void) {
         getEntities(ofType: getLabel(type), names: names, createIfMissing: createIfMissing, completion: completion)
     }
-
+    
     public func getProperties(ofEntities entities: [Entity], withNames names: Set<String>, completion: @escaping ([[String:Any]]) -> Void) {
         let context = container.viewContext
         context.perform {
@@ -108,7 +124,7 @@ public class Datastore {
             completion(result)
         }
     }
-
+    
     public func add(properties: [Entity: [String:Any]], completion: @escaping () -> Void) {
         let context = container.viewContext
         context.perform {
@@ -126,7 +142,26 @@ public class Datastore {
         }
     }
     
-    public func interchange(completion: @escaping ([[String:Any]]) -> Void) {
+    public func apply(json: String, completion: @escaping (LoadResult) -> Void) {
+        guard let data = json.data(using: .utf8) else {
+            completion(.failure(InvalidJSONError()))
+            return
+        }
+        
+        let result = LoadResult {
+            if let items = try JSONSerialization.jsonObject(with: data, options: []) as? [[String:Any]] {
+                for item in items {
+                    print(item)
+                }
+            }
+            
+            return self
+        }
+    
+        completion(result)
+    }
+    
+    public func interchange(encoder: InterchangeEncoder = NullInterchangeEncoder(), completion: @escaping ([[String:Any]]) -> Void) {
         var result: [[String:Any]] = []
         let context = container.viewContext
         context.perform {
@@ -135,9 +170,14 @@ public class Datastore {
                 for entity in results {
                     var record: [String:Any] = [:]
                     record["name"] = entity.name
-                    record["created"] = entity.created
-                    record["modified"] = entity.modified
+                    record["created"] = encoder.encode(date: entity.created)
+                    record["modified"] = encoder.encode(date: entity.modified)
                     record["uuid"] = entity.uuid?.uuidString
+                    if let properties = entity.strings as? Set<StringProperty> {
+                        for property in properties {
+                            record[property.label!.name!] = property.value
+                        }
+                    }
                     result.append(record)
                 }
             }
@@ -145,11 +185,21 @@ public class Datastore {
         }
     }
     
+    public func interchangeJSON(completion: @escaping (String) -> Void) {
+        interchange(encoder: JSONInterchangeEncoder()) { dictionary in
+            if let data = try? JSONSerialization.data(withJSONObject: dictionary, options: [.prettyPrinted]), let json = String(data: data, encoding: .utf8) {
+                completion(json)
+            } else {
+                completion("[]")
+            }
+        }
+    }
+    
     public class func model(bundle: Bundle = Bundle(for: Datastore.self), cached: Bool = true) -> NSManagedObjectModel? {
         if cached && (cachedModel != nil) {
             return cachedModel
         }
-
+        
         guard let url = bundle.url(forResource: "Model", withExtension: "momd") else {
             datastoreChannel.debug("failed to locate model")
             return nil
@@ -159,12 +209,12 @@ public class Datastore {
             datastoreChannel.debug("failed to load model")
             return nil
         }
-
+        
         datastoreChannel.debug("loaded collection model")
         if (cached) {
             cachedModel = model
         }
-
+        
         return model
     }
 }

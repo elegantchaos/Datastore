@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8B48FD79232FD98D00F37CF1 /* InterchangeEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B48FD78232FD98D00F37CF1 /* InterchangeEncoder.swift */; };
 		8BFF2E6A232F85E200D40D31 /* Datastore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8BFF2E60232F85E200D40D31 /* Datastore.framework */; };
 		8BFF2E6F232F85E200D40D31 /* DatastoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFF2E6E232F85E200D40D31 /* DatastoreTests.swift */; };
 		8BFF2E71232F85E200D40D31 /* Datastore.h in Headers */ = {isa = PBXBuildFile; fileRef = 8BFF2E63232F85E200D40D31 /* Datastore.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -30,6 +31,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		8B48FD78232FD98D00F37CF1 /* InterchangeEncoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterchangeEncoder.swift; sourceTree = "<group>"; };
 		8BFF2E60232F85E200D40D31 /* Datastore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Datastore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		8BFF2E63232F85E200D40D31 /* Datastore.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Datastore.h; sourceTree = "<group>"; };
 		8BFF2E64232F85E200D40D31 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -87,6 +89,7 @@
 			children = (
 				8BFF2E63232F85E200D40D31 /* Datastore.h */,
 				8BFF2E7D232F8A1D00D40D31 /* Datastore.swift */,
+				8B48FD78232FD98D00F37CF1 /* InterchangeEncoder.swift */,
 				8BFF2E85232F8CD200D40D31 /* Entity.swift */,
 				8BFF2E7A232F864200D40D31 /* Model.xcdatamodeld */,
 				8BFF2E64232F85E200D40D31 /* Info.plist */,
@@ -225,6 +228,7 @@
 				8BFF2E83232F8B2B00D40D31 /* NSEntityDescriptionExtensions.swift in Sources */,
 				8BFF2E82232F8B2B00D40D31 /* NSManagedObjectExtensions.swift in Sources */,
 				8BFF2E86232F8CD200D40D31 /* Entity.swift in Sources */,
+				8B48FD79232FD98D00F37CF1 /* InterchangeEncoder.swift in Sources */,
 				8BFF2E7C232F864200D40D31 /* Model.xcdatamodeld in Sources */,
 				8BFF2E7E232F8A1D00D40D31 /* Datastore.swift in Sources */,
 				8BFF2E84232F8B2B00D40D31 /* NSManagedObjectContextExtensions.swift in Sources */,

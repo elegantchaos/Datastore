@@ -86,7 +86,37 @@ class DatastoreTests: XCTestCase {
         wait(for: [done], timeout: 1.0)
     }
     
-    func testWriteInterchange() {
+    func testReadJSON() {
+        let json = """
+            [
+            {
+              "uuid" : "96D38D33-5E5F-4655-BC3D-480BA744F488",
+              "foo" : "bar",
+              "name" : "Person 1",
+              "modified" : {
+                "date" : "2019-09-16T15:03:05Z"
+              },
+              "created" : {
+                "date" : "2019-09-16T15:03:05Z"
+              }
+            }
+            ]
+            """
+        
+        let loaded = expectation(description: "loaded")
+        Datastore.load(name: "Test", json: json) { (result) in
+            switch result {
+            case .failure(let error):
+                XCTFail("\(error)")
+                
+            case .success(let store):
+                loaded.fulfill()
+            }
+        }
+        wait(for: [loaded], timeout: 1.0)
+    }
+    
+    func testInterchange() {
         let done = expectation(description: "loaded")
         loadAndCheck { (datastore) in
             let names = Set<String>(["Person 1", "Person 2"])
@@ -106,4 +136,22 @@ class DatastoreTests: XCTestCase {
         }
         wait(for: [done], timeout: 1.0)
     }
+
+    func testInterchangeJSON() {
+        let done = expectation(description: "loaded")
+        loadAndCheck { (datastore) in
+            let names = Set<String>(["Person 1", "Person 2"])
+            datastore.getEntities(ofType: "Person", names: names) { (people) in
+                let person = people[0]
+                datastore.add(properties: [person:["foo": "bar"]]) { () in
+                    datastore.interchangeJSON() { json in
+                        print(json)
+                        done.fulfill()
+                    }
+                }
+            }
+        }
+        wait(for: [done], timeout: 1.0)
+    }
+
 }
