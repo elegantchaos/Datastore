@@ -181,7 +181,7 @@ class DatastoreTests: XCTestCase {
             datastore.getEntities(ofType: "Person", names: names) { (people) in
                 let person = people[0]
                 datastore.add(properties: [person:["foo": "bar"]]) { () in
-                    datastore.interchangeJSON() { json in
+                    datastore.encodeJSON() { json in
                         print(json)
                         done.fulfill()
                     }

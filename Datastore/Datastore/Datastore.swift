@@ -79,7 +79,7 @@ public class Datastore {
         load(name: name) { (result) in
             switch result {
             case .success(let store):
-                store.apply(json: json) { result in
+                store.decode(json: json) { result in
                     completion(result)
                 }
             
@@ -204,109 +204,7 @@ public class Datastore {
             completion()
         }
     }
-    
-    public func apply(json: String, completion: @escaping (LoadResult) -> Void) {
-        guard let data = json.data(using: .utf8) else {
-            completion(.failure(InvalidJSONError()))
-            return
-        }
-        
-        let context = container.viewContext
-        let result = LoadResult {
-            var symbolIndex: [String:Symbol] = [:]
-            if let items = try JSONSerialization.jsonObject(with: data, options: []) as? [String:Any] {
-                if let symbols = items["symbols"] as? [[String:Any]] {
-                    for symbolRecord in symbols {
-                        if let uuid = symbolRecord["uuid"] as? String, let name = symbolRecord["name"] as? String {
-                            let symbol = self.symbol(uuid: uuid, name: name)
-                            symbolIndex[uuid] = symbol
-                        }
-                    }
-                }
-                
-                if let entities = items["entities"] as? [[String:Any]] {
-                    for entityRecord in entities {
-                        if let name = entityRecord["name"] as? String, let uuid = entityRecord["uuid"] as? String, let type = entityRecord["type"] as? String {
-                            var entity = Entity.withIdentifier(uuid, in: context)
-                            if entity == nil {
-                                let newEntity = Entity(in: context)
-                                newEntity.name = name
-                                newEntity.uuid = UUID(uuidString: uuid)
-                                newEntity.type = symbolIndex[type]
-                                entity = newEntity
-                            }
-                            if let entity = entity {
-                                var entityProperties = entityRecord
-                                entityProperties.removeValue(forKey: "name")
-                                entityProperties.removeValue(forKey: "uuid")
-                                entityProperties.removeValue(forKey: "created")
-                                entityProperties.removeValue(forKey: "modified")
-                                for (key, value) in entityProperties {
-                                    print("read property \(key) \(value)")
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            
-            return self
-        }
-    
-        try? context.save()
-        completion(result)
-    }
-    
-    public func interchange(encoder: InterchangeEncoder = NullInterchangeEncoder(), completion: @escaping InterchangeCompletion) {
-        let context = container.viewContext
-        context.perform {
-            var symbolResults: [[String:Any]] = []
-            var entityResults: [[String:Any]] = []
-            let request: NSFetchRequest<Symbol> = Symbol.fetcher(in: context)
-            if let symbols = try? context.fetch(request) {
-                for symbol in symbols {
-                    var record: [String:Any] = [:]
-                    let type = encoder.encode(uuid: symbol.uuid)
-                    record["name"] = symbol.name
-                    record["uuid"] = type
-                    symbolResults.append(record)
-                    
-                    if let entities = symbol.entities as? Set<Entity> {
-                        for entity in entities {
-                            var record: [String:Any] = [:]
-                            record["name"] = entity.name
-                            record["type"] = type
-                            record["created"] = encoder.encode(date: entity.created)
-                            record["modified"] = encoder.encode(date: entity.modified)
-                            record["uuid"] = entity.uuid!.uuidString
-                            if let properties = entity.strings as? Set<StringProperty> {
-                                for property in properties {
-                                    record[property.label!.name!] = property.value
-                                }
-                            }
-                            entityResults.append(record)
-                        }
-                    }
-                }
-                let result = [
-                    "symbols" : symbolResults,
-                    "entities" : entityResults
-                ]
-                completion(result)
-            }
-        }
-    }
-    
-    public func interchangeJSON(completion: @escaping (String) -> Void) {
-        interchange(encoder: JSONInterchangeEncoder()) { dictionary in
-            if let data = try? JSONSerialization.data(withJSONObject: dictionary, options: [.prettyPrinted]), let json = String(data: data, encoding: .utf8) {
-                completion(json)
-            } else {
-                completion("[]")
-            }
-        }
-    }
-    
+      
     public class func model(bundle: Bundle = Bundle(for: Datastore.self), cached: Bool = true) -> NSManagedObjectModel? {
         if cached && (cachedModel != nil) {
             return cachedModel
