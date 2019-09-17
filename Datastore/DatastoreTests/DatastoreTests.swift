@@ -91,17 +91,39 @@ class DatastoreTests: XCTestCase {
     func testReadJSON() {
         let json = """
             {
-              "Person" : [
+              "entities" : [
                 {
                   "created" : {
-                    "date" : "2019-09-17T15:15:19Z"
+                    "date" : "2019-09-17T16:10:38Z"
                   },
-                  "foo" : "bar",
                   "name" : "Person 1",
+                  "uuid" : "C41DB873-323D-4026-95D1-603120B9ADF6",
                   "modified" : {
-                    "date" : "2019-09-17T15:15:19Z"
+                    "date" : "2019-09-17T16:10:38Z"
                   },
-                  "uuid" : "2ADB4CAA-F542-49E7-9149-2D4A5FF1CDB6"
+                  "type" : "F9B7D73D-2020-49AD-B85D-4BBD62CCA80B",
+                  "foo" : "bar"
+                },
+                {
+                  "created" : {
+                    "date" : "2019-09-17T16:10:38Z"
+                  },
+                  "uuid" : "ADDD557A-668E-4C6B-A9A0-3BCF099646E8",
+                  "modified" : {
+                    "date" : "2019-09-17T16:10:38Z"
+                  },
+                  "name" : "Person 2",
+                  "type" : "F9B7D73D-2020-49AD-B85D-4BBD62CCA80B"
+                }
+              ],
+              "symbols" : [
+                {
+                  "name" : "foo",
+                  "uuid" : "078D9906-F26D-4028-99E6-880B32398C37"
+                },
+                {
+                  "uuid" : "F9B7D73D-2020-49AD-B85D-4BBD62CCA80B",
+                  "name" : "Person"
                 }
               ]
             }
@@ -114,10 +136,12 @@ class DatastoreTests: XCTestCase {
                 XCTFail("\(error)")
                 
             case .success(let store):
+                let names = ["Person 1", "Person 2"]
                 store.getAllEntities(ofType: "Person") { (people) in
-                    XCTAssertEqual(people.count, 1)
-                    let person = people[0]
-                    XCTAssertEqual(person.name, "Person 3")
+                    XCTAssertEqual(people.count, 2)
+                    for person in people {
+                        XCTAssertTrue(names.contains(person.name!))
+                    }
                     loaded.fulfill()
                 }
             }

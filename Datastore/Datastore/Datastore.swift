@@ -106,7 +106,21 @@ public class Datastore {
         print("made symbol \(name) \(symbol.uuid!)")
         return symbol
     }
-    
+
+    public func symbol(uuid: String, name: String) -> Symbol {
+        let context = container.viewContext
+        if let symbol = getWithIdentifier(uuid, type: Symbol.self, in: context) {
+            print("found symbol \(symbol.name!) \(symbol.uuid!)")
+            return symbol
+        }
+        
+        let symbol = Symbol(context: context)
+        symbol.name = name
+        symbol.uuid = UUID(uuidString: uuid)
+        print("made symbol \(symbol.name!) \(symbol.uuid!)")
+        return symbol
+    }
+
     public func getEntities(ofType type: Symbol, names: Set<String>, createIfMissing: Bool, completion: @escaping EntitiesCompletion) {
         let context = container.viewContext
         context.perform {
@@ -197,16 +211,49 @@ public class Datastore {
             return
         }
         
+        let context = container.viewContext
         let result = LoadResult {
-            if let items = try JSONSerialization.jsonObject(with: data, options: []) as? [[String:Any]] {
-                for item in items {
-                    print(item)
+            var symbolIndex: [String:Symbol] = [:]
+            if let items = try JSONSerialization.jsonObject(with: data, options: []) as? [String:Any] {
+                if let symbols = items["symbols"] as? [[String:Any]] {
+                    for symbolRecord in symbols {
+                        if let uuid = symbolRecord["uuid"] as? String, let name = symbolRecord["name"] as? String {
+                            let symbol = self.symbol(uuid: uuid, name: name)
+                            symbolIndex[uuid] = symbol
+                        }
+                    }
+                }
+                
+                if let entities = items["entities"] as? [[String:Any]] {
+                    for entityRecord in entities {
+                        if let name = entityRecord["name"] as? String, let uuid = entityRecord["uuid"] as? String, let type = entityRecord["type"] as? String {
+                            var entity = Entity.withIdentifier(uuid, in: context)
+                            if entity == nil {
+                                let newEntity = Entity(in: context)
+                                newEntity.name = name
+                                newEntity.uuid = UUID(uuidString: uuid)
+                                newEntity.type = symbolIndex[type]
+                                entity = newEntity
+                            }
+                            if let entity = entity {
+                                var entityProperties = entityRecord
+                                entityProperties.removeValue(forKey: "name")
+                                entityProperties.removeValue(forKey: "uuid")
+                                entityProperties.removeValue(forKey: "created")
+                                entityProperties.removeValue(forKey: "modified")
+                                for (key, value) in entityProperties {
+                                    print("read property \(key) \(value)")
+                                }
+                            }
+                        }
+                    }
                 }
             }
             
             return self
         }
     
+        try? context.save()
         completion(result)
     }
     
