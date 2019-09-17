@@ -90,19 +90,21 @@ class DatastoreTests: XCTestCase {
     
     func testReadJSON() {
         let json = """
-            [
             {
-              "uuid" : "96D38D33-5E5F-4655-BC3D-480BA744F488",
-              "foo" : "bar",
-              "name" : "Person 1",
-              "modified" : {
-                "date" : "2019-09-16T15:03:05Z"
-              },
-              "created" : {
-                "date" : "2019-09-16T15:03:05Z"
-              }
+              "Person" : [
+                {
+                  "created" : {
+                    "date" : "2019-09-17T15:15:19Z"
+                  },
+                  "foo" : "bar",
+                  "name" : "Person 1",
+                  "modified" : {
+                    "date" : "2019-09-17T15:15:19Z"
+                  },
+                  "uuid" : "2ADB4CAA-F542-49E7-9149-2D4A5FF1CDB6"
+                }
+              ]
             }
-            ]
             """
         
         let loaded = expectation(description: "loaded")
@@ -112,7 +114,12 @@ class DatastoreTests: XCTestCase {
                 XCTFail("\(error)")
                 
             case .success(let store):
-                loaded.fulfill()
+                store.getAllEntities(ofType: "Person") { (people) in
+                    XCTAssertEqual(people.count, 1)
+                    let person = people[0]
+                    XCTAssertEqual(person.name, "Person 3")
+                    loaded.fulfill()
+                }
             }
         }
         wait(for: [loaded], timeout: 1.0)
@@ -126,9 +133,13 @@ class DatastoreTests: XCTestCase {
                 let person = people[0]
                 datastore.add(properties: [person:["foo": "bar"]]) { () in
                     datastore.interchange() { interchange in
-                        
-                        for item in interchange {
-                            XCTAssertTrue(names.contains(item["name"] as! String))
+                        for (key, value) in interchange {
+                            XCTAssertEqual(key, "Person")
+                            if let entities = value as? [[String:Any]] {
+                                for entity in entities {
+                                    XCTAssertTrue(names.contains(entity["name"] as! String))
+                                }
+                            }
                         }
 
                         done.fulfill()
