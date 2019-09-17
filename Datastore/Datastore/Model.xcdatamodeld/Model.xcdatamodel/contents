@@ -1,27 +1,27 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="14903" systemVersion="19A536g" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="14903" systemVersion="19A558d" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
     <entity name="Entity" representedClassName=".Entity" syncable="YES" codeGenerationType="category">
         <attribute name="created" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="modified" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="name" optional="YES" attributeType="String"/>
         <attribute name="uuid" attributeType="UUID" usesScalarValueType="NO"/>
         <relationship name="strings" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="StringProperty" inverseName="owner" inverseEntity="StringProperty"/>
-        <relationship name="type" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Label" inverseName="entities" inverseEntity="Label"/>
+        <relationship name="type" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Symbol" inverseName="entities" inverseEntity="Symbol"/>
     </entity>
-    <entity name="Label" representedClassName=".Label" syncable="YES" codeGenerationType="class">
+    <entity name="StringProperty" representedClassName=".StringProperty" syncable="YES" codeGenerationType="class">
+        <attribute name="value" attributeType="String" defaultValueString=""/>
+        <relationship name="label" maxCount="1" deletionRule="Nullify" destinationEntity="Symbol" inverseName="strings" inverseEntity="Symbol"/>
+        <relationship name="owner" maxCount="1" deletionRule="Nullify" destinationEntity="Entity" inverseName="strings" inverseEntity="Entity"/>
+    </entity>
+    <entity name="Symbol" representedClassName=".Symbol" syncable="YES" codeGenerationType="class">
         <attribute name="name" optional="YES" attributeType="String"/>
         <attribute name="uuid" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
         <relationship name="entities" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Entity" inverseName="type" inverseEntity="Entity"/>
         <relationship name="strings" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="StringProperty" inverseName="label" inverseEntity="StringProperty"/>
     </entity>
-    <entity name="StringProperty" representedClassName=".StringProperty" syncable="YES" codeGenerationType="class">
-        <attribute name="value" attributeType="String" defaultValueString=""/>
-        <relationship name="label" maxCount="1" deletionRule="Nullify" destinationEntity="Label" inverseName="strings" inverseEntity="Label"/>
-        <relationship name="owner" maxCount="1" deletionRule="Nullify" destinationEntity="Entity" inverseName="strings" inverseEntity="Entity"/>
-    </entity>
     <elements>
         <element name="Entity" positionX="-63" positionY="-18" width="128" height="133"/>
-        <element name="Label" positionX="-54" positionY="-9" width="128" height="103"/>
+        <element name="Symbol" positionX="-54" positionY="-9" width="128" height="103"/>
         <element name="StringProperty" positionX="-9" positionY="63" width="128" height="88"/>
     </elements>
 </model>

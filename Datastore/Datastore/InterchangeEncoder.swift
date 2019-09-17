@@ -7,11 +7,15 @@ import Foundation
 
 public protocol InterchangeEncoder {
     func encode(date: Date?) -> Any?
+    func encode(uuid: UUID?) -> Any?
 }
 
 public extension InterchangeEncoder {
     func encode(date: Date?) -> Any? {
         return date
+    }
+    func encode(uuid: UUID?) -> Any? {
+        return uuid
     }
 }
 
@@ -31,5 +35,14 @@ public struct JSONInterchangeEncoder: InterchangeEncoder {
         
         return ["date": JSONInterchangeEncoder.formatter.string(from: date)]
     }
+
+    public func encode(uuid: UUID?) -> Any? {
+        guard let uuid = uuid else {
+            return nil
+        }
+        
+        return uuid.uuidString
+    }
+
 }
 

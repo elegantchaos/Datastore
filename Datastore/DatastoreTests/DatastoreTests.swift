@@ -53,7 +53,7 @@ class DatastoreTests: XCTestCase {
                 let person = people[0]
                 
                 let context = datastore.container.viewContext
-                let label = Label.named("foo", in: context)
+                let label = Symbol.named("foo", in: context)
                 let property = StringProperty(context: context)
                 property.value = "bar"
                 property.label = label
@@ -125,30 +125,30 @@ class DatastoreTests: XCTestCase {
         wait(for: [loaded], timeout: 1.0)
     }
     
-    func testInterchange() {
-        let done = expectation(description: "loaded")
-        loadAndCheck { (datastore) in
-            let names = Set<String>(["Person 1", "Person 2"])
-            datastore.getEntities(ofType: "Person", names: names) { (people) in
-                let person = people[0]
-                datastore.add(properties: [person:["foo": "bar"]]) { () in
-                    datastore.interchange() { interchange in
-                        for (key, value) in interchange {
-                            XCTAssertEqual(key, "Person")
-                            if let entities = value as? [[String:Any]] {
-                                for entity in entities {
-                                    XCTAssertTrue(names.contains(entity["name"] as! String))
-                                }
-                            }
-                        }
-
-                        done.fulfill()
-                    }
-                }
-            }
-        }
-        wait(for: [done], timeout: 1.0)
-    }
+//    func testInterchange() {
+//        let done = expectation(description: "loaded")
+//        loadAndCheck { (datastore) in
+//            let names = Set<String>(["Person 1", "Person 2"])
+//            datastore.getEntities(ofType: "Person", names: names) { (people) in
+//                let person = people[0]
+//                datastore.add(properties: [person:["foo": "bar"]]) { () in
+//                    datastore.interchange() { interchange in
+//                        for (key, value) in interchange {
+//                            XCTAssertEqual(key, "Person")
+//                            if let entities = value as? [[String:Any]] {
+//                                for entity in entities {
+//                                    XCTAssertTrue(names.contains(entity["name"] as! String))
+//                                }
+//                            }
+//                        }
+//
+//                        done.fulfill()
+//                    }
+//                }
+//            }
+//        }
+//        wait(for: [done], timeout: 1.0)
+//    }
 
     func testInterchangeJSON() {
         let done = expectation(description: "loaded")

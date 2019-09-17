@@ -93,12 +93,21 @@ public class Datastore {
         self.container = container
     }
     
-    public func getLabel(_ name: String) -> Label {
-        let label = getNamed(name, type: Label.self, in: container.viewContext, createIfMissing: true)!
-        return label
+    public func symbol(named name: String) -> Symbol {
+        let context = container.viewContext
+        if let symbol = getNamed(name, type: Symbol.self, in: context, createIfMissing: false) {
+            print("found symbol \(name) \(symbol.uuid!)")
+            return symbol
+        }
+        
+        let symbol = Symbol(context: context)
+        symbol.name = name
+        symbol.uuid = UUID()
+        print("made symbol \(name) \(symbol.uuid!)")
+        return symbol
     }
     
-    public func getEntities(ofType type: Label, names: Set<String>, createIfMissing: Bool, completion: @escaping EntitiesCompletion) {
+    public func getEntities(ofType type: Symbol, names: Set<String>, createIfMissing: Bool, completion: @escaping EntitiesCompletion) {
         let context = container.viewContext
         context.perform {
             var result: [Entity] = []
@@ -128,10 +137,10 @@ public class Datastore {
     }
 
     public func getEntities(ofType type: String, names: Set<String>, createIfMissing: Bool = true, completion: @escaping EntitiesCompletion) {
-        getEntities(ofType: getLabel(type), names: names, createIfMissing: createIfMissing, completion: completion)
+        getEntities(ofType: symbol(named: type), names: names, createIfMissing: createIfMissing, completion: completion)
     }
 
-    public func getAllEntities(ofType type: Label, completion: @escaping EntitiesCompletion) {
+    public func getAllEntities(ofType type: Symbol, completion: @escaping EntitiesCompletion) {
         let context = container.viewContext
         context.perform {
             if let entities = type.entities as? Set<Entity> {
@@ -143,7 +152,7 @@ public class Datastore {
     }
     
     public func getAllEntities(ofType type: String, completion: @escaping EntitiesCompletion) {
-        getAllEntities(ofType: getLabel(type), completion: completion)
+        getAllEntities(ofType: symbol(named: type), completion: completion)
     }
     
     public func getProperties(ofEntities entities: [Entity], withNames names: Set<String>, completion: @escaping ([[String:Any]]) -> Void) {
@@ -173,7 +182,7 @@ public class Datastore {
                     if let string = value as? String {
                         let property = StringProperty(context: context)
                         property.value = string
-                        property.label = Label.named(key, in: context)
+                        property.label = self.symbol(named: key)
                         property.owner = entity
                     }
                 }
@@ -202,20 +211,27 @@ public class Datastore {
     }
     
     public func interchange(encoder: InterchangeEncoder = NullInterchangeEncoder(), completion: @escaping InterchangeCompletion) {
-        var result: [String:Any] = [:]
         let context = container.viewContext
         context.perform {
-            let request: NSFetchRequest<Label> = Label.fetcher(in: context)
-            if let labels = try? context.fetch(request) {
-                for label in labels {
-                    var entityResults: [[String:Any]] = []
-                    if let entities = label.entities as? Set<Entity> {
+            var symbolResults: [[String:Any]] = []
+            var entityResults: [[String:Any]] = []
+            let request: NSFetchRequest<Symbol> = Symbol.fetcher(in: context)
+            if let symbols = try? context.fetch(request) {
+                for symbol in symbols {
+                    var record: [String:Any] = [:]
+                    let type = encoder.encode(uuid: symbol.uuid)
+                    record["name"] = symbol.name
+                    record["uuid"] = type
+                    symbolResults.append(record)
+                    
+                    if let entities = symbol.entities as? Set<Entity> {
                         for entity in entities {
                             var record: [String:Any] = [:]
                             record["name"] = entity.name
+                            record["type"] = type
                             record["created"] = encoder.encode(date: entity.created)
                             record["modified"] = encoder.encode(date: entity.modified)
-                            record["uuid"] = entity.uuid?.uuidString
+                            record["uuid"] = entity.uuid!.uuidString
                             if let properties = entity.strings as? Set<StringProperty> {
                                 for property in properties {
                                     record[property.label!.name!] = property.value
@@ -224,10 +240,11 @@ public class Datastore {
                             entityResults.append(record)
                         }
                     }
-                    if entityResults.count > 0 {
-                        result[label.name!] = entityResults
-                    }
                 }
+                let result = [
+                    "symbols" : symbolResults,
+                    "entities" : entityResults
+                ]
                 completion(result)
             }
         }
