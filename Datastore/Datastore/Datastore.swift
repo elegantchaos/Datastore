@@ -13,7 +13,7 @@ let datastoreChannel = Channel("com.elegantchaos.datastore")
 
 public class Datastore {
     static var cachedModel: NSManagedObjectModel!
-    let container: NSPersistentContainer
+    internal let container: NSPersistentContainer
     
     public typealias LoadResult = Result<Datastore, Error>
     public typealias LoadCompletion = (LoadResult) -> Void
@@ -24,6 +24,8 @@ public class Datastore {
     struct InvalidJSONError: Error { }
     
     public typealias ApplyResult = Result<Void, Error>
+    
+    static let specialProperties = ["name", "uuid", "created", "type", "modified"]
     
     struct Publisher: Combine.Publisher {
         typealias Output = Datastore
@@ -37,7 +39,7 @@ public class Datastore {
         
     }
     
-    class func loadCombine(name: String, url: URL? = nil) -> Future<Datastore, Error> {
+    public class func loadCombine(name: String, url: URL? = nil) -> Future<Datastore, Error> {
         let future = Future<Datastore, Error>() { promise in
             load(name: name, url: url) { result in
                 promise(result)
@@ -47,7 +49,7 @@ public class Datastore {
         return future
     }
     
-    class func load(name: String, url: URL? = nil, completion: @escaping LoadCompletion) {
+    public class func load(name: String, url: URL? = nil, completion: @escaping LoadCompletion) {
         guard let model = Datastore.model() else {
             completion(.failure(LoadingModelError()))
             return
@@ -76,7 +78,7 @@ public class Datastore {
         }
     }
     
-    class func load(name: String, json: String, completion: @escaping LoadCompletion) {
+    public class func load(name: String, json: String, completion: @escaping LoadCompletion) {
         load(name: name) { (result) in
             switch result {
             case .success(let store):
@@ -181,9 +183,13 @@ public class Datastore {
         context.perform {
             var result: [[String:Any]] = []
             for entityID in entities {
-                
                 var values: [String:Any] = [:]
                 if let entity = entityID.resolve(in: context), let strings = entity.strings as? Set<StringProperty> {
+                    for property in Datastore.specialProperties {
+                        if names.contains(property) {
+                            values[property] = entity.value(forKey: property)
+                        }
+                    }
                     for property in strings {
                         if let name = property.name?.name, names.contains(name) {
                             values[name] = property.value
@@ -196,12 +202,14 @@ public class Datastore {
         }
     }
     
-    public func add(properties: [Entity: [String:Any]], completion: @escaping () -> Void) {
+    public func add(properties: [EntityID: [String:Any]], completion: @escaping () -> Void) {
         let context = container.viewContext
         context.perform {
-            for (entity, values) in properties {
-                for (key, value) in values {
-                    entity.add(property: self.symbol(named: key), value: value)
+            for (entityID, values) in properties {
+                if let entity = entityID.resolve(in: context) {
+                    for (key, value) in values {
+                        entity.add(property: self.symbol(named: key), value: value)
+                    }
                 }
             }
             completion()

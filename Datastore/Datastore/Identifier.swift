@@ -10,6 +10,8 @@ let identifierChannel = Channel("com.elegantchaos.datastore.identifier")
 
 internal protocol ResolvableID {
     func resolve(in context: NSManagedObjectContext, as type: NSManagedObject.Type) -> ResolvableID?
+    func hash(into hasher: inout Hasher)
+    func equal(to: ResolvableID) -> Bool
     var object: NSManagedObject? { get }
 }
 
@@ -20,6 +22,14 @@ internal struct NullCachedID: ResolvableID {
     
     internal var object: NSManagedObject? {
         return nil
+    }
+
+    func hash(into hasher: inout Hasher) {
+        0.hash(into: &hasher)
+    }
+    
+    func equal(to other: ResolvableID) -> Bool {
+        return other is NullCachedID
     }
 }
 
@@ -48,6 +58,18 @@ internal struct OpaqueCachedID: ResolvableID {
     internal var object: NSManagedObject? {
         return cached
     }
+
+    func hash(into hasher: inout Hasher) {
+        cached.hash(into: &hasher)
+    }
+
+    func equal(to other: ResolvableID) -> Bool {
+        if let other = other as? OpaqueCachedID {
+            return other.cached == cached
+        } else {
+            return false
+        }
+    }
 }
 
 internal struct OpaqueNamedID: ResolvableID {
@@ -66,6 +88,19 @@ internal struct OpaqueNamedID: ResolvableID {
         identifierChannel.debug("identifier \(name) unresolved")
         return nil
     }
+
+    func hash(into hasher: inout Hasher) {
+        name.hash(into: &hasher)
+        createIfMissing.hash(into: &hasher)
+    }
+
+    func equal(to other: ResolvableID) -> Bool {
+        if let other = other as? OpaqueNamedID {
+            return (other.name == name) && (other.createIfMissing == createIfMissing)
+        } else {
+            return false
+        }
+    }
 }
 
 internal struct OpaqueIdentifiedID: ResolvableID {
@@ -83,9 +118,20 @@ internal struct OpaqueIdentifiedID: ResolvableID {
         identifierChannel.debug("identifier \(uuid) unresolved")
         return nil
     }
-}
 
-public class WrappedID<T: NSManagedObject> {
+    func hash(into hasher: inout Hasher) {
+        uuid.hash(into: &hasher)
+    }
+
+    func equal(to other: ResolvableID) -> Bool {
+        if let other = other as? Self {
+            return (other.uuid == uuid)
+        } else {
+            return false
+        }
+    }}
+
+public class WrappedID<T: NSManagedObject>: Equatable, Hashable {
     var id: ResolvableID
     
     init(_ object: T) {
@@ -111,10 +157,18 @@ public class WrappedID<T: NSManagedObject> {
         
         return id.object as? T
     }
+
+    public static func == (lhs: WrappedID<T>, rhs: WrappedID<T>) -> Bool {
+        return lhs.id.equal(to: rhs.id)
+    }
+    
+    public func hash(into hasher: inout Hasher) {
+        id.hash(into: &hasher)
+    }
 }
 
 public class GuaranteedWrappedID<T: NSManagedObject>: WrappedID<T> {
-    var object: T {
+    internal var object: T {
         return id.object as! T
     }
 }

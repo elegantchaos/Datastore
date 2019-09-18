@@ -51,11 +51,9 @@ extension Datastore {
                     if let entity = entity {
                         entity.name = name
                         var entityProperties = entityRecord
-                        entityProperties.removeValue(forKey: "name")
-                        entityProperties.removeValue(forKey: "uuid")
-                        entityProperties.removeValue(forKey: "type")
-                        entityProperties.removeValue(forKey: "created")
-                        entityProperties.removeValue(forKey: "modified")
+                        for key in Datastore.specialProperties {
+                            entityProperties.removeValue(forKey: key)
+                        }
                         print("adding \(entityProperties)")
                         entity.add(properties: entityProperties, store: self)
                     }

@@ -71,7 +71,7 @@ class DatastoreTests: XCTestCase {
         loadAndCheck { (datastore) in
             datastore.getEntities(ofType: "Person", names: ["Person 1"]) { (people) in
                 let person = people[0]
-                datastore.add(properties: [person.object:["foo": "bar"]]) { () in
+                datastore.add(properties: [person:["foo": "bar"]]) { () in
                     datastore.getProperties(ofEntities: [person], withNames: ["foo"]) { (results) in
                         XCTAssertEqual(results.count, 1)
                         let properties = results[0]
@@ -136,14 +136,11 @@ class DatastoreTests: XCTestCase {
                 let expected = ["Person 1": "bar", "Person 2": "baz"]
                 store.getAllEntities(ofType: "Person") { (people) in
                     XCTAssertEqual(people.count, 2)
-                    store.getProperties(ofEntities: people, withNames: ["foo"]) { results in
-                        var n = 0
-                        for person in people {
-                            let name = person.object.name!
-                            let properties = results[n]
-                            let value = properties["foo"] as? String
+                    store.getProperties(ofEntities: people, withNames: ["name", "foo"]) { results in
+                        for result in results {
+                            let name = result["name"] as! String
+                            let value = result["foo"] as! String
                             let expectedValue = expected[name]
-                            n += 1
                             XCTAssertEqual(expectedValue, value, "\(name)")
                         }
                         loaded.fulfill()
@@ -186,7 +183,7 @@ class DatastoreTests: XCTestCase {
             let names = Set<String>(["Person 1", "Person 2"])
             datastore.getEntities(ofType: "Person", names: names) { (people) in
                 let person = people[0]
-                datastore.add(properties: [person.object:["foo": "bar"]]) { () in
+                datastore.add(properties: [person:["foo": "bar"]]) { () in
                     datastore.encodeJSON() { json in
                         print(json)
                         done.fulfill()
