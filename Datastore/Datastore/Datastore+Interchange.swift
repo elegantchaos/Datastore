@@ -76,7 +76,7 @@ extension Datastore {
             if let symbols = try? context.fetch(request) {
                 for symbol in symbols {
                     var record: [String:Any] = [:]
-                    let type = encoder.encode(uuid: symbol.uuid)
+                    let type = encoder.encode(symbol.uuid)
                     record["name"] = symbol.name
                     record["uuid"] = type
                     symbolResults.append(record)
@@ -86,14 +86,12 @@ extension Datastore {
                             var record: [String:Any] = [:]
                             record["name"] = entity.name
                             record["type"] = type
-                            record["created"] = encoder.encode(date: entity.created)
-                            record["modified"] = encoder.encode(date: entity.modified)
+                            record["created"] = encoder.encode(entity.created)
+                            record["modified"] = encoder.encode(entity.modified)
                             record["uuid"] = entity.uuid!.uuidString
-                            if let properties = entity.strings as? Set<StringPropertyRecord> {
-                                for property in properties {
-                                    record[property.name!.name!] = property.value
-                                }
-                            }
+                            entity.encode(from: entity.strings, as: StringPropertyRecord.self, into: &record, encoder: encoder)
+                            entity.encode(from: entity.integers, as: IntegerPropertyRecord.self, into: &record, encoder: encoder)
+                            entity.encode(from: entity.dates, as: DatePropertyRecord.self, into: &record, encoder: encoder)
                             entityResults.append(record)
                         }
                     }

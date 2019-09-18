@@ -71,11 +71,14 @@ class DatastoreTests: XCTestCase {
         loadAndCheck { (datastore) in
             datastore.getEntities(ofType: "Person", names: ["Person 1"]) { (people) in
                 let person = people[0]
-                datastore.add(properties: [person:["foo": "bar"]]) { () in
-                    datastore.getProperties(ofEntities: [person], withNames: ["foo"]) { (results) in
+                let now = Date()
+                datastore.add(properties: [person:["foo": "bar", "date": now, "number": 123]]) { () in
+                    datastore.getProperties(ofEntities: [person], withNames: ["foo", "date", "number"]) { (results) in
                         XCTAssertEqual(results.count, 1)
                         let properties = results[0]
                         XCTAssertEqual(properties["foo"] as? String, "bar")
+                        XCTAssertEqual(properties["date"] as? Date, now)
+                        XCTAssertEqual(properties["number"] as? Int64, 123)
                         done.fulfill()
                     }
                 }
@@ -177,7 +180,8 @@ class DatastoreTests: XCTestCase {
             let names = Set<String>(["Person 1", "Person 2"])
             datastore.getEntities(ofType: "Person", names: names) { (people) in
                 let person = people[0]
-                datastore.add(properties: [person:["foo": "bar"]]) { () in
+                let now = Date()
+                datastore.add(properties: [person:["foo": "bar", "date": now, "number": 123]]) { () in
                     datastore.encodeJSON() { json in
                         print(json)
                         done.fulfill()
