@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8B40C3B9233251D000CC24E6 /* Identifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B40C3B8233251D000CC24E6 /* Identifier.swift */; };
 		8B41F50A23313FB20035081B /* Datastore+Interchange.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B41F50923313FB20035081B /* Datastore+Interchange.swift */; };
 		8B48FD79232FD98D00F37CF1 /* InterchangeEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B48FD78232FD98D00F37CF1 /* InterchangeEncoder.swift */; };
 		8BFF2E6A232F85E200D40D31 /* Datastore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8BFF2E60232F85E200D40D31 /* Datastore.framework */; };
@@ -33,6 +34,7 @@
 
 /* Begin PBXFileReference section */
 		8B40C3B7233233D000CC24E6 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		8B40C3B8233251D000CC24E6 /* Identifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Identifier.swift; sourceTree = "<group>"; };
 		8B41F50923313FB20035081B /* Datastore+Interchange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Datastore+Interchange.swift"; sourceTree = "<group>"; };
 		8B48FD78232FD98D00F37CF1 /* InterchangeEncoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterchangeEncoder.swift; sourceTree = "<group>"; };
 		8BFF2E60232F85E200D40D31 /* Datastore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Datastore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -96,6 +98,7 @@
 				8B41F50923313FB20035081B /* Datastore+Interchange.swift */,
 				8B48FD78232FD98D00F37CF1 /* InterchangeEncoder.swift */,
 				8BFF2E85232F8CD200D40D31 /* Entity.swift */,
+				8B40C3B8233251D000CC24E6 /* Identifier.swift */,
 				8BFF2E7A232F864200D40D31 /* Model.xcdatamodeld */,
 				8BFF2E64232F85E200D40D31 /* Info.plist */,
 				8BFF2E80232F8B2B00D40D31 /* NSEntityDescriptionExtensions.swift */,
@@ -231,6 +234,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8B41F50A23313FB20035081B /* Datastore+Interchange.swift in Sources */,
+				8B40C3B9233251D000CC24E6 /* Identifier.swift in Sources */,
 				8BFF2E83232F8B2B00D40D31 /* NSEntityDescriptionExtensions.swift in Sources */,
 				8BFF2E82232F8B2B00D40D31 /* NSManagedObjectExtensions.swift in Sources */,
 				8BFF2E86232F8CD200D40D31 /* Entity.swift in Sources */,
