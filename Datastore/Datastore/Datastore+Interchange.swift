@@ -27,7 +27,7 @@ extension Datastore {
     
     public func decode(interchange: [String:Any], completion: @escaping (LoadResult) -> Void) {
         let context = container.viewContext
-        var symbolIndex: [String:Symbol] = [:]
+        var symbolIndex: [String:SymbolRecord] = [:]
         if let symbols = interchange["symbols"] as? [[String:Any]] {
             for symbolRecord in symbols {
                 if let uuid = symbolRecord["uuid"] as? String, let name = symbolRecord["name"] as? String {
@@ -40,9 +40,9 @@ extension Datastore {
         if let entities = interchange["entities"] as? [[String:Any]] {
             for entityRecord in entities {
                 if let name = entityRecord["name"] as? String, let uuid = entityRecord["uuid"] as? String, let type = entityRecord["type"] as? String {
-                    var entity = Entity.withIdentifier(uuid, in: context)
+                    var entity = EntityRecord.withIdentifier(uuid, in: context)
                     if entity == nil {
-                        let newEntity = Entity(in: context)
+                        let newEntity = EntityRecord(in: context)
                         newEntity.uuid = UUID(uuidString: uuid)
                         newEntity.type = symbolIndex[type]
                         entity = newEntity
@@ -70,7 +70,7 @@ extension Datastore {
         context.perform {
             var symbolResults: [[String:Any]] = []
             var entityResults: [[String:Any]] = []
-            let request: NSFetchRequest<Symbol> = Symbol.fetcher(in: context)
+            let request: NSFetchRequest<SymbolRecord> = SymbolRecord.fetcher(in: context)
             if let symbols = try? context.fetch(request) {
                 for symbol in symbols {
                     var record: [String:Any] = [:]
@@ -79,7 +79,7 @@ extension Datastore {
                     record["uuid"] = type
                     symbolResults.append(record)
                     
-                    if let entities = symbol.entities as? Set<Entity> {
+                    if let entities = symbol.entities as? Set<EntityRecord> {
                         for entity in entities {
                             var record: [String:Any] = [:]
                             record["name"] = entity.name
@@ -87,7 +87,7 @@ extension Datastore {
                             record["created"] = encoder.encode(date: entity.created)
                             record["modified"] = encoder.encode(date: entity.modified)
                             record["uuid"] = entity.uuid!.uuidString
-                            if let properties = entity.strings as? Set<StringProperty> {
+                            if let properties = entity.strings as? Set<StringPropertyRecord> {
                                 for property in properties {
                                     record[property.name!.name!] = property.value
                                 }

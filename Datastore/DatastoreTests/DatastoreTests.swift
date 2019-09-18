@@ -53,7 +53,7 @@ class DatastoreTests: XCTestCase {
                 let person = people[0]
                 
                 let context = datastore.container.viewContext
-                let label = Symbol.named("foo", in: context)
+                let label = SymbolRecord.named("foo", in: context)
                 person.object.add(property: label, value: "bar")
                 datastore.getProperties(ofEntities: [person], withNames: ["foo"]) { (results) in
                     XCTAssertEqual(results.count, 1)

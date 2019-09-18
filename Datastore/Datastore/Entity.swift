@@ -5,10 +5,10 @@
 
 import CoreData
 
-public class Entity: NSManagedObject {
-    func add(property symbol: Symbol, value: Any) {
+public class EntityRecord: NSManagedObject {
+    func add(property symbol: SymbolRecord, value: Any) {
         if let string = value as? String, let context = managedObjectContext {
-            let property = StringProperty(context: context)
+            let property = StringPropertyRecord(context: context)
             property.value = string
             property.name = symbol
             property.owner = self

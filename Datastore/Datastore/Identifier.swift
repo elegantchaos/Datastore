@@ -173,9 +173,19 @@ public class GuaranteedWrappedID<T: NSManagedObject>: WrappedID<T> {
     }
 }
 
+public typealias EntityID = WrappedID<EntityRecord>
 
-public typealias EntityID = WrappedID<Entity>
-public typealias SymbolID = WrappedID<Symbol>
+public class SymbolID: WrappedID<SymbolRecord>, ExpressibleByStringLiteral {
+    public required init(named name: String) {
+        super.init(named: name, createIfMissing: true)
+    }
 
-public typealias GuaranteedEntityID = GuaranteedWrappedID<Entity>
-public typealias GuaranteedSymbolID = GuaranteedWrappedID<Symbol>
+    public required init(stringLiteral value: String) {
+        super.init(named: value, createIfMissing: true)
+    }
+
+}
+
+public typealias Entity = GuaranteedWrappedID<EntityRecord>
+public typealias Symbol = GuaranteedWrappedID<SymbolRecord>
+
