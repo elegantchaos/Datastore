@@ -26,7 +26,7 @@ extension Datastore {
     }
     
     public func decode(interchange: [String:Any], completion: @escaping (LoadResult) -> Void) {
-        let context = container.viewContext
+        let context = self.context
         var symbolIndex: [String:SymbolRecord] = [:]
         if let symbols = interchange["symbols"] as? [[String:Any]] {
             for symbolRecord in symbols {
@@ -66,7 +66,7 @@ extension Datastore {
     }
     
     public func encodeInterchange(encoder: InterchangeEncoder = NullInterchangeEncoder(), completion: @escaping InterchangeCompletion) {
-        let context = container.viewContext
+        let context = self.context
         context.perform {
             var symbolResults: [[String:Any]] = []
             var entityResults: [[String:Any]] = []

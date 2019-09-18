@@ -14,6 +14,7 @@ let datastoreChannel = Channel("com.elegantchaos.datastore")
 public class Datastore {
     static var cachedModel: NSManagedObjectModel!
     internal let container: NSPersistentContainer
+    internal let context: NSManagedObjectContext
     
     public typealias LoadResult = Result<Datastore, Error>
     public typealias LoadCompletion = (LoadResult) -> Void
@@ -94,10 +95,11 @@ public class Datastore {
     
     private init(container: NSPersistentContainer) {
         self.container = container
+        self.context = container.newBackgroundContext()
     }
     
     public func symbol(named name: String) -> SymbolRecord {
-        let context = container.viewContext
+        let context = self.context
         if let symbol = getNamed(name, type: SymbolRecord.self, in: context, createIfMissing: false) {
             print("found symbol \(name) \(symbol.uuid!)")
             return symbol
@@ -111,7 +113,7 @@ public class Datastore {
     }
     
     public func symbol(uuid: String, name: String) -> SymbolRecord {
-        let context = container.viewContext
+        let context = self.context
         if let symbol = getWithIdentifier(uuid, type: SymbolRecord.self, in: context) {
             print("found symbol \(symbol.name!) \(symbol.uuid!)")
             return symbol
@@ -125,7 +127,7 @@ public class Datastore {
     }
     
     public func getEntities(ofType typeID: SymbolID, names: Set<String>, createIfMissing: Bool = true, completion: @escaping EntitiesCompletion) {
-        let context = container.viewContext
+        let context = self.context
         context.perform {
             var result: [EntityRecord] = []
             var create: Set<String> = names
@@ -159,7 +161,7 @@ public class Datastore {
     }
     
     public func getAllEntities(ofType type: SymbolID, completion: @escaping EntitiesCompletion) {
-        let context = container.viewContext
+        let context = self.context
         context.perform {
             
             if let entities = type.resolve(in: context)?.entities as? Set<EntityRecord> {
@@ -171,7 +173,7 @@ public class Datastore {
     }
     
     public func getProperties(ofEntities entities: [EntityID], withNames names: Set<String>, completion: @escaping ([[String:Any]]) -> Void) {
-        let context = container.viewContext
+        let context = self.context
         context.perform {
             var result: [[String:Any]] = []
             for entityID in entities {
@@ -195,7 +197,7 @@ public class Datastore {
     }
     
     public func add(properties: [EntityID: [String:Any]], completion: @escaping () -> Void) {
-        let context = container.viewContext
+        let context = self.context
         context.perform {
             for (entityID, values) in properties {
                 if let entity = entityID.resolve(in: context) {

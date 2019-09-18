@@ -52,7 +52,7 @@ class DatastoreTests: XCTestCase {
             datastore.getEntities(ofType: "Person", names: ["Person 1"]) { (people) in
                 let person = people[0]
                 
-                let context = datastore.container.viewContext
+                let context = datastore.context
                 let label = SymbolRecord.named("foo", in: context)
                 person.object.add(property: label, value: "bar")
                 datastore.getProperties(ofEntities: [person], withNames: ["foo"]) { (results) in
