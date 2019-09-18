@@ -32,6 +32,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		8B40C3B7233233D000CC24E6 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		8B41F50923313FB20035081B /* Datastore+Interchange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Datastore+Interchange.swift"; sourceTree = "<group>"; };
 		8B48FD78232FD98D00F37CF1 /* InterchangeEncoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterchangeEncoder.swift; sourceTree = "<group>"; };
 		8BFF2E60232F85E200D40D31 /* Datastore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Datastore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -71,6 +72,7 @@
 		8BFF2E56232F85E200D40D31 = {
 			isa = PBXGroup;
 			children = (
+				8B40C3B7233233D000CC24E6 /* README.md */,
 				8BFF2E62232F85E200D40D31 /* Datastore */,
 				8BFF2E6D232F85E200D40D31 /* DatastoreTests */,
 				8BFF2E61232F85E200D40D31 /* Products */,
