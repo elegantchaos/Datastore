@@ -46,17 +46,18 @@ extension Datastore {
                         newEntity.uuid = UUID(uuidString: uuid)
                         newEntity.type = symbolIndex[type]
                         entity = newEntity
+                        print("made \(name)")
                     }
                     if let entity = entity {
                         entity.name = name
                         var entityProperties = entityRecord
                         entityProperties.removeValue(forKey: "name")
                         entityProperties.removeValue(forKey: "uuid")
+                        entityProperties.removeValue(forKey: "type")
                         entityProperties.removeValue(forKey: "created")
                         entityProperties.removeValue(forKey: "modified")
-                        for (key, value) in entityProperties {
-                            print("read property \(key) \(value)")
-                        }
+                        print("adding \(entityProperties)")
+                        entity.add(properties: entityProperties, store: self)
                     }
                 }
             }
@@ -90,7 +91,7 @@ extension Datastore {
                             record["uuid"] = entity.uuid!.uuidString
                             if let properties = entity.strings as? Set<StringProperty> {
                                 for property in properties {
-                                    record[property.label!.name!] = property.value
+                                    record[property.name!.name!] = property.value
                                 }
                             }
                             entityResults.append(record)

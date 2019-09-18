@@ -12,7 +12,7 @@ import Combine
 @testable import Datastore
 
 class DatastoreTests: XCTestCase {
-
+    
     func loadAndCheck(completion: @escaping (Datastore) -> Void) {
         Datastore.load(name: "Test") { (result) in
             switch result {
@@ -32,7 +32,7 @@ class DatastoreTests: XCTestCase {
         }
         wait(for: [loaded], timeout: 1.0)
     }
-
+    
     func testEntityCreation() {
         let created = expectation(description: "loaded")
         loadAndCheck { (datastore) in
@@ -54,11 +54,7 @@ class DatastoreTests: XCTestCase {
                 
                 let context = datastore.container.viewContext
                 let label = Symbol.named("foo", in: context)
-                let property = StringProperty(context: context)
-                property.value = "bar"
-                property.label = label
-                property.owner = person
-                
+                person.add(property: label, value: "bar")
                 datastore.getProperties(ofEntities: [person], withNames: ["foo"]) { (results) in
                     XCTAssertEqual(results.count, 1)
                     let properties = results[0]
@@ -69,7 +65,7 @@ class DatastoreTests: XCTestCase {
         }
         wait(for: [done], timeout: 1.0)
     }
-
+    
     func testAddProperties() {
         let done = expectation(description: "loaded")
         loadAndCheck { (datastore) in
@@ -113,7 +109,8 @@ class DatastoreTests: XCTestCase {
                     "date" : "2019-09-17T16:10:38Z"
                   },
                   "name" : "Person 2",
-                  "type" : "F9B7D73D-2020-49AD-B85D-4BBD62CCA80B"
+                  "type" : "F9B7D73D-2020-49AD-B85D-4BBD62CCA80B",
+                  "foo" : "baz"
                 }
               ],
               "symbols" : [
@@ -136,44 +133,53 @@ class DatastoreTests: XCTestCase {
                 XCTFail("\(error)")
                 
             case .success(let store):
-                let names = ["Person 1", "Person 2"]
+                let expected = ["Person 1": "bar", "Person 2": "baz"]
                 store.getAllEntities(ofType: "Person") { (people) in
                     XCTAssertEqual(people.count, 2)
-                    for person in people {
-                        XCTAssertTrue(names.contains(person.name!))
+                    store.getProperties(ofEntities: people, withNames: ["foo"]) { results in
+                        var n = 0
+                        for person in people {
+                            let name = person.name!
+                            let properties = results[n]
+                            let value = properties["foo"] as? String
+                            let expectedValue = expected[name]
+                            n += 1
+                            XCTAssertEqual(expectedValue, value, "\(name)")
+                        }
+                        loaded.fulfill()
+                        
                     }
-                    loaded.fulfill()
                 }
             }
         }
         wait(for: [loaded], timeout: 1.0)
     }
     
-//    func testInterchange() {
-//        let done = expectation(description: "loaded")
-//        loadAndCheck { (datastore) in
-//            let names = Set<String>(["Person 1", "Person 2"])
-//            datastore.getEntities(ofType: "Person", names: names) { (people) in
-//                let person = people[0]
-//                datastore.add(properties: [person:["foo": "bar"]]) { () in
-//                    datastore.interchange() { interchange in
-//                        for (key, value) in interchange {
-//                            XCTAssertEqual(key, "Person")
-//                            if let entities = value as? [[String:Any]] {
-//                                for entity in entities {
-//                                    XCTAssertTrue(names.contains(entity["name"] as! String))
-//                                }
-//                            }
-//                        }
-//
-//                        done.fulfill()
-//                    }
-//                }
-//            }
-//        }
-//        wait(for: [done], timeout: 1.0)
-//    }
-
+    //    func testInterchange() {
+    //        let done = expectation(description: "loaded")
+    //        loadAndCheck { (datastore) in
+    //            let names = Set<String>(["Person 1", "Person 2"])
+    //            datastore.getEntities(ofType: "Person", names: names) { (people) in
+    //                let person = people[0]
+    //                datastore.add(properties: [person:["foo": "bar"]]) { () in
+    //                    datastore.interchange() { interchange in
+    //                        for (key, value) in interchange {
+    //                            XCTAssertEqual(key, "Person")
+    //                            if let entities = value as? [[String:Any]] {
+    //                                for entity in entities {
+    //                                    XCTAssertTrue(names.contains(entity["name"] as! String))
+    //                                }
+    //                            }
+    //                        }
+    //
+    //                        done.fulfill()
+    //                    }
+    //                }
+    //            }
+    //        }
+    //        wait(for: [done], timeout: 1.0)
+    //    }
+    
     func testInterchangeJSON() {
         let done = expectation(description: "loaded")
         loadAndCheck { (datastore) in
@@ -190,7 +196,7 @@ class DatastoreTests: XCTestCase {
         }
         wait(for: [done], timeout: 1.0)
     }
-
+    
     func check<Output, Failure>(action: String, future: Future<Output, Failure>) {
         let done = expectation(description: action)
         let _ = future.sink(
@@ -206,7 +212,7 @@ class DatastoreTests: XCTestCase {
         })
         wait(for: [done], timeout: 1.0)
     }
-
+    
     func testLoadFuture() {
         let future = Datastore.loadCombine(name: "test")
         check(action: "load", future: future)
