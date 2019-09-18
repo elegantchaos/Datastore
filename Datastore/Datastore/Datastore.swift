@@ -10,13 +10,156 @@ import Combine
 
 let datastoreChannel = Channel("com.elegantchaos.datastore")
 
+public protocol ResolvableID {
+    func resolve(in context: NSManagedObjectContext, as type: NSManagedObject.Type) -> ResolvableID
+    var object: NSManagedObject? { get }
+}
+
+public struct NullCachedID: ResolvableID {
+    public func resolve(in context: NSManagedObjectContext, as type: NSManagedObject.Type) -> ResolvableID {
+        return self
+    }
+    
+    public var object: NSManagedObject? {
+        return nil
+    }
+}
+
+public struct OpaqueCachedID: ResolvableID {
+    let cached: NSManagedObject
+    let id: NSManagedObjectID
+    
+    public init(_ object: NSManagedObject) {
+        self.cached = object
+        self.id = object.objectID
+    }
+    
+    public func resolve(in context: NSManagedObjectContext, as objectType: NSManagedObject.Type) -> ResolvableID {
+        if context == cached.managedObjectContext {
+            if type(of: cached) == objectType {
+                return self
+            } else {
+                return NullCachedID()
+            }
+        } else {
+            let object = context.object(with: id)
+            return OpaqueCachedID(object)
+        }
+    }
+    
+    public var object: NSManagedObject? {
+        return cached
+    }
+}
+
+public struct OpaqueNamedID: ResolvableID {
+    let name: String
+    let createIfMissing: Bool
+    
+    public func resolve(in context: NSManagedObjectContext, as type: NSManagedObject.Type) -> ResolvableID {
+        if let object = type.named(name, in: context, createIfMissing: createIfMissing) {
+            return OpaqueCachedID(object)
+        } else {
+            return NullCachedID()
+        }
+    }
+    
+    public var object: NSManagedObject? {
+        fatalError("identifier unresolved")
+        return nil
+    }
+}
+
+public struct OpaqueIdentifiedID: ResolvableID {
+    let uuid: String
+    
+    public func resolve(in context: NSManagedObjectContext, as type: NSManagedObject.Type) -> ResolvableID {
+        if let object = type.withIdentifier(uuid, in: context) {
+            return OpaqueCachedID(object)
+        } else {
+            return NullCachedID()
+        }
+    }
+    
+    public var object: NSManagedObject? {
+        fatalError("identifier unresolved")
+        return nil
+    }
+}
+
+public struct WrappedID<T: NSManagedObject> {
+    let id: ResolvableID
+    
+    init(_ object: T) {
+        self.id = OpaqueCachedID(object)
+    }
+    
+    init(_ id: ResolvableID) {
+        self.id = id
+    }
+    
+    init(named name: String, createIfMissing: Bool) {
+        self.id = OpaqueNamedID(name: name, createIfMissing: createIfMissing)
+    }
+    
+    init(uuid: String) {
+        self.id = OpaqueIdentifiedID(uuid: uuid)
+    }
+    
+    public func resolve(in context: NSManagedObjectContext) -> WrappedID {
+        let resolved = id.resolve(in: context, as: T.self)
+        return WrappedID(resolved)
+    }
+    
+    var object: T? {
+        return id.object as? T
+    }
+}
+
+public struct GuaranteedWrappedID<T: NSManagedObject> {
+    let id: ResolvableID
+    
+    init(_ object: T) {
+        self.id = OpaqueCachedID(object)
+    }
+    
+    init(_ id: ResolvableID) {
+        self.id = id
+    }
+    
+    init(named name: String, createIfMissing: Bool) {
+        self.id = OpaqueNamedID(name: name, createIfMissing: createIfMissing)
+    }
+    
+    init(uuid: String) {
+        self.id = OpaqueIdentifiedID(uuid: uuid)
+    }
+    
+    public func resolve(in context: NSManagedObjectContext) -> GuaranteedWrappedID {
+        let resolved = id.resolve(in: context, as: T.self)
+        return GuaranteedWrappedID(resolved)
+    }
+    
+    var object: T {
+        return id.object as! T
+    }
+}
+
+
+public typealias EntityID = WrappedID<Entity>
+public typealias SymbolID = WrappedID<Symbol>
+
+public typealias GuaranteedEntityID = GuaranteedWrappedID<Entity>
+public typealias GuaranteedSymbolID = GuaranteedWrappedID<Symbol>
+
+
 public class Datastore {
     static var cachedModel: NSManagedObjectModel!
     let container: NSPersistentContainer
     
     public typealias LoadResult = Result<Datastore, Error>
     public typealias LoadCompletion = (LoadResult) -> Void
-    public typealias EntitiesCompletion = ([Entity]) -> Void
+    public typealias EntitiesCompletion = ([GuaranteedEntityID]) -> Void
     public typealias InterchangeCompletion = ([String:Any]) -> Void
     
     struct LoadingModelError: Error { }
@@ -82,7 +225,7 @@ public class Datastore {
                 store.decode(json: json) { result in
                     completion(result)
                 }
-            
+                
             default:
                 completion(result)
             }
@@ -106,7 +249,7 @@ public class Datastore {
         print("made symbol \(name) \(symbol.uuid!)")
         return symbol
     }
-
+    
     public func symbol(uuid: String, name: String) -> Symbol {
         let context = container.viewContext
         if let symbol = getWithIdentifier(uuid, type: Symbol.self, in: context) {
@@ -120,12 +263,17 @@ public class Datastore {
         print("made symbol \(symbol.name!) \(symbol.uuid!)")
         return symbol
     }
-
-    public func getEntities(ofType type: Symbol, names: Set<String>, createIfMissing: Bool, completion: @escaping EntitiesCompletion) {
+    
+    public func getEntities(ofType typeID: SymbolID, names: Set<String>, createIfMissing: Bool, completion: @escaping EntitiesCompletion) {
         let context = container.viewContext
         context.perform {
             var result: [Entity] = []
             var create: Set<String> = names
+            guard let type = typeID.resolve(in: context).object else {
+                completion([])
+                return
+            }
+            
             if let entities = type.entities as? Set<Entity> {
                 for entity in entities {
                     if let name = entity.name, names.contains(name) {
@@ -146,19 +294,19 @@ public class Datastore {
                     result.append(entity)
                 }
             }
-            completion(result)
+            completion(result.map({ GuaranteedEntityID($0) }))
         }
     }
-
+    
     public func getEntities(ofType type: String, names: Set<String>, createIfMissing: Bool = true, completion: @escaping EntitiesCompletion) {
-        getEntities(ofType: symbol(named: type), names: names, createIfMissing: createIfMissing, completion: completion)
+        getEntities(ofType: SymbolID(named: type, createIfMissing: true), names: names, createIfMissing: createIfMissing, completion: completion)
     }
-
+    
     public func getAllEntities(ofType type: Symbol, completion: @escaping EntitiesCompletion) {
         let context = container.viewContext
         context.perform {
             if let entities = type.entities as? Set<Entity> {
-                completion(Array(entities))
+                completion(Array(entities.map({ GuaranteedEntityID($0) })))
             } else {
                 completion([])
             }
@@ -199,7 +347,7 @@ public class Datastore {
             completion()
         }
     }
-      
+    
     public class func model(bundle: Bundle = Bundle(for: Datastore.self), cached: Bool = true) -> NSManagedObjectModel? {
         if cached && (cachedModel != nil) {
             return cachedModel
