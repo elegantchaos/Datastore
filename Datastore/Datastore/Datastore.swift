@@ -178,17 +178,15 @@ public class Datastore {
             var result: [[String:Any]] = []
             for entityID in entities {
                 var values: [String:Any] = [:]
-                if let entity = entityID.resolve(in: context), let strings = entity.strings as? Set<StringPropertyRecord> {
+                if let entity = entityID.resolve(in: context) {
                     for property in Datastore.specialProperties {
                         if names.contains(property) {
                             values[property] = entity.value(forKey: property)
                         }
                     }
-                    for property in strings {
-                        if let name = property.name?.name, names.contains(name) {
-                            values[name] = property.value
-                        }
-                    }
+                    entity.read(names: names, from: entity.strings, as: StringPropertyRecord.self, into: &values)
+                    entity.read(names: names, from: entity.integers, as: IntegerPropertyRecord.self, into: &values)
+                    entity.read(names: names, from: entity.dates, as: DatePropertyRecord.self, into: &values)
                 }
                 result.append(values)
             }
