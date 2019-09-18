@@ -160,10 +160,11 @@ public class Datastore {
         getEntities(ofType: SymbolID(named: type, createIfMissing: true), names: names, createIfMissing: createIfMissing, completion: completion)
     }
     
-    public func getAllEntities(ofType type: Symbol, completion: @escaping EntitiesCompletion) {
+    public func getAllEntities(ofType type: SymbolID, completion: @escaping EntitiesCompletion) {
         let context = container.viewContext
         context.perform {
-            if let entities = type.entities as? Set<Entity> {
+            
+            if let entities = type.resolve(in: context)?.entities as? Set<Entity> {
                 completion(Array(entities.map({ GuaranteedEntityID($0) })))
             } else {
                 completion([])
@@ -172,16 +173,17 @@ public class Datastore {
     }
     
     public func getAllEntities(ofType type: String, completion: @escaping EntitiesCompletion) {
-        getAllEntities(ofType: symbol(named: type), completion: completion)
+        getAllEntities(ofType: SymbolID(named: type, createIfMissing: true), completion: completion)
     }
     
-    public func getProperties(ofEntities entities: [Entity], withNames names: Set<String>, completion: @escaping ([[String:Any]]) -> Void) {
+    public func getProperties(ofEntities entities: [EntityID], withNames names: Set<String>, completion: @escaping ([[String:Any]]) -> Void) {
         let context = container.viewContext
         context.perform {
             var result: [[String:Any]] = []
-            for entity in entities {
+            for entityID in entities {
+                
                 var values: [String:Any] = [:]
-                if let strings = entity.strings as? Set<StringProperty> {
+                if let entity = entityID.resolve(in: context), let strings = entity.strings as? Set<StringProperty> {
                     for property in strings {
                         if let name = property.name?.name, names.contains(name) {
                             values[name] = property.value

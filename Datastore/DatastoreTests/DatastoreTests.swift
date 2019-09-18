@@ -55,7 +55,7 @@ class DatastoreTests: XCTestCase {
                 let context = datastore.container.viewContext
                 let label = Symbol.named("foo", in: context)
                 person.object.add(property: label, value: "bar")
-                datastore.getProperties(ofEntities: [person.object], withNames: ["foo"]) { (results) in
+                datastore.getProperties(ofEntities: [person], withNames: ["foo"]) { (results) in
                     XCTAssertEqual(results.count, 1)
                     let properties = results[0]
                     XCTAssertEqual(properties["foo"] as? String, "bar")
@@ -70,8 +70,8 @@ class DatastoreTests: XCTestCase {
         let done = expectation(description: "loaded")
         loadAndCheck { (datastore) in
             datastore.getEntities(ofType: "Person", names: ["Person 1"]) { (people) in
-                let person = people[0].object
-                datastore.add(properties: [person:["foo": "bar"]]) { () in
+                let person = people[0]
+                datastore.add(properties: [person.object:["foo": "bar"]]) { () in
                     datastore.getProperties(ofEntities: [person], withNames: ["foo"]) { (results) in
                         XCTAssertEqual(results.count, 1)
                         let properties = results[0]
@@ -136,7 +136,7 @@ class DatastoreTests: XCTestCase {
                 let expected = ["Person 1": "bar", "Person 2": "baz"]
                 store.getAllEntities(ofType: "Person") { (people) in
                     XCTAssertEqual(people.count, 2)
-                    store.getProperties(ofEntities: people.map({ $0.object }), withNames: ["foo"]) { results in
+                    store.getProperties(ofEntities: people, withNames: ["foo"]) { results in
                         var n = 0
                         for person in people {
                             let name = person.object.name!
