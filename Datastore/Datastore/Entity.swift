@@ -7,7 +7,17 @@ import CoreData
 
 public class EntityRecord: NSManagedObject {
     func add(property symbol: SymbolRecord, value: Any) {
-        if let string = value as? String, let context = managedObjectContext {
+        switch value {
+        case let string as String:
+            add(property: symbol, string: string)
+
+        default:
+            break
+        }
+    }
+    
+    func add(property symbol: SymbolRecord, string: String) {
+        if let context = managedObjectContext {
             let property = StringPropertyRecord(context: context)
             property.value = string
             property.name = symbol

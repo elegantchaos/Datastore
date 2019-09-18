@@ -89,26 +89,18 @@ class DatastoreTests: XCTestCase {
             {
               "entities" : [
                 {
-                  "created" : {
-                    "date" : "2019-09-17T16:10:38Z"
-                  },
                   "name" : "Person 1",
                   "uuid" : "C41DB873-323D-4026-95D1-603120B9ADF6",
-                  "modified" : {
-                    "date" : "2019-09-17T16:10:38Z"
-                  },
+                  "created" : { "date" : "1969-11-12T01:23:45Z" },
+                  "modified" : { "date" : "1963-09-21T01:23:45Z" },
                   "type" : "F9B7D73D-2020-49AD-B85D-4BBD62CCA80B",
                   "foo" : "bar"
                 },
                 {
-                  "created" : {
-                    "date" : "2019-09-17T16:10:38Z"
-                  },
-                  "uuid" : "ADDD557A-668E-4C6B-A9A0-3BCF099646E8",
-                  "modified" : {
-                    "date" : "2019-09-17T16:10:38Z"
-                  },
                   "name" : "Person 2",
+                  "uuid" : "ADDD557A-668E-4C6B-A9A0-3BCF099646E8",
+                  "created" : { "date" : "1969-11-12T01:23:45Z" },
+                  "modified" : { "date" : "1963-09-21T01:23:45Z" },
                   "type" : "F9B7D73D-2020-49AD-B85D-4BBD62CCA80B",
                   "foo" : "baz"
                 }
@@ -136,12 +128,16 @@ class DatastoreTests: XCTestCase {
                 let expected = ["Person 1": "bar", "Person 2": "baz"]
                 store.getAllEntities(ofType: "Person") { (people) in
                     XCTAssertEqual(people.count, 2)
-                    store.getProperties(ofEntities: people, withNames: ["name", "foo"]) { results in
+                    store.getProperties(ofEntities: people, withNames: ["name", "foo", "created", "modified"]) { results in
                         for result in results {
                             let name = result["name"] as! String
                             let value = result["foo"] as! String
                             let expectedValue = expected[name]
                             XCTAssertEqual(expectedValue, value, "\(name)")
+                            let created = result["created"] as! Date
+                            XCTAssertEqual(created.description, "1969-11-12 01:23:45 +0000")
+                            let modified = result["modified"] as! Date
+                            XCTAssertEqual(modified.description, "1963-09-21 01:23:45 +0000")
                         }
                         loaded.fulfill()
                         

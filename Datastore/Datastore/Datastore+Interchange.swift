@@ -16,7 +16,7 @@ extension Datastore {
         
         do {
             if let interchange = try JSONSerialization.jsonObject(with: data, options: []) as? [String:Any] {
-                decode(interchange: interchange, completion: completion)
+                decode(interchange: interchange, decoder: JSONInterchangeDecoder(), completion: completion)
             } else {
                 completion(.failure(InvalidJSONError()))
             }
@@ -25,7 +25,7 @@ extension Datastore {
         }
     }
     
-    public func decode(interchange: [String:Any], completion: @escaping (LoadResult) -> Void) {
+    public func decode(interchange: [String:Any], decoder: InterchangeDecoder, completion: @escaping (LoadResult) -> Void) {
         let context = self.context
         var symbolIndex: [String:SymbolRecord] = [:]
         if let symbols = interchange["symbols"] as? [[String:Any]] {
@@ -50,6 +50,8 @@ extension Datastore {
                     }
                     if let entity = entity {
                         entity.name = name
+                        entity.created = decoder.decode(value: entityRecord["created"], default: Date())
+                        entity.modified = decoder.decode(value: entityRecord["modified"], default: Date())
                         var entityProperties = entityRecord
                         for key in Datastore.specialProperties {
                             entityProperties.removeValue(forKey: key)
