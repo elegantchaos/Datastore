@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="14903" systemVersion="19A558d" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
-    <entity name="DatePropertyRecord" representedClassName=".DatePropertyRecord" syncable="YES" codeGenerationType="class">
+    <entity name="DateProperty" representedClassName=".DateProperty" syncable="YES" codeGenerationType="class">
         <attribute name="value" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <relationship name="name" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="SymbolRecord" inverseName="dateProperties" inverseEntity="SymbolRecord"/>
         <relationship name="owner" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="EntityRecord" inverseName="dates" inverseEntity="EntityRecord"/>
@@ -11,14 +11,14 @@
         <attribute name="modified" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="name" optional="YES" attributeType="String"/>
         <attribute name="uuid" attributeType="UUID" usesScalarValueType="NO"/>
-        <relationship name="dates" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="DatePropertyRecord" inverseName="owner" inverseEntity="DatePropertyRecord"/>
-        <relationship name="integers" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="IntegerPropertyRecord" inverseName="owner" inverseEntity="IntegerPropertyRecord"/>
+        <relationship name="dates" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="DateProperty" inverseName="owner" inverseEntity="DateProperty"/>
+        <relationship name="integers" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="IntegerProperty" inverseName="owner" inverseEntity="IntegerProperty"/>
         <relationship name="relationships" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="RelationshipProperty" inverseName="owner" inverseEntity="RelationshipProperty"/>
-        <relationship name="strings" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="StringPropertyRecord" inverseName="owner" inverseEntity="StringPropertyRecord"/>
+        <relationship name="strings" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="StringProperty" inverseName="owner" inverseEntity="StringProperty"/>
         <relationship name="targets" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="RelationshipProperty" inverseName="target" inverseEntity="RelationshipProperty"/>
         <relationship name="type" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="SymbolRecord" inverseName="entities" inverseEntity="SymbolRecord"/>
     </entity>
-    <entity name="IntegerPropertyRecord" representedClassName=".IntegerPropertyRecord" syncable="YES" codeGenerationType="class">
+    <entity name="IntegerProperty" representedClassName=".IntegerProperty" syncable="YES" codeGenerationType="class">
         <attribute name="value" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
         <relationship name="name" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="SymbolRecord" inverseName="integerProperties" inverseEntity="SymbolRecord"/>
         <relationship name="owner" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="EntityRecord" inverseName="integers" inverseEntity="EntityRecord"/>
@@ -30,7 +30,7 @@
         <relationship name="target" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="EntityRecord" inverseName="targets" inverseEntity="EntityRecord"/>
         <relationship name="type" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="SymbolRecord" inverseName="relationshipTypes" inverseEntity="SymbolRecord"/>
     </entity>
-    <entity name="StringPropertyRecord" representedClassName=".StringPropertyRecord" syncable="YES" codeGenerationType="class">
+    <entity name="StringProperty" representedClassName=".StringProperty" syncable="YES" codeGenerationType="class">
         <attribute name="value" attributeType="String" defaultValueString=""/>
         <relationship name="name" maxCount="1" deletionRule="Nullify" destinationEntity="SymbolRecord" inverseName="stringProperties" inverseEntity="SymbolRecord"/>
         <relationship name="owner" maxCount="1" deletionRule="Nullify" destinationEntity="EntityRecord" inverseName="strings" inverseEntity="EntityRecord"/>
@@ -39,22 +39,22 @@
     <entity name="SymbolRecord" representedClassName=".SymbolRecord" syncable="YES" codeGenerationType="class">
         <attribute name="name" optional="YES" attributeType="String"/>
         <attribute name="uuid" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
-        <relationship name="dateProperties" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="DatePropertyRecord" inverseName="name" inverseEntity="DatePropertyRecord"/>
-        <relationship name="dateTypes" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="DatePropertyRecord" inverseName="type" inverseEntity="DatePropertyRecord"/>
+        <relationship name="dateProperties" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="DateProperty" inverseName="name" inverseEntity="DateProperty"/>
+        <relationship name="dateTypes" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="DateProperty" inverseName="type" inverseEntity="DateProperty"/>
         <relationship name="entities" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="EntityRecord" inverseName="type" inverseEntity="EntityRecord"/>
-        <relationship name="integerProperties" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="IntegerPropertyRecord" inverseName="name" inverseEntity="IntegerPropertyRecord"/>
-        <relationship name="integerTypes" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="IntegerPropertyRecord" inverseName="type" inverseEntity="IntegerPropertyRecord"/>
+        <relationship name="integerProperties" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="IntegerProperty" inverseName="name" inverseEntity="IntegerProperty"/>
+        <relationship name="integerTypes" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="IntegerProperty" inverseName="type" inverseEntity="IntegerProperty"/>
         <relationship name="relationships" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="RelationshipProperty" inverseName="name" inverseEntity="RelationshipProperty"/>
         <relationship name="relationshipTypes" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="RelationshipProperty" inverseName="type" inverseEntity="RelationshipProperty"/>
-        <relationship name="stringProperties" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="StringPropertyRecord" inverseName="name" inverseEntity="StringPropertyRecord"/>
-        <relationship name="stringTypes" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="StringPropertyRecord" inverseName="type" inverseEntity="StringPropertyRecord"/>
+        <relationship name="stringProperties" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="StringProperty" inverseName="name" inverseEntity="StringProperty"/>
+        <relationship name="stringTypes" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="StringProperty" inverseName="type" inverseEntity="StringProperty"/>
     </entity>
     <elements>
-        <element name="DatePropertyRecord" positionX="0" positionY="0" width="0" height="0"/>
+        <element name="DateProperty" positionX="0" positionY="0" width="0" height="0"/>
         <element name="EntityRecord" positionX="0" positionY="0" width="0" height="0"/>
-        <element name="IntegerPropertyRecord" positionX="0" positionY="0" width="0" height="0"/>
+        <element name="IntegerProperty" positionX="0" positionY="0" width="0" height="0"/>
         <element name="RelationshipProperty" positionX="0" positionY="0" width="0" height="0"/>
-        <element name="StringPropertyRecord" positionX="0" positionY="0" width="0" height="0"/>
+        <element name="StringProperty" positionX="0" positionY="0" width="0" height="0"/>
         <element name="SymbolRecord" positionX="0" positionY="0" width="0" height="0"/>
     </elements>
 </model>

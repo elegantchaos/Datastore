@@ -89,9 +89,9 @@ extension Datastore {
                             record["created"] = encoder.encode(entity.created)
                             record["modified"] = encoder.encode(entity.modified)
                             record["uuid"] = entity.uuid!.uuidString
-                            entity.encode(from: entity.strings, as: StringPropertyRecord.self, into: &record, encoder: encoder)
-                            entity.encode(from: entity.integers, as: IntegerPropertyRecord.self, into: &record, encoder: encoder)
-                            entity.encode(from: entity.dates, as: DatePropertyRecord.self, into: &record, encoder: encoder)
+                            entity.encode(from: entity.strings, as: StringProperty.self, into: &record, encoder: encoder)
+                            entity.encode(from: entity.integers, as: IntegerProperty.self, into: &record, encoder: encoder)
+                            entity.encode(from: entity.dates, as: DateProperty.self, into: &record, encoder: encoder)
                             entity.encode(from: entity.relationships, as: RelationshipProperty.self, into: &record, encoder: encoder)
                             entityResults.append(record)
                         }

@@ -5,13 +5,12 @@
 
 import Foundation
 
-
-extension DatePropertyRecord: NamedProperty {
+extension StringProperty: NamedProperty {
     func typedValue(in store: Datastore) -> SemanticValue {
         return store.value(value, type: type)
     }
-
-    func encode(encoder: InterchangeEncoder) -> Any? {
-        return encoder.encode(value)
+    
+    func encode(with encoder: InterchangeEncoder, into record: inout [String:Any]) {
+        encoder.encode(self, into: &record)
     }
 }

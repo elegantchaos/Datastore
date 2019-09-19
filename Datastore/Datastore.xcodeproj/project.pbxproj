@@ -14,9 +14,9 @@
 		8B41F50A23313FB20035081B /* Datastore+Interchange.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B41F50923313FB20035081B /* Datastore+Interchange.swift */; };
 		8B48FD79232FD98D00F37CF1 /* InterchangeEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B48FD78232FD98D00F37CF1 /* InterchangeEncoder.swift */; };
 		8B55DF0723328AF600B99383 /* InterchangeDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B55DF0623328AF600B99383 /* InterchangeDecoder.swift */; };
-		8B64FD562333CBA2001A0BBD /* StringPropertyRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B64FD552333CBA2001A0BBD /* StringPropertyRecord.swift */; };
-		8B64FD582333CBB4001A0BBD /* IntegerPropertyRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B64FD572333CBB4001A0BBD /* IntegerPropertyRecord.swift */; };
-		8B64FD5A2333CBC9001A0BBD /* DatePropertyRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B64FD592333CBC9001A0BBD /* DatePropertyRecord.swift */; };
+		8B64FD562333CBA2001A0BBD /* StringProperty.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B64FD552333CBA2001A0BBD /* StringProperty.swift */; };
+		8B64FD582333CBB4001A0BBD /* IntegerProperty.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B64FD572333CBB4001A0BBD /* IntegerProperty.swift */; };
+		8B64FD5A2333CBC9001A0BBD /* DateProperty.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B64FD592333CBC9001A0BBD /* DateProperty.swift */; };
 		8B64FD5C2333CBD9001A0BBD /* RelationshipProperty.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B64FD5B2333CBD9001A0BBD /* RelationshipProperty.swift */; };
 		8B64FD5E2333CBEB001A0BBD /* NamedProperty.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B64FD5D2333CBEB001A0BBD /* NamedProperty.swift */; };
 		8BFF2E6A232F85E200D40D31 /* Datastore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8BFF2E60232F85E200D40D31 /* Datastore.framework */; };
@@ -50,9 +50,9 @@
 		8B41F50923313FB20035081B /* Datastore+Interchange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Datastore+Interchange.swift"; sourceTree = "<group>"; };
 		8B48FD78232FD98D00F37CF1 /* InterchangeEncoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterchangeEncoder.swift; sourceTree = "<group>"; };
 		8B55DF0623328AF600B99383 /* InterchangeDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterchangeDecoder.swift; sourceTree = "<group>"; };
-		8B64FD552333CBA2001A0BBD /* StringPropertyRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringPropertyRecord.swift; sourceTree = "<group>"; };
-		8B64FD572333CBB4001A0BBD /* IntegerPropertyRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntegerPropertyRecord.swift; sourceTree = "<group>"; };
-		8B64FD592333CBC9001A0BBD /* DatePropertyRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatePropertyRecord.swift; sourceTree = "<group>"; };
+		8B64FD552333CBA2001A0BBD /* StringProperty.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringProperty.swift; sourceTree = "<group>"; };
+		8B64FD572333CBB4001A0BBD /* IntegerProperty.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntegerProperty.swift; sourceTree = "<group>"; };
+		8B64FD592333CBC9001A0BBD /* DateProperty.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateProperty.swift; sourceTree = "<group>"; };
 		8B64FD5B2333CBD9001A0BBD /* RelationshipProperty.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelationshipProperty.swift; sourceTree = "<group>"; };
 		8B64FD5D2333CBEB001A0BBD /* NamedProperty.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NamedProperty.swift; sourceTree = "<group>"; };
 		8BFF2E60232F85E200D40D31 /* Datastore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Datastore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -113,24 +113,24 @@
 			children = (
 				8BFF2E63232F85E200D40D31 /* Datastore.h */,
 				8BFF2E7D232F8A1D00D40D31 /* Datastore.swift */,
-				8B3B6B6B233389360098DAC1 /* SemanticValue.swift */,
-				8B3B6B6D233389400098DAC1 /* SemanticDictionary.swift */,
 				8B41F50923313FB20035081B /* Datastore+Interchange.swift */,
-				8B48FD78232FD98D00F37CF1 /* InterchangeEncoder.swift */,
-				8B64FD552333CBA2001A0BBD /* StringPropertyRecord.swift */,
-				8B64FD572333CBB4001A0BBD /* IntegerPropertyRecord.swift */,
-				8B64FD592333CBC9001A0BBD /* DatePropertyRecord.swift */,
-				8B64FD5B2333CBD9001A0BBD /* RelationshipProperty.swift */,
-				8B64FD5D2333CBEB001A0BBD /* NamedProperty.swift */,
-				8B55DF0623328AF600B99383 /* InterchangeDecoder.swift */,
+				8B64FD592333CBC9001A0BBD /* DateProperty.swift */,
 				8BFF2E85232F8CD200D40D31 /* EntityRecord.swift */,
-				8B3B6B6F23339FC50098DAC1 /* SymbolRecord.swift */,
 				8B40C3B8233251D000CC24E6 /* Identifier.swift */,
-				8BFF2E7A232F864200D40D31 /* Model.xcdatamodeld */,
 				8BFF2E64232F85E200D40D31 /* Info.plist */,
+				8B64FD572333CBB4001A0BBD /* IntegerProperty.swift */,
+				8B55DF0623328AF600B99383 /* InterchangeDecoder.swift */,
+				8B48FD78232FD98D00F37CF1 /* InterchangeEncoder.swift */,
+				8BFF2E7A232F864200D40D31 /* Model.xcdatamodeld */,
+				8B64FD5D2333CBEB001A0BBD /* NamedProperty.swift */,
 				8BFF2E80232F8B2B00D40D31 /* NSEntityDescriptionExtensions.swift */,
 				8BFF2E81232F8B2B00D40D31 /* NSManagedObjectContextExtensions.swift */,
 				8BFF2E7F232F8B2B00D40D31 /* NSManagedObjectExtensions.swift */,
+				8B64FD5B2333CBD9001A0BBD /* RelationshipProperty.swift */,
+				8B3B6B6D233389400098DAC1 /* SemanticDictionary.swift */,
+				8B3B6B6B233389360098DAC1 /* SemanticValue.swift */,
+				8B64FD552333CBA2001A0BBD /* StringProperty.swift */,
+				8B3B6B6F23339FC50098DAC1 /* SymbolRecord.swift */,
 			);
 			path = Datastore;
 			sourceTree = "<group>";
@@ -260,12 +260,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8B64FD562333CBA2001A0BBD /* StringPropertyRecord.swift in Sources */,
+				8B64FD562333CBA2001A0BBD /* StringProperty.swift in Sources */,
 				8B41F50A23313FB20035081B /* Datastore+Interchange.swift in Sources */,
 				8B3B6B7023339FC50098DAC1 /* SymbolRecord.swift in Sources */,
 				8B3B6B6E233389400098DAC1 /* SemanticDictionary.swift in Sources */,
 				8B3B6B6C233389360098DAC1 /* SemanticValue.swift in Sources */,
-				8B64FD5A2333CBC9001A0BBD /* DatePropertyRecord.swift in Sources */,
+				8B64FD5A2333CBC9001A0BBD /* DateProperty.swift in Sources */,
 				8B55DF0723328AF600B99383 /* InterchangeDecoder.swift in Sources */,
 				8B40C3B9233251D000CC24E6 /* Identifier.swift in Sources */,
 				8B64FD5E2333CBEB001A0BBD /* NamedProperty.swift in Sources */,
@@ -274,7 +274,7 @@
 				8B64FD5C2333CBD9001A0BBD /* RelationshipProperty.swift in Sources */,
 				8BFF2E86232F8CD200D40D31 /* EntityRecord.swift in Sources */,
 				8B48FD79232FD98D00F37CF1 /* InterchangeEncoder.swift in Sources */,
-				8B64FD582333CBB4001A0BBD /* IntegerPropertyRecord.swift in Sources */,
+				8B64FD582333CBB4001A0BBD /* IntegerProperty.swift in Sources */,
 				8BFF2E7C232F864200D40D31 /* Model.xcdatamodeld in Sources */,
 				8BFF2E7E232F8A1D00D40D31 /* Datastore.swift in Sources */,
 				8BFF2E84232F8B2B00D40D31 /* NSManagedObjectContextExtensions.swift in Sources */,

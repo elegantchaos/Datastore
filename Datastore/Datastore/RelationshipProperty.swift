@@ -9,8 +9,8 @@ extension RelationshipProperty: NamedProperty {
     func typedValue(in store: Datastore) -> SemanticValue {
         return store.value(target, type: type)
     }
-
-    func encode(encoder: InterchangeEncoder) -> Any? {
-        return encoder.encode(target)
+    
+    func encode(with encoder: InterchangeEncoder, into record: inout [String:Any]) {
+        encoder.encode(self, into: &record)
     }
 }

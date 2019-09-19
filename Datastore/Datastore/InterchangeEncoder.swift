@@ -8,26 +8,53 @@ import Foundation
 public protocol InterchangeEncoder {
     func encode(_ date: Date?) -> Any?
     func encode(_ uuid: UUID?) -> Any?
-    func encode(_ string: String?) -> Any?
-    func encode(_ integer: Int64?) -> Any?
-    func encode(_ entity: EntityRecord?) -> Any?
+
+    func encode(_ date: DateProperty, into record: inout [String:Any])
+    func encode(_ symbol: SymbolRecord, into record: inout [String:Any])
+    func encode(_ string: StringProperty, into record: inout [String:Any])
+    func encode(_ integer: IntegerProperty, into record: inout [String:Any])
+    func encode(_ relationship: RelationshipProperty, into record: inout [String:Any])
 }
 
 public extension InterchangeEncoder {
     func encode(_ date: Date?) -> Any? {
         return date
     }
+
     func encode(_ uuid: UUID?) -> Any? {
         return uuid
     }
-    func encode(_ string: String?) -> Any? {
-        return string
+
+    func encode(type: SymbolRecord?, into record: inout [String:Any]) {
+        record["type"] = encode(type?.uuid)
     }
-    func encode(_ integer: Int64?) -> Any? {
-        return integer
+    
+    func encode(_ date: DateProperty, into record: inout [String:Any]) {
+        record["date"] = encode(date.value)
+        encode(type: date.type, into: &record)
     }
-    func encode(_ entity: EntityRecord?) -> Any? {
-        return entity
+    
+    func encode(_ symbol: SymbolRecord, into record: inout [String:Any]) {
+        record["uuid"] = encode(symbol.uuid)
+    }
+    
+    func encode(_ string: StringProperty, into record: inout [String:Any]) {
+        if let string = string.value {
+            record["string"] = string
+        }
+        encode(type: string.type, into: &record)
+    }
+    
+    func encode(_ integer: IntegerProperty, into record: inout [String:Any]) {
+        record["integer"] = integer.value
+        encode(type: integer.type, into: &record)
+    }
+    
+    func encode(_ relationship: RelationshipProperty, into record: inout [String:Any]) {
+        if let value = relationship.target?.uuid {
+            record["entity"] = encode(value)
+        }
+        encode(type: relationship.type, into: &record)
     }
 }
 
@@ -45,23 +72,11 @@ public struct JSONInterchangeEncoder: InterchangeEncoder {
             return nil
         }
         
-        return ["date": JSONInterchangeEncoder.formatter.string(from: date)]
+        return JSONInterchangeEncoder.formatter.string(from: date)
     }
 
     public func encode(_ uuid: UUID?) -> Any? {
-        guard let uuid = uuid else {
-            return nil
-        }
-        
-        return uuid.uuidString
-    }
-
-    public func encode(_ entity: EntityRecord?) -> Any? {
-        guard let uuid = entity?.uuid else {
-            return nil
-        }
-        
-        return ["entity": uuid.uuidString]
+        return uuid?.uuidString
     }
 }
 

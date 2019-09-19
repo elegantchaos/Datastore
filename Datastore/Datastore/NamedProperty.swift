@@ -8,5 +8,14 @@ import Foundation
 protocol NamedProperty {
     var name: SymbolRecord? { get }
     func typedValue(in store: Datastore) -> SemanticValue
-    func encode(encoder: InterchangeEncoder) -> Any?
+    func encode(with encoder: InterchangeEncoder) -> Any?
+    func encode(with encoder: InterchangeEncoder, into record: inout [String:Any])
+}
+
+extension NamedProperty {
+    func encode(with encoder: InterchangeEncoder) -> Any? {
+        var value: [String:Any] = [:]
+        encode(with: encoder, into: &value)
+        return value
+    }
 }

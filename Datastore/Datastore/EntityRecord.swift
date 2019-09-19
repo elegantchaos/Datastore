@@ -36,7 +36,7 @@ public class EntityRecord: NSManagedObject {
     
     func add(_ value: String, key: SymbolRecord, type: SymbolID) {
         if let context = managedObjectContext {
-            let property = StringPropertyRecord(context: context)
+            let property = StringProperty(context: context)
             property.value = value
             property.name = key
             property.owner = self
@@ -46,7 +46,7 @@ public class EntityRecord: NSManagedObject {
     
     func add(_ value: Int, key: SymbolRecord, type: SymbolID) {
         if let context = managedObjectContext {
-            let property = IntegerPropertyRecord(context: context)
+            let property = IntegerProperty(context: context)
             property.value = Int64(value)
             property.name = key
             property.owner = self
@@ -56,7 +56,7 @@ public class EntityRecord: NSManagedObject {
     
     func add(_ value: Date, key: SymbolRecord, type: SymbolID) {
         if let context = managedObjectContext {
-            let property = DatePropertyRecord(context: context)
+            let property = DateProperty(context: context)
             property.value = value
             property.name = key
             property.owner = self
@@ -84,7 +84,7 @@ public class EntityRecord: NSManagedObject {
         if let set = properties as? Set<T> {
             for property in set {
                 if let name = property.name?.name {
-                    values[name] = property.encode(encoder: encoder)
+                    values[name] = property.encode(with: encoder)
                 }
             }
         }
