@@ -27,6 +27,13 @@ extension Datastore {
     
     public func decode(interchange: [String:Any], decoder: InterchangeDecoder, completion: @escaping (LoadResult) -> Void) {
         let context = self.context
+        let symbols = decodeSymbols(from: interchange)
+        decodeEntities(from: interchange, in: context, with: decoder, symbols: symbols)
+        try? context.save()
+        completion(.success(self))
+    }
+    
+    fileprivate func decodeSymbols(from interchange: [String : Any]) -> [String:SymbolRecord] {
         var symbolIndex: [String:SymbolRecord] = [:]
         if let symbols = interchange["symbols"] as? [[String:Any]] {
             for symbolRecord in symbols {
@@ -36,7 +43,11 @@ extension Datastore {
                 }
             }
         }
-        
+        return symbolIndex
+    }
+    
+ 
+    fileprivate func decodeEntities(from interchange: [String : Any], in context: NSManagedObjectContext, with decoder: InterchangeDecoder, symbols symbolIndex: [String : SymbolRecord]) {
         if let entities = interchange["entities"] as? [[String:Any]] {
             for entityRecord in entities {
                 if let name = entityRecord["name"] as? String, let uuid = entityRecord["uuid"] as? String, let type = entityRecord["type"] as? String {
@@ -49,24 +60,31 @@ extension Datastore {
                         print("made \(name)")
                     }
                     if let entity = entity {
-                        entity.name = name
-                        entity.created = decoder.decode(entityRecord["created"], store: self).coerced(or: Date())
-                        entity.modified = decoder.decode(entityRecord["modified"], store: self).coerced(or: Date())
-                        var entityProperties = entityRecord
-                        for key in Datastore.specialProperties {
-                            entityProperties.removeValue(forKey: key)
-                        }
-                        print("adding \(entityProperties)")
-                        entity.add(properties: entityProperties, store: self)
+                        decodeEntity(entity, name: name, with: decoder, values: entityRecord)
                     }
                 }
             }
         }
-        
-        try? context.save()
-        completion(.success(self))
     }
     
+    fileprivate func decodeEntity(_ entity: EntityRecord, name: String, with decoder: InterchangeDecoder, values entityRecord: [String : Any]) {
+         entity.name = name
+         entity.created = decoder.decode(entityRecord["created"], store: self).coerced(or: Date())
+         entity.modified = decoder.decode(entityRecord["modified"], store: self).coerced(or: Date())
+         var entityProperties = entityRecord
+         for key in Datastore.specialProperties {
+             entityProperties.removeValue(forKey: key)
+         }
+         print("adding \(entityProperties)")
+        decode(properties: entityProperties, of: entity, with: decoder)
+     }
+     
+    fileprivate func decode(properties: [String:Any], of entity: EntityRecord, with decoder: InterchangeDecoder) {
+        for (key, value) in properties {
+            entity.add(property: symbol(named: key), value: decoder.decode(value, store: self))
+        }
+    }
+
     public func encodeInterchange(encoder: InterchangeEncoder = NullInterchangeEncoder(), completion: @escaping InterchangeCompletion) {
         let context = self.context
         context.perform {

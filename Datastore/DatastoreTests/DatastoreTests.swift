@@ -96,7 +96,8 @@ class DatastoreTests: XCTestCase {
         wait(for: [done], timeout: 1.0)
     }
     
-    func testReadJSON() {
+
+    func testCompactJSON() {
         let json = """
             {
               "entities" : [
@@ -106,7 +107,7 @@ class DatastoreTests: XCTestCase {
                   "created" : { "date" : "1969-11-12T01:23:45Z" },
                   "modified" : { "date" : "1963-09-21T01:23:45Z" },
                   "type" : "F9B7D73D-2020-49AD-B85D-4BBD62CCA80B",
-                  "foo" : "bar"
+                  "address" : "123 New St"
                 },
                 {
                   "name" : "Person 2",
@@ -114,7 +115,7 @@ class DatastoreTests: XCTestCase {
                   "created" : { "date" : "1969-11-12T01:23:45Z" },
                   "modified" : { "date" : "1963-09-21T01:23:45Z" },
                   "type" : "F9B7D73D-2020-49AD-B85D-4BBD62CCA80B",
-                  "foo" : "baz"
+                  "address" : "456 Old St"
                 }
               ],
               "symbols" : [
@@ -129,6 +130,83 @@ class DatastoreTests: XCTestCase {
               ]
             }
             """
+
+        testReadJSON(json: json)
+    }
+    
+    func testNormalizedJSON() {
+        let json = """
+            {
+              "entities" : [
+                {
+                  "uuid" : "FE396F3F-A325-4F50-899C-F22308C97D12",
+                  "type" : "09035403-D3AE-4076-A77C-0B5596E5E361",
+                  "name" : "Person 1",
+                  "created" : { "date" : "1969-11-12T01:23:45Z" },
+                  "modified" : { "date" : "1963-09-21T01:23:45Z" },
+                  "address" : {
+                      "string" : "123 New St",
+                      "type" : "93E59849-0410-4390-AAE0-197FD3878223"
+                    },
+                },
+
+                {
+                  "address" : {
+                    "string" : "456 Old St",
+                    "type" : "93E59849-0410-4390-AAE0-197FD3878223"
+                  },
+                  "owner" : {
+                    "entity" : "FE396F3F-A325-4F50-899C-F22308C97D12",
+                    "type" : "B9B994A8-B47E-4EF2-9440-0E7564CA5C6A"
+                  },
+                  "created" : { "date" : "1969-11-12T01:23:45Z" },
+                  "modified" : { "date" : "1963-09-21T01:23:45Z" },
+                  "date" : {
+                    "date" : "2019-09-19T16:14:58Z",
+                    "type" : "C85E45D1-4F00-4A63-A2C9-0F8E2475A1DB"
+                  },
+                  "type" : "09035403-D3AE-4076-A77C-0B5596E5E361",
+                  "uuid" : "652A3D31-C409-4CBE-8469-6232D1EEBC96",
+                  "number" : {
+                    "integer" : 123,
+                    "type" : "C85E45D1-4F00-4A63-A2C9-0F8E2475A1DB"
+                  },
+                  "name" : "Person 2"
+                }
+              ],
+              "symbols" : [
+                {
+                  "uuid" : "B9B994A8-B47E-4EF2-9440-0E7564CA5C6A",
+                  "name" : "owner"
+                },
+                {
+                  "name" : "null",
+                  "uuid" : "C85E45D1-4F00-4A63-A2C9-0F8E2475A1DB"
+                },
+                {
+                  "uuid" : "0D39C199-65BF-417F-BA22-077E1023A766",
+                  "name" : "number"
+                },
+                {
+                  "uuid" : "09035403-D3AE-4076-A77C-0B5596E5E361",
+                  "name" : "person"
+                },
+                {
+                  "name" : "address",
+                  "uuid" : "93E59849-0410-4390-AAE0-197FD3878223"
+                },
+                {
+                  "name" : "date",
+                  "uuid" : "A697927C-2986-496A-815F-64120A5B2521"
+                }
+              ]
+            }
+            """
+
+        testReadJSON(json: json)
+    }
+    
+    func testReadJSON(json: String) {
         
         let loaded = expectation(description: "loaded")
         Datastore.load(name: "Test", json: json) { (result) in
@@ -137,13 +215,13 @@ class DatastoreTests: XCTestCase {
                 XCTFail("\(error)")
                 
             case .success(let store):
-                let expected = ["Person 1": "bar", "Person 2": "baz"]
+                let expected = ["Person 1": "123 New St", "Person 2": "456 Old St"]
                 store.getAllEntities(ofType: "person") { (people) in
                     XCTAssertEqual(people.count, 2)
-                    store.getProperties(ofEntities: people, withNames: ["name", "foo", "created", "modified"]) { results in
+                    store.getProperties(ofEntities: people, withNames: ["name", "address", "created", "modified"]) { results in
                         for result in results {
                             let name = result["name"] as! String
-                            let value = result["foo"] as! String
+                            let value = result["address"] as! String
                             let expectedValue = expected[name]
                             XCTAssertEqual(expectedValue, value, "\(name)")
                             let created = result["created"] as! Date

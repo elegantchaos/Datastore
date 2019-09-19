@@ -73,12 +73,6 @@ public class EntityRecord: NSManagedObject {
             property.type = type.resolve(in: context)
         }
     }
-    
-    func add(properties: [String:Any], store: Datastore) {
-        for (key, value) in properties {
-            add(property: store.symbol(named: key), value: store.value(value))
-        }
-    }
 
     func encode<T>(from properties: NSSet?, as: T.Type, into values: inout [String:Any], encoder: InterchangeEncoder) where T: NamedProperty, T: Hashable {
         if let set = properties as? Set<T> {
