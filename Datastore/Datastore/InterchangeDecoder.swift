@@ -5,42 +5,17 @@
 
 import Foundation
 
-public struct TypedValue {
-    let value: Any?
-    let type: SymbolID
-    
-    public func coerced<T>(or defaultValue: @autoclosure () -> T) -> T {
-        return (value as? T) ?? defaultValue()
-    }
-}
 
-public struct TypedDictionary {
-    var values: [String:TypedValue] = [:]
-    subscript(_ key: String) -> Any? {
-        get { return values[key]?.value }
-    }
-    subscript(typeWithKey key: String) -> SymbolID? {
-        get { return values[key]?.type }
-    }
-    subscript(valueWithKey key: String) -> TypedValue? {
-        get { return values[key] }
-        set { values[key] = newValue }
-    }
-    //    subscript(_ key: String) -> TypedValue? {
-    //        get { return values[key] }
-    //        set { values[key] = newValue }
-    //    }
-}
 
 public protocol InterchangeDecoder {
-    func decode(_ value: Any?, store: Datastore) -> TypedValue
+    func decode(_ value: Any?, store: Datastore) -> SemanticValue
 }
 
 public extension InterchangeDecoder {
 }
 
 public struct NullInterchangeDecoder: InterchangeDecoder {
-    public func decode(_ value: Any?, store: Datastore) -> TypedValue {
+    public func decode(_ value: Any?, store: Datastore) -> SemanticValue {
         return store.value(value)
     }
 }
@@ -49,7 +24,7 @@ public struct NullInterchangeDecoder: InterchangeDecoder {
 public struct JSONInterchangeDecoder: InterchangeDecoder {
     static let formatter = ISO8601DateFormatter()
     
-    public func decode(_ value: Any?, store: Datastore) -> TypedValue {
+    public func decode(_ value: Any?, store: Datastore) -> SemanticValue {
         var decoded = value
         var type: SymbolID? = nil
         if let record = value as? [String:Any] {

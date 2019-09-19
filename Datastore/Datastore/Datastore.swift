@@ -127,12 +127,12 @@ public class Datastore {
         return symbol
     }
     
-    public func value(_ value: Any?, type: SymbolID? = nil) -> TypedValue {
-        return TypedValue(value: value, type: type ?? nullSymbol)
+    public func value(_ value: Any?, type: SymbolID? = nil) -> SemanticValue {
+        return SemanticValue(value: value, type: type ?? nullSymbol)
     }
     
-    public func value(_ value: Any?, type: SymbolRecord?) -> TypedValue {
-        return TypedValue(value: value, type: type == nil ? nullSymbol : SymbolID(type!))
+    public func value(_ value: Any?, type: SymbolRecord?) -> SemanticValue {
+        return SemanticValue(value: value, type: type == nil ? nullSymbol : SymbolID(type!))
     }
     
     public func getEntities(ofType typeID: SymbolID, names: Set<String>, createIfMissing: Bool = true, completion: @escaping EntitiesCompletion) {
@@ -181,12 +181,12 @@ public class Datastore {
         }
     }
     
-    public func getProperties(ofEntities entities: [EntityID], withNames names: Set<String>, completion: @escaping ([TypedDictionary]) -> Void) {
+    public func getProperties(ofEntities entities: [EntityID], withNames names: Set<String>, completion: @escaping ([SemanticDictionary]) -> Void) {
         let context = self.context
         context.perform {
-            var result: [TypedDictionary] = []
+            var result: [SemanticDictionary] = []
             for entityID in entities {
-                var values = TypedDictionary()
+                var values = SemanticDictionary()
                 if let entity = entityID.resolve(in: context) {
                     for property in Datastore.specialProperties {
                         if names.contains(property) {

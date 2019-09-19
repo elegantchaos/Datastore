@@ -44,3 +44,11 @@ The store can be read from, and written to, a dictionary-based interchange forma
 
 Combine support is being considered.
 
+## To Do
+
+- set property value and type using SemanticValue
+- export type information to interchange
+- read in type information from interchange
+- optimise interchange reading for compact values
+- optimise interchange writing for compact values
+

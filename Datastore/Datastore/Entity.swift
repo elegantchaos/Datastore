@@ -7,12 +7,12 @@ import CoreData
 
 protocol NamedProperty {
     var name: SymbolRecord? { get }
-    func typedValue(in store: Datastore) -> TypedValue
+    func typedValue(in store: Datastore) -> SemanticValue
     func encode(encoder: InterchangeEncoder) -> Any?
 }
 
 extension StringPropertyRecord: NamedProperty {
-    func typedValue(in store: Datastore) -> TypedValue {
+    func typedValue(in store: Datastore) -> SemanticValue {
         return store.value(value, type: type)
     }
     
@@ -22,7 +22,7 @@ extension StringPropertyRecord: NamedProperty {
 }
 
 extension IntegerPropertyRecord: NamedProperty {
-    func typedValue(in store: Datastore) -> TypedValue {
+    func typedValue(in store: Datastore) -> SemanticValue {
         return store.value(value, type: type)
     }
 
@@ -32,7 +32,7 @@ extension IntegerPropertyRecord: NamedProperty {
 }
 
 extension DatePropertyRecord: NamedProperty {
-    func typedValue(in store: Datastore) -> TypedValue {
+    func typedValue(in store: Datastore) -> SemanticValue {
         return store.value(value, type: type)
     }
 
@@ -101,7 +101,7 @@ public class EntityRecord: NSManagedObject {
         }
     }
     
-    func read<T>(names: Set<String>, from properties: NSSet?, as: T.Type, into values: inout TypedDictionary, store: Datastore) where T: NamedProperty, T: Hashable {
+    func read<T>(names: Set<String>, from properties: NSSet?, as: T.Type, into values: inout SemanticDictionary, store: Datastore) where T: NamedProperty, T: Hashable {
         if let set = properties as? Set<T> {
             for property in set {
                 if let name = property.name?.name, names.contains(name) {

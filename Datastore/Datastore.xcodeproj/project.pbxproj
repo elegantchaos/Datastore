@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8B3B6B6C233389360098DAC1 /* SemanticValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B3B6B6B233389360098DAC1 /* SemanticValue.swift */; };
+		8B3B6B6E233389400098DAC1 /* SemanticDictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B3B6B6D233389400098DAC1 /* SemanticDictionary.swift */; };
 		8B40C3B9233251D000CC24E6 /* Identifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B40C3B8233251D000CC24E6 /* Identifier.swift */; };
 		8B41F50A23313FB20035081B /* Datastore+Interchange.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B41F50923313FB20035081B /* Datastore+Interchange.swift */; };
 		8B48FD79232FD98D00F37CF1 /* InterchangeEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B48FD78232FD98D00F37CF1 /* InterchangeEncoder.swift */; };
@@ -34,6 +36,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		8B3B6B6B233389360098DAC1 /* SemanticValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SemanticValue.swift; sourceTree = "<group>"; };
+		8B3B6B6D233389400098DAC1 /* SemanticDictionary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SemanticDictionary.swift; sourceTree = "<group>"; };
 		8B40C3B7233233D000CC24E6 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		8B40C3B8233251D000CC24E6 /* Identifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Identifier.swift; sourceTree = "<group>"; };
 		8B41F50923313FB20035081B /* Datastore+Interchange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Datastore+Interchange.swift"; sourceTree = "<group>"; };
@@ -97,6 +101,8 @@
 			children = (
 				8BFF2E63232F85E200D40D31 /* Datastore.h */,
 				8BFF2E7D232F8A1D00D40D31 /* Datastore.swift */,
+				8B3B6B6B233389360098DAC1 /* SemanticValue.swift */,
+				8B3B6B6D233389400098DAC1 /* SemanticDictionary.swift */,
 				8B41F50923313FB20035081B /* Datastore+Interchange.swift */,
 				8B48FD78232FD98D00F37CF1 /* InterchangeEncoder.swift */,
 				8B55DF0623328AF600B99383 /* InterchangeDecoder.swift */,
@@ -237,6 +243,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				8B41F50A23313FB20035081B /* Datastore+Interchange.swift in Sources */,
+				8B3B6B6E233389400098DAC1 /* SemanticDictionary.swift in Sources */,
+				8B3B6B6C233389360098DAC1 /* SemanticValue.swift in Sources */,
 				8B55DF0723328AF600B99383 /* InterchangeDecoder.swift in Sources */,
 				8B40C3B9233251D000CC24E6 /* Identifier.swift in Sources */,
 				8BFF2E83232F8B2B00D40D31 /* NSEntityDescriptionExtensions.swift in Sources */,
