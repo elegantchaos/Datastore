@@ -15,6 +15,7 @@ public class Datastore {
     static var cachedModel: NSManagedObjectModel!
     internal let container: NSPersistentContainer
     internal let context: NSManagedObjectContext
+    internal let nullSymbol = SymbolID(named: "null")
     
     public typealias LoadResult = Result<Datastore, Error>
     public typealias LoadCompletion = (LoadResult) -> Void
@@ -126,6 +127,14 @@ public class Datastore {
         return symbol
     }
     
+    public func value(_ value: Any?, type: SymbolID? = nil) -> TypedValue {
+        return TypedValue(value: value, type: type ?? nullSymbol)
+    }
+    
+    public func value(_ value: Any?, type: SymbolRecord?) -> TypedValue {
+        return TypedValue(value: value, type: type == nil ? nullSymbol : SymbolID(type!))
+    }
+    
     public func getEntities(ofType typeID: SymbolID, names: Set<String>, createIfMissing: Bool = true, completion: @escaping EntitiesCompletion) {
         let context = self.context
         context.perform {
@@ -172,21 +181,21 @@ public class Datastore {
         }
     }
     
-    public func getProperties(ofEntities entities: [EntityID], withNames names: Set<String>, completion: @escaping ([[String:Any]]) -> Void) {
+    public func getProperties(ofEntities entities: [EntityID], withNames names: Set<String>, completion: @escaping ([TypedDictionary]) -> Void) {
         let context = self.context
         context.perform {
-            var result: [[String:Any]] = []
+            var result: [TypedDictionary] = []
             for entityID in entities {
-                var values: [String:Any] = [:]
+                var values = TypedDictionary()
                 if let entity = entityID.resolve(in: context) {
                     for property in Datastore.specialProperties {
                         if names.contains(property) {
-                            values[property] = entity.value(forKey: property)
+                            values[valueWithKey: property] = self.value(entity.value(forKey: property))
                         }
                     }
-                    entity.read(names: names, from: entity.strings, as: StringPropertyRecord.self, into: &values)
-                    entity.read(names: names, from: entity.integers, as: IntegerPropertyRecord.self, into: &values)
-                    entity.read(names: names, from: entity.dates, as: DatePropertyRecord.self, into: &values)
+                    entity.read(names: names, from: entity.strings, as: StringPropertyRecord.self, into: &values, store: self)
+                    entity.read(names: names, from: entity.integers, as: IntegerPropertyRecord.self, into: &values, store: self)
+                    entity.read(names: names, from: entity.dates, as: DatePropertyRecord.self, into: &values, store: self)
                 }
                 result.append(values)
             }

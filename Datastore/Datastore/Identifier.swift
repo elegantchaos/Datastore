@@ -176,6 +176,10 @@ public class GuaranteedWrappedID<T: NSManagedObject>: WrappedID<T> {
 public typealias EntityID = WrappedID<EntityRecord>
 
 public class SymbolID: WrappedID<SymbolRecord>, ExpressibleByStringLiteral {
+    override init(_ symbol: SymbolRecord) {
+        super.init(symbol)
+    }
+    
     public required init(named name: String) {
         super.init(named: name, createIfMissing: true)
     }

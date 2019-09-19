@@ -50,8 +50,8 @@ extension Datastore {
                     }
                     if let entity = entity {
                         entity.name = name
-                        entity.created = decoder.decode(value: entityRecord["created"], default: Date())
-                        entity.modified = decoder.decode(value: entityRecord["modified"], default: Date())
+                        entity.created = decoder.decode(entityRecord["created"], store: self).coerced(or: Date())
+                        entity.modified = decoder.decode(entityRecord["modified"], store: self).coerced(or: Date())
                         var entityProperties = entityRecord
                         for key in Datastore.specialProperties {
                             entityProperties.removeValue(forKey: key)
