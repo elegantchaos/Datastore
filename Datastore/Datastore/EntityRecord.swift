@@ -5,51 +5,8 @@
 
 import CoreData
 
-protocol NamedProperty {
-    var name: SymbolRecord? { get }
-    func typedValue(in store: Datastore) -> SemanticValue
-    func encode(encoder: InterchangeEncoder) -> Any?
-}
 
-extension StringPropertyRecord: NamedProperty {
-    func typedValue(in store: Datastore) -> SemanticValue {
-        return store.value(value, type: type)
-    }
-    
-    func encode(encoder: InterchangeEncoder) -> Any? {
-        return encoder.encode(value)
-    }
-}
 
-extension IntegerPropertyRecord: NamedProperty {
-    func typedValue(in store: Datastore) -> SemanticValue {
-        return store.value(value, type: type)
-    }
-
-    func encode(encoder: InterchangeEncoder) -> Any? {
-        return encoder.encode(value)
-    }
-}
-
-extension DatePropertyRecord: NamedProperty {
-    func typedValue(in store: Datastore) -> SemanticValue {
-        return store.value(value, type: type)
-    }
-
-    func encode(encoder: InterchangeEncoder) -> Any? {
-        return encoder.encode(value)
-    }
-}
-
-extension RelationshipRecord: NamedProperty {
-    func typedValue(in store: Datastore) -> SemanticValue {
-        return store.value(target, type: type)
-    }
-
-    func encode(encoder: InterchangeEncoder) -> Any? {
-        return encoder.encode(target)
-    }
-}
 
 public class EntityRecord: NSManagedObject {
     func add(property symbol: SymbolRecord, value: SemanticValue) {
@@ -109,7 +66,7 @@ public class EntityRecord: NSManagedObject {
     
     func add(_ entity: EntityRecord, key: SymbolRecord, type: SymbolID) {
         if let context = managedObjectContext {
-            let property = RelationshipRecord(context: context)
+            let property = RelationshipProperty(context: context)
             property.target = entity
             property.name = key
             property.owner = self

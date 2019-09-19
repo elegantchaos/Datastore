@@ -196,7 +196,7 @@ public class Datastore {
                     entity.read(names: names, from: entity.strings, as: StringPropertyRecord.self, into: &values, store: self)
                     entity.read(names: names, from: entity.integers, as: IntegerPropertyRecord.self, into: &values, store: self)
                     entity.read(names: names, from: entity.dates, as: DatePropertyRecord.self, into: &values, store: self)
-                    entity.read(names: names, from: entity.relationships, as: RelationshipRecord.self, into: &values, store: self)
+                    entity.read(names: names, from: entity.relationships, as: RelationshipProperty.self, into: &values, store: self)
                 }
                 result.append(values)
             }
