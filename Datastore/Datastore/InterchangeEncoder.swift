@@ -10,6 +10,7 @@ public protocol InterchangeEncoder {
     func encode(_ uuid: UUID?) -> Any?
     func encode(_ string: String?) -> Any?
     func encode(_ integer: Int64?) -> Any?
+    func encode(_ entity: EntityRecord?) -> Any?
 }
 
 public extension InterchangeEncoder {
@@ -24,6 +25,9 @@ public extension InterchangeEncoder {
     }
     func encode(_ integer: Int64?) -> Any? {
         return integer
+    }
+    func encode(_ entity: EntityRecord?) -> Any? {
+        return entity
     }
 }
 
@@ -52,5 +56,12 @@ public struct JSONInterchangeEncoder: InterchangeEncoder {
         return uuid.uuidString
     }
 
+    public func encode(_ entity: EntityRecord?) -> Any? {
+        guard let uuid = entity?.uuid else {
+            return nil
+        }
+        
+        return ["entity": uuid.uuidString]
+    }
 }
 

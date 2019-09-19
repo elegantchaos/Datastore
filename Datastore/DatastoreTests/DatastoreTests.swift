@@ -54,7 +54,7 @@ class DatastoreTests: XCTestCase {
                 
                 let context = datastore.context
                 let label = SymbolRecord.named("foo", in: context)
-                person.object.add(property: label, value: "bar")
+                person.object.add(property: label, value: datastore.value("bar"))
                 datastore.getProperties(ofEntities: [person], withNames: ["foo"]) { (results) in
                     XCTAssertEqual(results.count, 1)
                     let properties = results[0]
@@ -66,17 +66,26 @@ class DatastoreTests: XCTestCase {
         wait(for: [done], timeout: 1.0)
     }
     
+    func exampleProperties(date: Date = Date(), owner: EntityID, in store: Datastore) -> SemanticDictionary {
+        var properties = SemanticDictionary()
+        properties["address"] = store.value("123 New St", type: "address")
+        properties["date"] = store.value(date)
+        properties["number"] = store.value(123)
+        properties["owner"] = store.value(owner, type: "owner")
+        return properties
+    }
+    
     func testAddProperties() {
         let done = expectation(description: "loaded")
         loadAndCheck { (datastore) in
             datastore.getEntities(ofType: "Person", names: ["Person 1"]) { (people) in
                 let person = people[0]
                 let now = Date()
-                datastore.add(properties: [person:["foo": "bar", "date": now, "number": 123]]) { () in
-                    datastore.getProperties(ofEntities: [person], withNames: ["foo", "date", "number"]) { (results) in
+                datastore.add(properties: [person: self.exampleProperties(date: now, owner: person, in: datastore)]) { () in
+                    datastore.getProperties(ofEntities: [person], withNames: ["address", "date", "number"]) { (results) in
                         XCTAssertEqual(results.count, 1)
                         let properties = results[0]
-                        XCTAssertEqual(properties["foo"] as? String, "bar")
+                        XCTAssertEqual(properties["address"] as? String, "123 New St")
                         XCTAssertEqual(properties["date"] as? Date, now)
                         XCTAssertEqual(properties["number"] as? Int64, 123)
                         done.fulfill()
@@ -115,7 +124,7 @@ class DatastoreTests: XCTestCase {
                 },
                 {
                   "uuid" : "F9B7D73D-2020-49AD-B85D-4BBD62CCA80B",
-                  "name" : "Person"
+                  "name" : "person"
                 }
               ]
             }
@@ -129,7 +138,7 @@ class DatastoreTests: XCTestCase {
                 
             case .success(let store):
                 let expected = ["Person 1": "bar", "Person 2": "baz"]
-                store.getAllEntities(ofType: "Person") { (people) in
+                store.getAllEntities(ofType: "person") { (people) in
                     XCTAssertEqual(people.count, 2)
                     store.getProperties(ofEntities: people, withNames: ["name", "foo", "created", "modified"]) { results in
                         for result in results {
@@ -157,8 +166,7 @@ class DatastoreTests: XCTestCase {
                 let names = Set<String>(["Person 1", "Person 2"])
                 datastore.getEntities(ofType: "Person", names: names) { (people) in
                     let person = people[0]
-                    let now = Date()
-                    datastore.add(properties: [person:["foo": "bar", "time": now]]) { () in
+                    datastore.add(properties: [person: self.exampleProperties(owner: people[1], in: datastore)]) { () in
                         datastore.encodeInterchange() { interchange in
                             if let entities = interchange["entities"] as? [[String:Any]] {
                                 for entity in entities {
@@ -180,8 +188,7 @@ class DatastoreTests: XCTestCase {
             let names = Set<String>(["Person 1", "Person 2"])
             datastore.getEntities(ofType: "Person", names: names) { (people) in
                 let person = people[0]
-                let now = Date()
-                datastore.add(properties: [person:["foo": "bar", "date": now, "number": 123]]) { () in
+                datastore.add(properties: [person: self.exampleProperties(owner: people[1], in: datastore)]) { () in
                     datastore.encodeJSON() { json in
                         print(json)
                         done.fulfill()

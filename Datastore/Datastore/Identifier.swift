@@ -143,7 +143,7 @@ public class WrappedID<T: NSManagedObject>: Equatable, Hashable {
     }
     
     init(named name: String, createIfMissing: Bool) {
-        self.id = OpaqueNamedID(name: name, createIfMissing: createIfMissing)
+        self.id = OpaqueNamedID(name: name.lowercased(), createIfMissing: createIfMissing)
     }
     
     init(uuid: String) {

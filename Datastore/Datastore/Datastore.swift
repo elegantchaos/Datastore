@@ -101,15 +101,15 @@ public class Datastore {
     
     public func symbol(named name: String) -> SymbolRecord {
         let context = self.context
-        if let symbol = getNamed(name, type: SymbolRecord.self, in: context, createIfMissing: false) {
-            print("found symbol \(name) \(symbol.uuid!)")
+        let normalizedName = name.lowercased()
+        if let symbol = getNamed(normalizedName, type: SymbolRecord.self, in: context, createIfMissing: false) {
+            print("found symbol \(normalizedName) \(symbol.uuid!)")
             return symbol
         }
         
         let symbol = SymbolRecord(context: context)
-        symbol.name = name
-        symbol.uuid = UUID()
-        print("made symbol \(name) \(symbol.uuid!)")
+        symbol.name = normalizedName
+        print("made symbol \(symbol.name!) \(symbol.uuid!)")
         return symbol
     }
     
@@ -121,7 +121,7 @@ public class Datastore {
         }
         
         let symbol = SymbolRecord(context: context)
-        symbol.name = name
+        symbol.name = name.lowercased()
         symbol.uuid = UUID(uuidString: uuid)
         print("made symbol \(symbol.name!) \(symbol.uuid!)")
         return symbol
@@ -196,6 +196,7 @@ public class Datastore {
                     entity.read(names: names, from: entity.strings, as: StringPropertyRecord.self, into: &values, store: self)
                     entity.read(names: names, from: entity.integers, as: IntegerPropertyRecord.self, into: &values, store: self)
                     entity.read(names: names, from: entity.dates, as: DatePropertyRecord.self, into: &values, store: self)
+                    entity.read(names: names, from: entity.relationships, as: RelationshipRecord.self, into: &values, store: self)
                 }
                 result.append(values)
             }
@@ -203,14 +204,12 @@ public class Datastore {
         }
     }
     
-    public func add(properties: [EntityID: [String:Any]], completion: @escaping () -> Void) {
+    public func add(properties: [EntityID: SemanticDictionary], completion: @escaping () -> Void) {
         let context = self.context
         context.perform {
             for (entityID, values) in properties {
                 if let entity = entityID.resolve(in: context) {
-                    for (key, value) in values {
-                        entity.add(property: self.symbol(named: key), value: value)
-                    }
+                    values.add(to: entity, store: self)
                 }
             }
             completion()

@@ -14,6 +14,7 @@ public struct SemanticDictionary {
 
     subscript(_ key: String) -> Any? {
         get { return values[key]?.value }
+        set { values[key] = (newValue as! SemanticValue) } // assigning a non SemanticValue will produce a fatal error
     }
 
     subscript(typeWithKey key: String) -> SymbolID? {
@@ -23,5 +24,11 @@ public struct SemanticDictionary {
     subscript(valueWithKey key: String) -> SemanticValue? {
         get { return values[key] }
         set { values[key] = newValue }
+    }
+    
+    func add(to entity: EntityRecord, store: Datastore) {
+        for (key, value) in values {
+            entity.add(property: store.symbol(named: key), value: value)
+        }
     }
 }
