@@ -15,7 +15,11 @@ public class Datastore {
     static var cachedModel: NSManagedObjectModel!
     internal let container: NSPersistentContainer
     internal let context: NSManagedObjectContext
-    internal let nullSymbol = SymbolID(named: "null")
+    internal let valueSymbol = SymbolID(named: "value")
+    internal let stringSymbol = SymbolID(named: "string")
+    internal let numberSymbol = SymbolID(named: "number")
+    internal let dateSymbol = SymbolID(named: "date")
+    internal let entitySymbol = SymbolID(named: "entity")
     
     public typealias LoadResult = Result<Datastore, Error>
     public typealias LoadCompletion = (LoadResult) -> Void
@@ -128,11 +132,11 @@ public class Datastore {
     }
     
     public func value(_ value: Any?, type: SymbolID? = nil) -> SemanticValue {
-        return SemanticValue(value: value, type: type ?? nullSymbol)
+        return SemanticValue(value: value, type: type ?? valueSymbol)
     }
     
     public func value(_ value: Any?, type: SymbolRecord?) -> SemanticValue {
-        return SemanticValue(value: value, type: type == nil ? nullSymbol : SymbolID(type!))
+        return SemanticValue(value: value, type: type == nil ? valueSymbol : SymbolID(type!))
     }
     
     public func getEntities(ofType typeID: SymbolID, names: Set<String>, createIfMissing: Bool = true, completion: @escaping EntitiesCompletion) {
