@@ -10,7 +10,7 @@
         <attribute name="created" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="modified" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="name" attributeType="String"/>
-        <attribute name="uuid" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="uuid" attributeType="String"/>
         <relationship name="dates" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="DateProperty" inverseName="owner" inverseEntity="DateProperty"/>
         <relationship name="integers" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="IntegerProperty" inverseName="owner" inverseEntity="IntegerProperty"/>
         <relationship name="relationships" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="RelationshipProperty" inverseName="owner" inverseEntity="RelationshipProperty"/>
@@ -38,7 +38,7 @@
     </entity>
     <entity name="SymbolRecord" representedClassName=".SymbolRecord" syncable="YES" codeGenerationType="class">
         <attribute name="name" attributeType="String"/>
-        <attribute name="uuid" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="uuid" attributeType="String"/>
         <relationship name="dateProperties" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="DateProperty" inverseName="name" inverseEntity="DateProperty"/>
         <relationship name="dateTypes" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="DateProperty" inverseName="type" inverseEntity="DateProperty"/>
         <relationship name="entities" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="EntityRecord" inverseName="type" inverseEntity="EntityRecord"/>

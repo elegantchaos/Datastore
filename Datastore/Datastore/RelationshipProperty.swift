@@ -7,7 +7,7 @@ import Foundation
 
 extension RelationshipProperty: NamedProperty {
     func typedValue(in store: Datastore) -> SemanticValue {
-        return store.value(target, type: type)
+        return store.value(GuaranteedWrappedID(target!), type: type)
     }
     
     func encode(with encoder: InterchangeEncoder, into record: inout [String:Any]) {

@@ -10,11 +10,14 @@ import Foundation
 public protocol InterchangeDecoder {
     func decode(_ value: Any?, store: Datastore) -> SemanticValue
     
+    func decode(date: Any?) -> Date?
+    func decode(uuid: Any?) -> String?
+    
     // TODO: split decode functions into small helper objects so that we can iterate them
     func decode(string: Any?, type: SymbolID?, store: Datastore) -> SemanticValue?
     func decode(integer: Any?, type: SymbolID?, store: Datastore) -> SemanticValue?
     func decode(date: Any?, type: SymbolID?, store: Datastore) -> SemanticValue?
-    func decode(uuid: Any?, type: SymbolID?, store: Datastore) -> SemanticValue?
+    func decode(entity: Any?, type: SymbolID?, store: Datastore) -> SemanticValue?
 }
 
 public extension InterchangeDecoder {
@@ -32,8 +35,8 @@ public extension InterchangeDecoder {
                 decoded = decode(integer: integer, type: type, store: store)
             } else if let date = record["date"] {
                 decoded = decode(date: date, type: type, store: store)
-            } else if let uuid = record["entity"] {
-                decoded = decode(uuid: uuid, type: type, store: store)
+            } else if let entity = record["entity"] {
+                decoded = decode(entity: entity, type: type, store: store)
             }
         } else if let string = decode(string: value, type: nil, store: store) {
             decoded = string
@@ -41,13 +44,14 @@ public extension InterchangeDecoder {
             decoded = integer
         } else if let date = decode(date: value, type: nil, store: store) {
             decoded = date
-        } else if let uuid = decode(uuid: value, type: nil, store: store) {
-            decoded = uuid
+        } else if let uuid = decode(uuid: value) {
+            decoded = decode(entity: uuid, type: nil, store: store) // we assume that raw uuids refer to entities
         }
         
         return decoded ?? store.value(value)
     }
-
+    
+    
     func decode(string: Any?, type: SymbolID?, store: Datastore) -> SemanticValue? {
         if let string = string as? String {
             return store.value(string, type: type ?? store.stringSymbol)
@@ -63,40 +67,52 @@ public extension InterchangeDecoder {
     }
     
     func decode(date: Any?, type: SymbolID?, store: Datastore) -> SemanticValue? {
-        if let date = date as? Date {
+        if let date = decode(date: date) {
             return store.value(date, type: type ?? store.dateSymbol)
         }
         return nil
     }
     
-    func decode(uuid: Any?, type: SymbolID?, store: Datastore) -> SemanticValue? {
-        if let uuid = uuid as? UUID {
-            return store.value(uuid, type: type ?? store.entitySymbol)
+    func decode(entity: Any?, type: SymbolID?, store: Datastore) -> SemanticValue? {
+        if let uuid = decode(uuid: entity) {
+            return store.value(EntityID(uuid: uuid), type: type ?? store.entitySymbol)
         }
         return nil
     }
-
 }
 
 public struct NullInterchangeDecoder: InterchangeDecoder {
+    public func decode(date: Any?) -> Date? {
+        return date as? Date
+    }
+
+    public func decode(uuid value: Any?) -> String? {
+        switch value {
+        case let uuid as UUID:
+            return uuid.uuidString
+        case let string as String:
+            return string
+        default:
+            return nil
+        }
+    }
+
 }
 
 
 public struct JSONInterchangeDecoder: InterchangeDecoder {
     static let formatter = ISO8601DateFormatter()
 
-    public func decode(date: Any?, type: SymbolID?, store: Datastore) -> SemanticValue? {
+    public func decode(date: Any?) -> Date? {
         if let string = date as? String {
-            let date = JSONInterchangeDecoder.formatter.date(from: string)
-            return store.value(date, type: type)
+            return JSONInterchangeDecoder.formatter.date(from: string)
         }
         return nil
     }
     
-    public func decode(uuid: Any?, type: SymbolID?, store: Datastore) -> SemanticValue? {
+    public func decode(uuid: Any?) -> String? {
         if let string = uuid as? String {
-            let uuid = UUID(uuidString: string)
-            return store.value(uuid, type: type)
+            return string
         }
         return nil
     }

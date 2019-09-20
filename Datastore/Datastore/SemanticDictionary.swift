@@ -23,6 +23,11 @@ public struct SemanticDictionary {
         }
     }
 
+    subscript(_ key: String, as type: SymbolID) -> Any? {
+        get { return values[key]?.value }
+        set { values[key] = SemanticValue(value: newValue, type: type) }
+    }
+
     subscript(typeWithKey key: String) -> SymbolID? {
         get { return values[key]?.type }
     }

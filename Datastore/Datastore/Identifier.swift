@@ -113,7 +113,7 @@ internal struct OpaqueIdentifiedID: ResolvableID {
         } else if let name = name {
             let symbol = SymbolRecord(in: context)
             symbol.name = name.lowercased()
-            symbol.uuid = UUID(uuidString: uuid)
+            symbol.uuid = uuid
             return OpaqueCachedID(symbol)
         } else {
             return NullCachedID()

@@ -137,7 +137,7 @@ public class Datastore {
                     let now = Date()
                     entity.created = now
                     entity.modified = now
-                    entity.uuid = UUID()
+                    entity.uuid = UUID().uuidString
                     result.append(entity)
                 }
             }

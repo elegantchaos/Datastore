@@ -68,8 +68,8 @@ class DatastoreTests: XCTestCase {
         var properties = SemanticDictionary()
         properties["address"] = store.value("123 New St", type: "address")
         properties["date"] = date
-        properties["number"] = 123 // store.value(123)
-        properties["owner"] = store.value(owner, type: "owner")
+        properties["number"] = 123
+        properties["owner"] = (owner, "owner")
         return properties
     }
     
@@ -105,7 +105,11 @@ class DatastoreTests: XCTestCase {
                   "created" : { "date" : "1969-11-12T01:23:45Z" },
                   "modified" : { "date" : "1963-09-21T01:23:45Z" },
                   "type" : "F9B7D73D-2020-49AD-B85D-4BBD62CCA80B",
-                  "address" : "123 New St"
+                  "address" : "123 New St",
+                  "owner" : {
+                    "entity" : "C41DB873-323D-4026-95D1-603120B9ADF6",
+                    "type" : "B9B994A8-B47E-4EF2-9440-0E7564CA5C6A"
+                  },
                 },
                 {
                   "name" : "Person 2",
@@ -113,10 +117,18 @@ class DatastoreTests: XCTestCase {
                   "created" : { "date" : "1969-11-12T01:23:45Z" },
                   "modified" : { "date" : "1963-09-21T01:23:45Z" },
                   "type" : "F9B7D73D-2020-49AD-B85D-4BBD62CCA80B",
-                  "address" : "456 Old St"
+                  "address" : "456 Old St",
+                  "owner" : {
+                    "entity" : "ADDD557A-668E-4C6B-A9A0-3BCF099646E8",
+                    "type" : "B9B994A8-B47E-4EF2-9440-0E7564CA5C6A"
+                  },
                 }
               ],
               "symbols" : [
+                {
+                  "uuid" : "B9B994A8-B47E-4EF2-9440-0E7564CA5C6A",
+                  "name" : "owner"
+                },
                 {
                   "name" : "foo",
                   "uuid" : "078D9906-F26D-4028-99E6-880B32398C37"
@@ -146,6 +158,10 @@ class DatastoreTests: XCTestCase {
                       "string" : "123 New St",
                       "type" : "93E59849-0410-4390-AAE0-197FD3878223"
                     },
+                    "owner" : {
+                      "entity" : "FE396F3F-A325-4F50-899C-F22308C97D12",
+                      "type" : "B9B994A8-B47E-4EF2-9440-0E7564CA5C6A"
+                    },
                 },
 
                 {
@@ -154,7 +170,7 @@ class DatastoreTests: XCTestCase {
                     "type" : "93E59849-0410-4390-AAE0-197FD3878223"
                   },
                   "owner" : {
-                    "entity" : "FE396F3F-A325-4F50-899C-F22308C97D12",
+                    "entity" : "652A3D31-C409-4CBE-8469-6232D1EEBC96",
                     "type" : "B9B994A8-B47E-4EF2-9440-0E7564CA5C6A"
                   },
                   "created" : { "date" : "1969-11-12T01:23:45Z" },
@@ -216,7 +232,8 @@ class DatastoreTests: XCTestCase {
                 let expected = ["Person 1": "123 New St", "Person 2": "456 Old St"]
                 store.get(allEntitiesOfType: "person") { (people) in
                     XCTAssertEqual(people.count, 2)
-                    store.get(properties : ["name", "address", "created", "modified"], of: people) { results in
+                    store.get(properties : ["name", "address", "created", "modified", "owner"], of: people) { results in
+                        var n = 0
                         for result in results {
                             let name = result["name"] as! String
                             let value = result["address"] as! String
@@ -226,6 +243,9 @@ class DatastoreTests: XCTestCase {
                             XCTAssertEqual(created.description, "1969-11-12 01:23:45 +0000")
                             let modified = result["modified"] as! Date
                             XCTAssertEqual(modified.description, "1963-09-21 01:23:45 +0000")
+                            let owner = result["owner"] as! Entity
+                            XCTAssertEqual(owner, people[n])
+                            n += 1
                         }
                         loaded.fulfill()
                         

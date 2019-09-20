@@ -53,10 +53,11 @@ extension Datastore {
                     var entity = EntityRecord.withIdentifier(uuid, in: context)
                     if entity == nil {
                         let newEntity = EntityRecord(in: context)
-                        newEntity.uuid = UUID(uuidString: uuid)
+                        newEntity.uuid = uuid
                         newEntity.type = symbolIndex[type]
                         entity = newEntity
                         print("made \(name)")
+                        try? context.save()
                     }
                     if let entity = entity {
                         decodeEntity(entity, name: name, with: decoder, values: entityRecord)
@@ -93,7 +94,7 @@ extension Datastore {
             if let symbols = try? context.fetch(request) {
                 for symbol in symbols {
                     var record: [String:Any] = [:]
-                    let type = encoder.encode(symbol.uuid)
+                    let type = encoder.encode(uuid: symbol.uuid)
                     record["name"] = symbol.name
                     record["uuid"] = type
                     symbolResults.append(record)
@@ -103,9 +104,9 @@ extension Datastore {
                             var record: [String:Any] = [:]
                             record["name"] = entity.name
                             record["type"] = type
-                            record["created"] = encoder.encode(entity.created)
-                            record["modified"] = encoder.encode(entity.modified)
-                            record["uuid"] = entity.uuid!.uuidString
+                            record["created"] = encoder.encode(date: entity.created)
+                            record["modified"] = encoder.encode(date: entity.modified)
+                            record["uuid"] = entity.uuid
                             entity.encode(from: entity.strings, as: StringProperty.self, into: &record, encoder: encoder)
                             entity.encode(from: entity.integers, as: IntegerProperty.self, into: &record, encoder: encoder)
                             entity.encode(from: entity.dates, as: DateProperty.self, into: &record, encoder: encoder)
