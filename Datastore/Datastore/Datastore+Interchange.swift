@@ -26,17 +26,17 @@ extension Datastore {
     }
     
     public func decode(interchange: [String:Any], decoder: InterchangeDecoder, completion: @escaping (LoadResult) -> Void) {
-        let symbols = decodeSymbols(from: interchange)
+        let symbols = decodeSymbols(from: interchange, decoder: decoder)
         decodeEntities(from: interchange, with: decoder, symbols: symbols)
         try? context.save()
         completion(.success(self))
     }
     
-    fileprivate func decodeSymbols(from interchange: [String : Any]) -> [String:SymbolRecord] {
-        var symbolIndex: [String:SymbolRecord] = [:]
+    fileprivate func decodeSymbols(from interchange: [String : Any], decoder: InterchangeDecoder) -> [UUID:SymbolRecord] {
+        var symbolIndex: [UUID:SymbolRecord] = [:]
         if let symbols = interchange["symbols"] as? [[String:Any]] {
             for symbolRecord in symbols {
-                if let uuid = symbolRecord["uuid"] as? String, let name = symbolRecord["name"] as? String {
+                if let uuid = decoder.decodePrimitive(uuid: symbolRecord["uuid"]), let name = symbolRecord["name"] as? String {
                     let symbol = SymbolID(uuid: uuid, name: name)
                     symbolIndex[uuid] = symbol.resolve(in: context)
                 }
@@ -46,10 +46,10 @@ extension Datastore {
     }
     
  
-    fileprivate func decodeEntities(from interchange: [String : Any], with decoder: InterchangeDecoder, symbols symbolIndex: [String : SymbolRecord]) {
+    fileprivate func decodeEntities(from interchange: [String : Any], with decoder: InterchangeDecoder, symbols symbolIndex: [UUID : SymbolRecord]) {
         if let entities = interchange["entities"] as? [[String:Any]] {
             for entityRecord in entities {
-                if let name = entityRecord["name"] as? String, let uuid = entityRecord["uuid"] as? String, let type = entityRecord["type"] as? String {
+                if let name = entityRecord["name"] as? String, let uuid = decoder.decodePrimitive(uuid: entityRecord["uuid"]), let type = decoder.decodePrimitive(uuid: entityRecord["type"]) {
                     var entity = EntityRecord.withIdentifier(uuid, in: context)
                     if entity == nil {
                         let newEntity = EntityRecord(in: context)
@@ -94,7 +94,7 @@ extension Datastore {
             if let symbols = try? context.fetch(request) {
                 for symbol in symbols {
                     var record: [String:Any] = [:]
-                    let type = encoder.encode(uuid: symbol.uuid)
+                    let type = encoder.encodePrimitive(symbol.uuid)
                     record["name"] = symbol.name
                     record["uuid"] = type
                     symbolResults.append(record)
@@ -104,9 +104,9 @@ extension Datastore {
                             var record: [String:Any] = [:]
                             record["name"] = entity.name
                             record["type"] = type
-                            record["created"] = encoder.encode(date: entity.created)
-                            record["modified"] = encoder.encode(date: entity.modified)
-                            record["uuid"] = entity.uuid
+                            record["created"] = encoder.encodePrimitive(entity.created)
+                            record["modified"] = encoder.encodePrimitive(entity.modified)
+                            record["uuid"] = encoder.encodePrimitive(entity.uuid)
                             entity.encode(from: entity.strings, as: StringProperty.self, into: &record, encoder: encoder)
                             entity.encode(from: entity.integers, as: IntegerProperty.self, into: &record, encoder: encoder)
                             entity.encode(from: entity.dates, as: DateProperty.self, into: &record, encoder: encoder)

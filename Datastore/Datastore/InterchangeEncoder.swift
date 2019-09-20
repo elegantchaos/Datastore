@@ -6,8 +6,8 @@
 import Foundation
 
 public protocol InterchangeEncoder {
-    func encode(date: Date?) -> Any?
-    func encode(uuid: String?) -> Any?
+    func encodePrimitive(_ date: Date?) -> Any?
+    func encodePrimitive(_ uuid: UUID?) -> Any?
 
     func encode(_ date: DateProperty, into record: inout [String:Any])
     func encode(_ symbol: SymbolRecord, into record: inout [String:Any])
@@ -17,29 +17,25 @@ public protocol InterchangeEncoder {
 }
 
 public extension InterchangeEncoder {
-    func encode(date: Date?) -> Any? {
+    func encodePrimitive(_ date: Date?) -> Any? {
         return date
     }
 
-    func encode(uuid: String?) -> Any? {
-        if let uuid = uuid {
-            return UUID(uuidString: uuid)
-        } else {
-            return nil
-        }
+    func encodePrimitive(_ uuid: UUID?) -> Any? {
+        return uuid
     }
 
     func encode(type: SymbolRecord?, into record: inout [String:Any]) {
-        record["type"] = encode(uuid: type?.uuid)
+        record["type"] = encodePrimitive(type?.uuid)
     }
     
     func encode(_ date: DateProperty, into record: inout [String:Any]) {
-        record["date"] = encode(date: date.value)
+        record["date"] = encodePrimitive(date.value)
         encode(type: date.type, into: &record)
     }
     
     func encode(_ symbol: SymbolRecord, into record: inout [String:Any]) {
-        record["uuid"] = encode(uuid: symbol.uuid)
+        record["uuid"] = encodePrimitive(symbol.uuid)
     }
     
     func encode(_ string: StringProperty, into record: inout [String:Any]) {
@@ -56,7 +52,7 @@ public extension InterchangeEncoder {
     
     func encode(_ relationship: RelationshipProperty, into record: inout [String:Any]) {
         if let value = relationship.target?.uuid {
-            record["entity"] = encode(uuid: value)
+            record["entity"] = encodePrimitive(value)
         }
         encode(type: relationship.type, into: &record)
     }
@@ -71,7 +67,7 @@ public struct NullInterchangeEncoder: InterchangeEncoder {
 public struct JSONInterchangeEncoder: InterchangeEncoder {
     static let formatter = ISO8601DateFormatter()
 
-    public func encode(date: Date?) -> Any? {
+    public func encodePrimitive(_ date: Date?) -> Any? {
         guard let date = date else {
             return nil
         }
@@ -79,8 +75,8 @@ public struct JSONInterchangeEncoder: InterchangeEncoder {
         return JSONInterchangeEncoder.formatter.string(from: date)
     }
 
-    public func encode(uuid: String?) -> Any? {
-        return uuid
+    public func encodePrimitive(_ uuid: UUID?) -> Any? {
+        return uuid?.uuidString
     }
 }
 

@@ -8,7 +8,7 @@ import Foundation
 extension SymbolRecord {
     public override func awakeFromInsert() {
         if uuid == nil {
-            uuid = UUID().uuidString
+            uuid = UUID()
         }
     }
 }

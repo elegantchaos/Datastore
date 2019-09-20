@@ -104,7 +104,7 @@ internal struct OpaqueNamedID: ResolvableID {
 }
 
 internal struct OpaqueIdentifiedID: ResolvableID {
-    let uuid: String
+    let uuid: UUID
     let name: String?
     
     internal func resolve(in context: NSManagedObjectContext, as type: NSManagedObject.Type) -> ResolvableID? {
@@ -152,7 +152,7 @@ public class WrappedID<T: NSManagedObject>: Equatable, Hashable {
         self.id = OpaqueNamedID(name: name.lowercased(), createIfMissing: createIfMissing)
     }
     
-    init(uuid: String, name: String? = nil) {
+    init(uuid: UUID, name: String? = nil) {
         self.id = OpaqueIdentifiedID(uuid: uuid, name: name)
     }
     
@@ -190,7 +190,7 @@ public class SymbolID: WrappedID<SymbolRecord>, ExpressibleByStringLiteral {
         super.init(named: name, createIfMissing: true)
     }
 
-    override init(uuid: String, name: String?) {
+    override init(uuid: UUID, name: String?) {
         super.init(uuid: uuid, name: name)
     }
     

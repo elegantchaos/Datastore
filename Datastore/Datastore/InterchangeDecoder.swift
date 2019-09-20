@@ -10,8 +10,8 @@ import Foundation
 public protocol InterchangeDecoder {
     func decode(_ value: Any?, store: Datastore) -> SemanticValue
     
-    func decode(date: Any?) -> Date?
-    func decode(uuid: Any?) -> String?
+    func decodePrimitive(date: Any?) -> Date?
+    func decodePrimitive(uuid: Any?) -> UUID?
     
     // TODO: split decode functions into small helper objects so that we can iterate them
     func decode(string: Any?, type: SymbolID?, store: Datastore) -> SemanticValue?
@@ -44,7 +44,7 @@ public extension InterchangeDecoder {
             decoded = integer
         } else if let date = decode(date: value, type: nil, store: store) {
             decoded = date
-        } else if let uuid = decode(uuid: value) {
+        } else if let uuid = decodePrimitive(uuid: value) {
             decoded = decode(entity: uuid, type: nil, store: store) // we assume that raw uuids refer to entities
         }
         
@@ -67,14 +67,14 @@ public extension InterchangeDecoder {
     }
     
     func decode(date: Any?, type: SymbolID?, store: Datastore) -> SemanticValue? {
-        if let date = decode(date: date) {
+        if let date = decodePrimitive(date: date) {
             return store.value(date, type: type ?? store.dateSymbol)
         }
         return nil
     }
     
     func decode(entity: Any?, type: SymbolID?, store: Datastore) -> SemanticValue? {
-        if let uuid = decode(uuid: entity) {
+        if let uuid = decodePrimitive(uuid: entity) {
             return store.value(EntityID(uuid: uuid), type: type ?? store.entitySymbol)
         }
         return nil
@@ -82,16 +82,16 @@ public extension InterchangeDecoder {
 }
 
 public struct NullInterchangeDecoder: InterchangeDecoder {
-    public func decode(date: Any?) -> Date? {
+    public func decodePrimitive(date: Any?) -> Date? {
         return date as? Date
     }
 
-    public func decode(uuid value: Any?) -> String? {
+    public func decodePrimitive(uuid value: Any?) -> UUID? {
         switch value {
         case let uuid as UUID:
-            return uuid.uuidString
+            return uuid
         case let string as String:
-            return string
+            return UUID(uuidString: string)
         default:
             return nil
         }
@@ -103,16 +103,16 @@ public struct NullInterchangeDecoder: InterchangeDecoder {
 public struct JSONInterchangeDecoder: InterchangeDecoder {
     static let formatter = ISO8601DateFormatter()
 
-    public func decode(date: Any?) -> Date? {
+    public func decodePrimitive(date: Any?) -> Date? {
         if let string = date as? String {
             return JSONInterchangeDecoder.formatter.date(from: string)
         }
         return nil
     }
     
-    public func decode(uuid: Any?) -> String? {
+    public func decodePrimitive(uuid: Any?) -> UUID? {
         if let string = uuid as? String {
-            return string
+            return UUID(uuidString: string)
         }
         return nil
     }

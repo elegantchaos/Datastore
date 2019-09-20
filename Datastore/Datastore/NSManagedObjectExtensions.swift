@@ -31,9 +31,9 @@ internal func getNamed<EntityType: NSManagedObject>(_ named: String, type: Entit
  Generic which gets an existing entity of a given identifier and type.
  */
 
-internal func getWithIdentifier<EntityType: NSManagedObject>(_ identifier: String, type: EntityType.Type, in context: NSManagedObjectContext) -> EntityType? {
+internal func getWithIdentifier<EntityType: NSManagedObject>(_ identifier: UUID, type: EntityType.Type, in context: NSManagedObjectContext) -> EntityType? {
     let request: NSFetchRequest<EntityType> = EntityType.fetcher(in: context)
-    request.predicate = NSPredicate(format: "uuid = %@", identifier)
+    request.predicate = NSPredicate(format: "uuid = %@", identifier as CVarArg)
     if let results = try? context.fetch(request), let object = results.first {
         return object
     }
@@ -63,7 +63,7 @@ extension NSManagedObject {
      Return the entity of our type with a given uuid.
      */
     
-    public class func withIdentifier(_ identifier: String, in context: NSManagedObjectContext) -> Self? {
+    public class func withIdentifier(_ identifier: UUID, in context: NSManagedObjectContext) -> Self? {
         return getWithIdentifier(identifier, type: self, in: context)
     }
 
