@@ -34,7 +34,7 @@ public struct SemanticDictionary {
     
     func add(to entity: EntityRecord, store: Datastore) {
         for (key, value) in values {
-            entity.add(property: store.symbol(named: key), value: value, store: store)
+            entity.add(property: SymbolID(named: key), value: value, store: store)
         }
     }
 }

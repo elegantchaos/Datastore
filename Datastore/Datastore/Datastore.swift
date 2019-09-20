@@ -103,34 +103,6 @@ public class Datastore {
         self.context = container.newBackgroundContext()
     }
     
-    public func symbol(named name: String) -> SymbolRecord {
-        let context = self.context
-        let normalizedName = name.lowercased()
-        if let symbol = getNamed(normalizedName, type: SymbolRecord.self, in: context, createIfMissing: false) {
-            print("found symbol \(normalizedName) \(symbol.uuid!)")
-            return symbol
-        }
-        
-        let symbol = SymbolRecord(context: context)
-        symbol.name = normalizedName
-        print("made symbol \(symbol.name!) \(symbol.uuid!)")
-        return symbol
-    }
-    
-    public func symbol(uuid: String, name: String) -> SymbolRecord {
-        let context = self.context
-        if let symbol = getWithIdentifier(uuid, type: SymbolRecord.self, in: context) {
-            print("found symbol \(symbol.name!) \(symbol.uuid!)")
-            return symbol
-        }
-        
-        let symbol = SymbolRecord(context: context)
-        symbol.name = name.lowercased()
-        symbol.uuid = UUID(uuidString: uuid)
-        print("made symbol \(symbol.name!) \(symbol.uuid!)")
-        return symbol
-    }
-    
     public func value(_ value: Any?, type: SymbolID? = nil) -> SemanticValue {
         return SemanticValue(value: value, type: type ?? valueSymbol)
     }
@@ -139,7 +111,7 @@ public class Datastore {
         return SemanticValue(value: value, type: type == nil ? valueSymbol : SymbolID(type!))
     }
     
-    public func getEntities(ofType typeID: SymbolID, names: Set<String>, createIfMissing: Bool = true, completion: @escaping EntitiesCompletion) {
+    public func get(entities names: Set<String>, ofType typeID: SymbolID, createIfMissing: Bool = true, completion: @escaping EntitiesCompletion) {
         let context = self.context
         context.perform {
             var result: [EntityRecord] = []
@@ -173,7 +145,7 @@ public class Datastore {
         }
     }
     
-    public func getAllEntities(ofType type: SymbolID, completion: @escaping EntitiesCompletion) {
+    public func get(allEntitiesOfType type: SymbolID, completion: @escaping EntitiesCompletion) {
         let context = self.context
         context.perform {
             
@@ -185,22 +157,16 @@ public class Datastore {
         }
     }
     
-    public func getProperties(ofEntities entities: [EntityID], withNames names: Set<String>, completion: @escaping ([SemanticDictionary]) -> Void) {
+    public func get(properties names: Set<String>, of entities: [EntityID], completion: @escaping ([SemanticDictionary]) -> Void) {
         let context = self.context
         context.perform {
             var result: [SemanticDictionary] = []
             for entityID in entities {
-                var values = SemanticDictionary()
+                let values: SemanticDictionary
                 if let entity = entityID.resolve(in: context) {
-                    for property in Datastore.specialProperties {
-                        if names.contains(property) {
-                            values[valueWithKey: property] = self.value(entity.value(forKey: property))
-                        }
-                    }
-                    entity.read(names: names, from: entity.strings, as: StringProperty.self, into: &values, store: self)
-                    entity.read(names: names, from: entity.integers, as: IntegerProperty.self, into: &values, store: self)
-                    entity.read(names: names, from: entity.dates, as: DateProperty.self, into: &values, store: self)
-                    entity.read(names: names, from: entity.relationships, as: RelationshipProperty.self, into: &values, store: self)
+                    values = entity.read(properties: names, store: self)
+                } else {
+                    values = SemanticDictionary()
                 }
                 result.append(values)
             }
@@ -218,6 +184,12 @@ public class Datastore {
             }
             completion()
         }
+    }
+    
+    public func update(properties: [EntityID: SemanticDictionary], completion: @escaping () -> Void) {
+    }
+    
+    public func remove(properties names: Set<String>, completion: @escaping () -> Void) {
     }
     
     public class func model(bundle: Bundle = Bundle(for: Datastore.self), cached: Bool = true) -> NSManagedObjectModel? {

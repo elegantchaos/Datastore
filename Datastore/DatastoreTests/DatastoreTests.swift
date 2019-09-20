@@ -36,7 +36,7 @@ class DatastoreTests: XCTestCase {
     func testEntityCreation() {
         let created = expectation(description: "loaded")
         loadAndCheck { (datastore) in
-            datastore.getEntities(ofType: "Person", names: ["Person 1"]) { (people) in
+            datastore.get(entities: ["Person 1"], ofType: "Person") { (people) in
                 XCTAssertEqual(people.count, 1)
                 let person = people[0].object
                 XCTAssertEqual(person.name, "Person 1")
@@ -49,13 +49,11 @@ class DatastoreTests: XCTestCase {
     func testGetProperties() {
         let done = expectation(description: "loaded")
         loadAndCheck { (datastore) in
-            datastore.getEntities(ofType: "Person", names: ["Person 1"]) { (people) in
+            datastore.get(entities: ["Person 1"], ofType: "Person") { (people) in
                 let person = people[0]
                 
-                let context = datastore.context
-                let label = SymbolRecord.named("foo", in: context)
-                person.object.add(property: label, value: datastore.value("bar"), store: datastore)
-                datastore.getProperties(ofEntities: [person], withNames: ["foo"]) { (results) in
+                person.object.add(property: "foo", value: datastore.value("bar"), store: datastore)
+                datastore.get(properties : ["foo"], of: [person]) { (results) in
                     XCTAssertEqual(results.count, 1)
                     let properties = results[0]
                     XCTAssertEqual(properties["foo"] as? String, "bar")
@@ -78,11 +76,11 @@ class DatastoreTests: XCTestCase {
     func testAddProperties() {
         let done = expectation(description: "loaded")
         loadAndCheck { (datastore) in
-            datastore.getEntities(ofType: "Person", names: ["Person 1"]) { (people) in
+            datastore.get(entities: ["Person 1"], ofType: "Person") { (people) in
                 let person = people[0]
                 let now = Date()
                 datastore.add(properties: [person: self.exampleProperties(date: now, owner: person, in: datastore)]) { () in
-                    datastore.getProperties(ofEntities: [person], withNames: ["address", "date", "number"]) { (results) in
+                    datastore.get(properties : ["address", "date", "number"], of: [person]) { (results) in
                         XCTAssertEqual(results.count, 1)
                         let properties = results[0]
                         XCTAssertEqual(properties["address"] as? String, "123 New St")
@@ -216,9 +214,9 @@ class DatastoreTests: XCTestCase {
                 
             case .success(let store):
                 let expected = ["Person 1": "123 New St", "Person 2": "456 Old St"]
-                store.getAllEntities(ofType: "person") { (people) in
+                store.get(allEntitiesOfType: "person") { (people) in
                     XCTAssertEqual(people.count, 2)
-                    store.getProperties(ofEntities: people, withNames: ["name", "address", "created", "modified"]) { results in
+                    store.get(properties : ["name", "address", "created", "modified"], of: people) { results in
                         for result in results {
                             let name = result["name"] as! String
                             let value = result["address"] as! String
@@ -242,7 +240,7 @@ class DatastoreTests: XCTestCase {
             let done = expectation(description: "loaded")
             loadAndCheck { (datastore) in
                 let names = Set<String>(["Person 1", "Person 2"])
-                datastore.getEntities(ofType: "Person", names: names) { (people) in
+                datastore.get(entities: names, ofType: "Person") { (people) in
                     let person = people[0]
                     datastore.add(properties: [person: self.exampleProperties(owner: people[1], in: datastore)]) { () in
                         datastore.encodeInterchange() { interchange in
@@ -264,7 +262,7 @@ class DatastoreTests: XCTestCase {
         let done = expectation(description: "loaded")
         loadAndCheck { (datastore) in
             let names = Set<String>(["Person 1", "Person 2"])
-            datastore.getEntities(ofType: "Person", names: names) { (people) in
+            datastore.get(entities: names, ofType: "Person") { (people) in
                 let person = people[0]
                 datastore.add(properties: [person: self.exampleProperties(owner: people[1], in: datastore)]) { () in
                     datastore.encodeJSON() { json in

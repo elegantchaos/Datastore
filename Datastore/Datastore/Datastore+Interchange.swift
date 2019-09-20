@@ -26,9 +26,8 @@ extension Datastore {
     }
     
     public func decode(interchange: [String:Any], decoder: InterchangeDecoder, completion: @escaping (LoadResult) -> Void) {
-        let context = self.context
         let symbols = decodeSymbols(from: interchange)
-        decodeEntities(from: interchange, in: context, with: decoder, symbols: symbols)
+        decodeEntities(from: interchange, with: decoder, symbols: symbols)
         try? context.save()
         completion(.success(self))
     }
@@ -38,8 +37,8 @@ extension Datastore {
         if let symbols = interchange["symbols"] as? [[String:Any]] {
             for symbolRecord in symbols {
                 if let uuid = symbolRecord["uuid"] as? String, let name = symbolRecord["name"] as? String {
-                    let symbol = self.symbol(uuid: uuid, name: name)
-                    symbolIndex[uuid] = symbol
+                    let symbol = SymbolID(uuid: uuid, name: name)
+                    symbolIndex[uuid] = symbol.resolve(in: context)
                 }
             }
         }
@@ -47,7 +46,7 @@ extension Datastore {
     }
     
  
-    fileprivate func decodeEntities(from interchange: [String : Any], in context: NSManagedObjectContext, with decoder: InterchangeDecoder, symbols symbolIndex: [String : SymbolRecord]) {
+    fileprivate func decodeEntities(from interchange: [String : Any], with decoder: InterchangeDecoder, symbols symbolIndex: [String : SymbolRecord]) {
         if let entities = interchange["entities"] as? [[String:Any]] {
             for entityRecord in entities {
                 if let name = entityRecord["name"] as? String, let uuid = entityRecord["uuid"] as? String, let type = entityRecord["type"] as? String {
@@ -81,7 +80,7 @@ extension Datastore {
      
     fileprivate func decode(properties: [String:Any], of entity: EntityRecord, with decoder: InterchangeDecoder) {
         for (key, value) in properties {
-            entity.add(property: symbol(named: key), value: decoder.decode(value, store: self), store: self)
+            entity.add(property: SymbolID(named: key), value: decoder.decode(value, store: self), store: self)
         }
     }
 
