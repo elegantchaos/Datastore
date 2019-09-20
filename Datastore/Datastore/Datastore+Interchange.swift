@@ -81,7 +81,7 @@ extension Datastore {
      
     fileprivate func decode(properties: [String:Any], of entity: EntityRecord, with decoder: InterchangeDecoder) {
         for (key, value) in properties {
-            entity.add(property: symbol(named: key), value: decoder.decode(value, store: self))
+            entity.add(property: symbol(named: key), value: decoder.decode(value, store: self), store: self)
         }
     }
 

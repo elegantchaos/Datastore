@@ -54,7 +54,7 @@ class DatastoreTests: XCTestCase {
                 
                 let context = datastore.context
                 let label = SymbolRecord.named("foo", in: context)
-                person.object.add(property: label, value: datastore.value("bar"))
+                person.object.add(property: label, value: datastore.value("bar"), store: datastore)
                 datastore.getProperties(ofEntities: [person], withNames: ["foo"]) { (results) in
                     XCTAssertEqual(results.count, 1)
                     let properties = results[0]
@@ -69,8 +69,8 @@ class DatastoreTests: XCTestCase {
     func exampleProperties(date: Date = Date(), owner: EntityID, in store: Datastore) -> SemanticDictionary {
         var properties = SemanticDictionary()
         properties["address"] = store.value("123 New St", type: "address")
-        properties["date"] = store.value(date)
-        properties["number"] = store.value(123)
+        properties["date"] = date
+        properties["number"] = 123 // store.value(123)
         properties["owner"] = store.value(owner, type: "owner")
         return properties
     }
