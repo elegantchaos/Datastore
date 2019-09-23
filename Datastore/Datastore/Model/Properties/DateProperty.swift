@@ -5,15 +5,16 @@
 
 import Foundation
 
-extension RelationshipProperty: NamedProperty {
+
+extension DateProperty: NamedProperty {
     func typedValue(in store: Datastore) -> SemanticValue {
-        return store.value(GuaranteedWrappedID(target!), type: type)
+        return store.value(value, type: type, datestamp: datestamp)
     }
-    
+
     func encode(with encoder: InterchangeEncoder, into record: inout [String:Any]) {
         encoder.encode(self, into: &record)
     }
-    
+
     public override func awakeFromInsert() {
         datestamp = Date()
     }

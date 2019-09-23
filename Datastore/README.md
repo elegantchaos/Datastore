@@ -64,6 +64,7 @@ Combine support is being considered.
 ## To Do
 
 - deleting properties
+- real (double) properties
 - export type information to interchange
 - read in type information from interchange
 - optimise interchange reading for compact values

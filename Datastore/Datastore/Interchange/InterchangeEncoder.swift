@@ -25,13 +25,14 @@ public extension InterchangeEncoder {
         return uuid
     }
 
-    func encode(type: SymbolRecord?, into record: inout [String:Any]) {
+    func encode(type: SymbolRecord?, datestamp: Date?, into record: inout [String:Any]) {
         record["type"] = encodePrimitive(type?.uuid)
+        record["datestamp"] = encodePrimitive(datestamp)
     }
     
     func encode(_ date: DateProperty, into record: inout [String:Any]) {
         record["date"] = encodePrimitive(date.value)
-        encode(type: date.type, into: &record)
+        encode(type: date.type, datestamp: date.datestamp, into: &record)
     }
     
     func encode(_ symbol: SymbolRecord, into record: inout [String:Any]) {
@@ -42,19 +43,19 @@ public extension InterchangeEncoder {
         if let string = string.value {
             record["string"] = string
         }
-        encode(type: string.type, into: &record)
+        encode(type: string.type, datestamp: string.datestamp, into: &record)
     }
     
     func encode(_ integer: IntegerProperty, into record: inout [String:Any]) {
         record["integer"] = integer.value
-        encode(type: integer.type, into: &record)
+        encode(type: integer.type, datestamp: integer.datestamp, into: &record)
     }
     
     func encode(_ relationship: RelationshipProperty, into record: inout [String:Any]) {
         if let value = relationship.target?.uuid {
             record["entity"] = encodePrimitive(value)
         }
-        encode(type: relationship.type, into: &record)
+        encode(type: relationship.type, datestamp: relationship.datestamp, into: &record)
     }
 }
 

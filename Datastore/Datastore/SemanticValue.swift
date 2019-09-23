@@ -11,6 +11,7 @@ import Foundation
 public struct SemanticValue {
     let value: Any?
     let type: SymbolID?
+    let datestamp: Date?
     
     public func coerced<T>(or defaultValue: @autoclosure () -> T) -> T {
         return (value as? T) ?? defaultValue()

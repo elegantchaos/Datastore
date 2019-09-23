@@ -104,12 +104,12 @@ public class Datastore {
         self.context = container.newBackgroundContext()
     }
     
-    public func value(_ value: Any?, type: SymbolID? = nil) -> SemanticValue {
-        return SemanticValue(value: value, type: type ?? valueSymbol)
+    public func value(_ value: Any?, type: SymbolID? = nil, datestamp: Date? = nil) -> SemanticValue {
+        return SemanticValue(value: value, type: type ?? valueSymbol, datestamp: datestamp)
     }
     
-    public func value(_ value: Any?, type: SymbolRecord?) -> SemanticValue {
-        return SemanticValue(value: value, type: type == nil ? valueSymbol : SymbolID(type!))
+    public func value(_ value: Any?, type: SymbolRecord?, datestamp: Date? = nil) -> SemanticValue {
+        return SemanticValue(value: value, type: type == nil ? valueSymbol : SymbolID(type!), datestamp: datestamp)
     }
     
     public func get(entities names: Set<String>, ofType typeID: SymbolID, createIfMissing: Bool = true, completion: @escaping EntitiesCompletion) {

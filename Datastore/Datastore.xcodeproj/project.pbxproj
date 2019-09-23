@@ -101,6 +101,37 @@
 			path = Properties;
 			sourceTree = "<group>";
 		};
+		8B54A7492339009900F87365 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				8BFF2E80232F8B2B00D40D31 /* NSEntityDescriptionExtensions.swift */,
+				8BFF2E81232F8B2B00D40D31 /* NSManagedObjectContextExtensions.swift */,
+				8BFF2E7F232F8B2B00D40D31 /* NSManagedObjectExtensions.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		8B54A74A233900B900F87365 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				8B54A7482338F50400F87365 /* Properties */,
+				8BFF2E85232F8CD200D40D31 /* EntityRecord.swift */,
+				8BFF2E7A232F864200D40D31 /* Model.xcdatamodeld */,
+				8B3B6B6F23339FC50098DAC1 /* SymbolRecord.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		8B54A74B233900C700F87365 /* Interchange */ = {
+			isa = PBXGroup;
+			children = (
+				8B41F50923313FB20035081B /* Datastore+Interchange.swift */,
+				8B55DF0623328AF600B99383 /* InterchangeDecoder.swift */,
+				8B48FD78232FD98D00F37CF1 /* InterchangeEncoder.swift */,
+			);
+			path = Interchange;
+			sourceTree = "<group>";
+		};
 		8BFF2E56232F85E200D40D31 = {
 			isa = PBXGroup;
 			children = (
@@ -124,21 +155,14 @@
 			isa = PBXGroup;
 			children = (
 				8BFF2E63232F85E200D40D31 /* Datastore.h */,
-				8BFF2E7D232F8A1D00D40D31 /* Datastore.swift */,
-				8B41F50923313FB20035081B /* Datastore+Interchange.swift */,
-				8B54A7482338F50400F87365 /* Properties */,
-				8BFF2E85232F8CD200D40D31 /* EntityRecord.swift */,
-				8B40C3B8233251D000CC24E6 /* Identifier.swift */,
 				8BFF2E64232F85E200D40D31 /* Info.plist */,
-				8B55DF0623328AF600B99383 /* InterchangeDecoder.swift */,
-				8B48FD78232FD98D00F37CF1 /* InterchangeEncoder.swift */,
-				8BFF2E7A232F864200D40D31 /* Model.xcdatamodeld */,
-				8BFF2E80232F8B2B00D40D31 /* NSEntityDescriptionExtensions.swift */,
-				8BFF2E81232F8B2B00D40D31 /* NSManagedObjectContextExtensions.swift */,
-				8BFF2E7F232F8B2B00D40D31 /* NSManagedObjectExtensions.swift */,
+				8BFF2E7D232F8A1D00D40D31 /* Datastore.swift */,
+				8B40C3B8233251D000CC24E6 /* Identifier.swift */,
 				8B3B6B6D233389400098DAC1 /* SemanticDictionary.swift */,
 				8B3B6B6B233389360098DAC1 /* SemanticValue.swift */,
-				8B3B6B6F23339FC50098DAC1 /* SymbolRecord.swift */,
+				8B54A7492339009900F87365 /* Extensions */,
+				8B54A74B233900C700F87365 /* Interchange */,
+				8B54A74A233900B900F87365 /* Model */,
 			);
 			path = Datastore;
 			sourceTree = "<group>";
