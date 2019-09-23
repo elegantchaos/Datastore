@@ -333,4 +333,28 @@ class DatastoreTests: XCTestCase {
         }
         wait(for: [created], timeout: 1.0)
     }
+    
+    func testGetPropertyReturnsNewest() {
+        let done = expectation(description: "loaded")
+        loadAndCheck { (datastore) in
+            datastore.get(entities: ["test"], ofType: "test") { (entities) in
+                XCTAssertEqual(entities.count, 1)
+                let entity = entities[0]
+                var properties = SemanticDictionary()
+                properties["thing"] = "foo"
+                datastore.add(properties: [entity: properties]) { () in
+                    properties["thing"] = "bar"
+                    datastore.add(properties: [entity: properties]) { () in
+                        datastore.get(properties : ["thing"], of: [entity]) { (results) in
+                            XCTAssertEqual(results.count, 1)
+                            let properties = results[0]
+                            XCTAssertEqual(properties["thing"] as? String, "bar")
+                            done.fulfill()
+                        }
+                    }
+                }
+            }
+        }
+        wait(for: [done], timeout: 1.0)
+    }
 }

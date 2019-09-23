@@ -8,9 +8,9 @@ It forces asynchronous usage patterns by no supplying synchronous ones!
 
 The datastore contains *entities*, which have *properties* and *relationships*.
 
-For housekeeping purposes, all entities have some fixed properties: `name`, `type`, `creation date`, `modification date`, `uuid`.
+For housekeeping purposes, all entities have three fixed properties:  `type`, `datestamp` and `uuid`.
 
-Entities also have any number of custom properties stored as `key, value, type` triples. 
+Entities also have any number of custom properties stored as `key, value, date, type` tuples. 
 
 Entities are tagged as being of a particular *type*, but it's just a tag, it's up to you whether it implies structure.
 
@@ -18,13 +18,18 @@ Properties values are stored as primitive types (string, number, etc), but are t
 
 Relationships are just properties that tie together two entities in some way; the `value` is the related entity, and the `type` indicates the kind of relationship.
 
+Property values have a datestamp. An entity can have more than one entry for the same property. 
+
+What multiple entries for the same property means is up to interpretation - it can either indicate a change history (with the newest entry being the current value),
+or it can indicate that the entity does indeed have multiple values for that property. 
+
 ## Access
 
 All access operations are asynchronous, and backing-store neutral.
 
 Entities are passed in and returned as opaque references. 
 
-Properties are passed in and returned as `[String:Any]` dictionaries. 
+Properties are passed in and returned as dictionaries. 
 
 Results are returned using callback blocks.
 
@@ -40,17 +45,28 @@ The main reason for using CoreData is to allow leverage of other solutions which
 
 The store can be read from, and written to, a dictionary-based interchange format. This only uses JSON-legal types, hence can be easily converted into JSON/XML/whatever.
 
+## Efficiency
+
+Some of the aspects of the design make it expensive to implement using a traditional database. 
+
+Each property for each entity is stored as a separate record in a different table from the entity itself.
+Multiple entries can exist for the same property on the same entity.
+Thus a simple property lookup requires quite a bit of work filtering and/or sorting entries.
+
+Right now I'm not too worried about this - I'm more interested in other aspects of how this design works.
+
+I'm fairly sure that a custom implementation could greatly improve efficiency if required.
+
 ## Future
 
 Combine support is being considered.
 
 ## To Do
 
-- set property value and type using SemanticValue
+- deleting properties
 - export type information to interchange
 - read in type information from interchange
 - optimise interchange reading for compact values
 - optimise interchange writing for compact values
-- adding relationships
 - encoding/decoding relationships
 - getting all properties

@@ -116,11 +116,16 @@ public class EntityRecord: NSManagedObject {
     
     func read<T>(names: Set<String>, from properties: NSSet?, as: T.Type, into values: inout SemanticDictionary, store: Datastore) where T: NamedProperty, T: Hashable {
         if let set = properties as? Set<T> {
-            for property in set {
-                if let name = property.name?.name, names.contains(name) {
+            // there may be multiple entries for each property, so we sort them in date
+            // order, and only return the newest one
+            let sorted = set.sorted(by: { (p1, p2) in p1.datestamp! > p2.datestamp! })
+            var remaining = names
+            for property in sorted {
+                if let name = property.name?.name, remaining.contains(name) {
                     let value = property.typedValue(in: store)
                     assert(value.type != nil)
                     values[valueWithKey: name] = value
+                    remaining.remove(name)
                 }
             }
         }

@@ -45,7 +45,7 @@
 		8B3B6B6B233389360098DAC1 /* SemanticValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SemanticValue.swift; sourceTree = "<group>"; };
 		8B3B6B6D233389400098DAC1 /* SemanticDictionary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SemanticDictionary.swift; sourceTree = "<group>"; };
 		8B3B6B6F23339FC50098DAC1 /* SymbolRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymbolRecord.swift; sourceTree = "<group>"; };
-		8B40C3B7233233D000CC24E6 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		8B40C3B7233233D000CC24E6 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; wrapsLines = 1; };
 		8B40C3B8233251D000CC24E6 /* Identifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Identifier.swift; sourceTree = "<group>"; };
 		8B41F50923313FB20035081B /* Datastore+Interchange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Datastore+Interchange.swift"; sourceTree = "<group>"; };
 		8B48FD78232FD98D00F37CF1 /* InterchangeEncoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterchangeEncoder.swift; sourceTree = "<group>"; };
@@ -94,6 +94,7 @@
 			children = (
 				8B64FD592333CBC9001A0BBD /* DateProperty.swift */,
 				8B64FD572333CBB4001A0BBD /* IntegerProperty.swift */,
+				8B64FD5D2333CBEB001A0BBD /* NamedProperty.swift */,
 				8B64FD5B2333CBD9001A0BBD /* RelationshipProperty.swift */,
 				8B64FD552333CBA2001A0BBD /* StringProperty.swift */,
 			);
@@ -132,7 +133,6 @@
 				8B55DF0623328AF600B99383 /* InterchangeDecoder.swift */,
 				8B48FD78232FD98D00F37CF1 /* InterchangeEncoder.swift */,
 				8BFF2E7A232F864200D40D31 /* Model.xcdatamodeld */,
-				8B64FD5D2333CBEB001A0BBD /* NamedProperty.swift */,
 				8BFF2E80232F8B2B00D40D31 /* NSEntityDescriptionExtensions.swift */,
 				8BFF2E81232F8B2B00D40D31 /* NSManagedObjectContextExtensions.swift */,
 				8BFF2E7F232F8B2B00D40D31 /* NSManagedObjectExtensions.swift */,
