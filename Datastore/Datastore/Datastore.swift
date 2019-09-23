@@ -20,6 +20,7 @@ public class Datastore {
     internal let numberSymbol = SymbolID(named: "number")
     internal let dateSymbol = SymbolID(named: "date")
     internal let entitySymbol = SymbolID(named: "entity")
+    internal let nameSymbol = SymbolID(named: "name")
     
     public typealias LoadResult = Result<Datastore, Error>
     public typealias LoadCompletion = (LoadResult) -> Void
@@ -31,7 +32,7 @@ public class Datastore {
     
     public typealias ApplyResult = Result<Void, Error>
     
-    static let specialProperties = ["name", "uuid", "created", "type", "modified"]
+    static let specialProperties = ["uuid", "created", "type"]
     
     struct Publisher: Combine.Publisher {
         typealias Output = Datastore
@@ -113,6 +114,7 @@ public class Datastore {
     
     public func get(entities names: Set<String>, ofType typeID: SymbolID, createIfMissing: Bool = true, completion: @escaping EntitiesCompletion) {
         let context = self.context
+        
         context.perform {
             var result: [EntityRecord] = []
             var create: Set<String> = names
@@ -123,21 +125,24 @@ public class Datastore {
             
             if let entities = type.entities as? Set<EntityRecord> {
                 for entity in entities {
-                    if let name = entity.name, names.contains(name) {
+                    if let name = entity.string(withKey: self.nameSymbol), names.contains(name) {
                         result.append(entity)
                         create.remove(name)
                     }
                 }
             }
+            
+            let nameKey = self.nameSymbol.resolve(in: context)
             if createIfMissing {
                 for name in create {
-                    let entity = EntityRecord(context: context)
-                    entity.name = name
+                    let entity = EntityRecord(in: context)
                     entity.type = type
-                    let now = Date()
-                    entity.created = now
-                    entity.modified = now
+                    entity.created = Date()
                     entity.uuid = UUID()
+                    let property = StringProperty(in: context)
+                    property.owner = entity
+                    property.name = nameKey
+                    property.value = name
                     result.append(entity)
                 }
             }

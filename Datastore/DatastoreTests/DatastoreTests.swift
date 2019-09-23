@@ -39,7 +39,7 @@ class DatastoreTests: XCTestCase {
             datastore.get(entities: ["Person 1"], ofType: "Person") { (people) in
                 XCTAssertEqual(people.count, 1)
                 let person = people[0].object
-                XCTAssertEqual(person.name, "Person 1")
+                XCTAssertEqual(person.string(withKey: datastore.nameSymbol), "Person 1")
                 created.fulfill()
             }
         }
@@ -266,7 +266,8 @@ class DatastoreTests: XCTestCase {
                         datastore.encodeInterchange() { interchange in
                             if let entities = interchange["entities"] as? [[String:Any]] {
                                 for entity in entities {
-                                    XCTAssertTrue(names.contains(entity["name"] as! String))
+                                    let nameRecord = entity["name"] as? [String:Any]
+                                    XCTAssertTrue(names.contains(nameRecord?["string"] as! String))
                                 }
                             }
                             

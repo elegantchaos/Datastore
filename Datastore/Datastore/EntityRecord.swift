@@ -115,4 +115,20 @@ public class EntityRecord: NSManagedObject {
             }
         }
     }
+    
+    func string(withKey keyID: SymbolID) -> String? {
+        if let context = managedObjectContext, let key = keyID.resolve(in: context), let strings = strings as? Set<StringProperty> {
+            let names = strings.filter({ $0.name == key })
+            let sorted = names.sorted(by: {$0.created! > $1.created! })
+            return sorted.first?.value
+//            let request: NSFetchRequest<StringProperty> = StringProperty.fetcher(in: context)
+//            request.predicate = NSPredicate(format: "(name = %@) && (entity = %@)", key, self)
+//            request.sortDescriptors = [NSSortDescriptor(key: "created", ascending: false)]
+//            request.fetchLimit = 1
+//            if let results = try? context.fetch(request), let object = results.first {
+//                return object.value
+//            }
+        }
+        return nil
+    }
 }

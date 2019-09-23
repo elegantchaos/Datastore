@@ -68,9 +68,7 @@ extension Datastore {
     }
     
     fileprivate func decodeEntity(_ entity: EntityRecord, name: String, with decoder: InterchangeDecoder, values entityRecord: [String : Any]) {
-         entity.name = name
          entity.created = decoder.decode(entityRecord["created"], store: self).coerced(or: Date())
-         entity.modified = decoder.decode(entityRecord["modified"], store: self).coerced(or: Date())
          var entityProperties = entityRecord
          for key in Datastore.specialProperties {
              entityProperties.removeValue(forKey: key)
@@ -102,10 +100,8 @@ extension Datastore {
                     if let entities = symbol.entities as? Set<EntityRecord> {
                         for entity in entities {
                             var record: [String:Any] = [:]
-                            record["name"] = entity.name
                             record["type"] = type
                             record["created"] = encoder.encodePrimitive(entity.created)
-                            record["modified"] = encoder.encodePrimitive(entity.modified)
                             record["uuid"] = encoder.encodePrimitive(entity.uuid)
                             entity.encode(from: entity.strings, as: StringProperty.self, into: &record, encoder: encoder)
                             entity.encode(from: entity.integers, as: IntegerProperty.self, into: &record, encoder: encoder)
