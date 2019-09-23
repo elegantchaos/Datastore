@@ -102,7 +102,7 @@ class DatastoreTests: XCTestCase {
                 {
                   "name" : "Person 1",
                   "uuid" : "C41DB873-323D-4026-95D1-603120B9ADF6",
-                  "created" : { "date" : "1969-11-12T01:23:45Z" },
+                  "datestamp" : { "date" : "1969-11-12T01:23:45Z" },
                   "modified" : { "date" : "1963-09-21T01:23:45Z" },
                   "type" : "F9B7D73D-2020-49AD-B85D-4BBD62CCA80B",
                   "address" : "123 New St",
@@ -114,7 +114,7 @@ class DatastoreTests: XCTestCase {
                 {
                   "name" : "Person 2",
                   "uuid" : "ADDD557A-668E-4C6B-A9A0-3BCF099646E8",
-                  "created" : { "date" : "1969-11-12T01:23:45Z" },
+                  "datestamp" : { "date" : "1969-11-12T01:23:45Z" },
                   "modified" : { "date" : "1963-09-21T01:23:45Z" },
                   "type" : "F9B7D73D-2020-49AD-B85D-4BBD62CCA80B",
                   "address" : "456 Old St",
@@ -152,7 +152,7 @@ class DatastoreTests: XCTestCase {
                   "uuid" : "FE396F3F-A325-4F50-899C-F22308C97D12",
                   "type" : "09035403-D3AE-4076-A77C-0B5596E5E361",
                   "name" : "Person 1",
-                  "created" : { "date" : "1969-11-12T01:23:45Z" },
+                  "datestamp" : { "date" : "1969-11-12T01:23:45Z" },
                   "modified" : { "date" : "1963-09-21T01:23:45Z" },
                   "address" : {
                       "string" : "123 New St",
@@ -173,7 +173,7 @@ class DatastoreTests: XCTestCase {
                     "entity" : "652A3D31-C409-4CBE-8469-6232D1EEBC96",
                     "type" : "B9B994A8-B47E-4EF2-9440-0E7564CA5C6A"
                   },
-                  "created" : { "date" : "1969-11-12T01:23:45Z" },
+                  "datestamp" : { "date" : "1969-11-12T01:23:45Z" },
                   "modified" : { "date" : "1963-09-21T01:23:45Z" },
                   "date" : {
                     "date" : "2019-09-19T16:14:58Z",
@@ -232,14 +232,14 @@ class DatastoreTests: XCTestCase {
                 let expected = ["Person 1": "123 New St", "Person 2": "456 Old St"]
                 store.get(allEntitiesOfType: "person") { (people) in
                     XCTAssertEqual(people.count, 2)
-                    store.get(properties : ["name", "address", "created", "modified", "owner"], of: people) { results in
+                    store.get(properties : ["name", "address", "datestamp", "modified", "owner"], of: people) { results in
                         var n = 0
                         for result in results {
                             let name = result["name"] as! String
                             let value = result["address"] as! String
                             let expectedValue = expected[name]
                             XCTAssertEqual(expectedValue, value, "\(name)")
-                            let created = result["created"] as! Date
+                            let created = result["datestamp"] as! Date
                             XCTAssertEqual(created.description, "1969-11-12 01:23:45 +0000")
                             let modified = result["modified"] as! Date
                             XCTAssertEqual(modified.description, "1963-09-21 01:23:45 +0000")
@@ -315,5 +315,22 @@ class DatastoreTests: XCTestCase {
     func testLoadFuture() {
         let future = Datastore.loadCombine(name: "test")
         check(action: "load", future: future)
+    }
+    
+    func testChangeName() {
+        let created = expectation(description: "loaded")
+        loadAndCheck { (datastore) in
+            datastore.get(entities: ["Person 1"], ofType: "Person") { (people) in
+                let person = people[0]
+                var properties = SemanticDictionary()
+                properties["name"] = "New Name"
+                datastore.add(properties: [person : properties]) {
+                    XCTAssertEqual(people.count, 1)
+                    XCTAssertEqual(person.object.string(withKey: datastore.nameSymbol), "New Name")
+                    created.fulfill()
+                }
+            }
+        }
+        wait(for: [created], timeout: 1.0)
     }
 }

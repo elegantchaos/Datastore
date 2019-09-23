@@ -15,4 +15,8 @@ extension DateProperty: NamedProperty {
         encoder.encode(self, into: &record)
     }
 
+    public override func awakeFromInsert() {
+        datestamp = Date()
+    }
+
 }

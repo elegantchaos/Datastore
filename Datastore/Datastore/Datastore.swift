@@ -32,7 +32,7 @@ public class Datastore {
     
     public typealias ApplyResult = Result<Void, Error>
     
-    static let specialProperties = ["uuid", "created", "type"]
+    static let specialProperties = ["uuid", "datestamp", "type"]
     
     struct Publisher: Combine.Publisher {
         typealias Output = Datastore
@@ -137,8 +137,6 @@ public class Datastore {
                 for name in create {
                     let entity = EntityRecord(in: context)
                     entity.type = type
-                    entity.created = Date()
-                    entity.uuid = UUID()
                     let property = StringProperty(in: context)
                     property.owner = entity
                     property.name = nameKey

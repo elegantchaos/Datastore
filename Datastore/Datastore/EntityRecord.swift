@@ -9,6 +9,16 @@ import CoreData
 
 
 public class EntityRecord: NSManagedObject {
+    
+    public override func awakeFromInsert() {
+        if uuid == nil {
+            uuid = UUID()
+        }
+        if datestamp == nil {
+            datestamp = Date()
+        }
+    }
+
     func add(property symbolID: SymbolID, value: SemanticValue, store: Datastore) {
         if let context = managedObjectContext, let symbol = symbolID.resolve(in: context) {
             switch value.value {
@@ -119,15 +129,8 @@ public class EntityRecord: NSManagedObject {
     func string(withKey keyID: SymbolID) -> String? {
         if let context = managedObjectContext, let key = keyID.resolve(in: context), let strings = strings as? Set<StringProperty> {
             let names = strings.filter({ $0.name == key })
-            let sorted = names.sorted(by: {$0.created! > $1.created! })
+            let sorted = names.sorted(by: {$0.datestamp! > $1.datestamp! })
             return sorted.first?.value
-//            let request: NSFetchRequest<StringProperty> = StringProperty.fetcher(in: context)
-//            request.predicate = NSPredicate(format: "(name = %@) && (entity = %@)", key, self)
-//            request.sortDescriptors = [NSSortDescriptor(key: "created", ascending: false)]
-//            request.fetchLimit = 1
-//            if let results = try? context.fetch(request), let object = results.first {
-//                return object.value
-//            }
         }
         return nil
     }

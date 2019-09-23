@@ -89,6 +89,17 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		8B54A7482338F50400F87365 /* Properties */ = {
+			isa = PBXGroup;
+			children = (
+				8B64FD592333CBC9001A0BBD /* DateProperty.swift */,
+				8B64FD572333CBB4001A0BBD /* IntegerProperty.swift */,
+				8B64FD5B2333CBD9001A0BBD /* RelationshipProperty.swift */,
+				8B64FD552333CBA2001A0BBD /* StringProperty.swift */,
+			);
+			path = Properties;
+			sourceTree = "<group>";
+		};
 		8BFF2E56232F85E200D40D31 = {
 			isa = PBXGroup;
 			children = (
@@ -114,11 +125,10 @@
 				8BFF2E63232F85E200D40D31 /* Datastore.h */,
 				8BFF2E7D232F8A1D00D40D31 /* Datastore.swift */,
 				8B41F50923313FB20035081B /* Datastore+Interchange.swift */,
-				8B64FD592333CBC9001A0BBD /* DateProperty.swift */,
+				8B54A7482338F50400F87365 /* Properties */,
 				8BFF2E85232F8CD200D40D31 /* EntityRecord.swift */,
 				8B40C3B8233251D000CC24E6 /* Identifier.swift */,
 				8BFF2E64232F85E200D40D31 /* Info.plist */,
-				8B64FD572333CBB4001A0BBD /* IntegerProperty.swift */,
 				8B55DF0623328AF600B99383 /* InterchangeDecoder.swift */,
 				8B48FD78232FD98D00F37CF1 /* InterchangeEncoder.swift */,
 				8BFF2E7A232F864200D40D31 /* Model.xcdatamodeld */,
@@ -126,10 +136,8 @@
 				8BFF2E80232F8B2B00D40D31 /* NSEntityDescriptionExtensions.swift */,
 				8BFF2E81232F8B2B00D40D31 /* NSManagedObjectContextExtensions.swift */,
 				8BFF2E7F232F8B2B00D40D31 /* NSManagedObjectExtensions.swift */,
-				8B64FD5B2333CBD9001A0BBD /* RelationshipProperty.swift */,
 				8B3B6B6D233389400098DAC1 /* SemanticDictionary.swift */,
 				8B3B6B6B233389360098DAC1 /* SemanticValue.swift */,
-				8B64FD552333CBA2001A0BBD /* StringProperty.swift */,
 				8B3B6B6F23339FC50098DAC1 /* SymbolRecord.swift */,
 			);
 			path = Datastore;

@@ -13,4 +13,8 @@ extension StringProperty: NamedProperty {
     func encode(with encoder: InterchangeEncoder, into record: inout [String:Any]) {
         encoder.encode(self, into: &record)
     }
+    
+    public override func awakeFromInsert() {
+        datestamp = Date()
+    }
 }
