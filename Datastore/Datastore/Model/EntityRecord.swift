@@ -70,7 +70,7 @@ public class EntityRecord: NSManagedObject {
 
             default:
                 let unknown = Swift.type(of: value.value)
-                print("unknown value type \(unknown) \(value.value)")
+                print("unknown value type \(unknown) \(String(describing: value.value))")
                 break
             }
         }
@@ -121,6 +121,15 @@ public class EntityRecord: NSManagedObject {
         return values
     }
     
+    func readAllProperties(store: Datastore) -> SemanticDictionary {
+        var values = SemanticDictionary()
+        readAll(from: strings, as: StringProperty.self, into: &values, store: store)
+        readAll(from: integers, as: IntegerProperty.self, into: &values, store: store)
+        readAll(from: doubles, as: DoubleProperty.self, into: &values, store: store)
+        readAll(from: dates, as: DateProperty.self, into: &values, store: store)
+        readAll(from: relationships, as: RelationshipProperty.self, into: &values, store: store)
+        return values
+    }
     
     func string(withKey keyID: SymbolID) -> String? {
         if let context = managedObjectContext, let key = keyID.resolve(in: context), let strings = strings as? Set<StringProperty> {
@@ -177,6 +186,23 @@ public class EntityRecord: NSManagedObject {
                     assert(value.type != nil)
                     values[valueWithKey: name] = value
                     remaining.remove(name)
+                }
+            }
+        }
+    }
+
+    func readAll<T>(from properties: NSSet?, as: T.Type, into values: inout SemanticDictionary, store: Datastore) where T: NamedProperty {
+        if let set = properties as? Set<T> {
+            // there may be multiple entries for each property, so we sort them in date
+            // order, and only return the newest one
+            let sorted = set.sorted(by: { (p1, p2) in p1.datestamp! > p2.datestamp! })
+            var done: Set<String> = []
+            for property in sorted {
+                if let name = property.name?.name, !done.contains(name) {
+                    let value = property.typedValue(in: store)
+                    assert(value.type != nil)
+                    values[valueWithKey: name] = value
+                    done.insert(name)
                 }
             }
         }

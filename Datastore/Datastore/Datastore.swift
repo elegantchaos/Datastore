@@ -171,7 +171,24 @@ public class Datastore {
             completion(result)
         }
     }
-    
+
+    public func get(allPropertiesOf entities: [EntityID], completion: @escaping ([SemanticDictionary]) -> Void) {
+        let context = self.context
+        context.perform {
+            var result: [SemanticDictionary] = []
+            for entityID in entities {
+                let values: SemanticDictionary
+                if let entity = entityID.resolve(in: context) {
+                    values = entity.readAllProperties(store: self)
+                } else {
+                    values = SemanticDictionary()
+                }
+                result.append(values)
+            }
+            completion(result)
+        }
+    }
+
     public func add(properties: [EntityID: SemanticDictionary], completion: @escaping () -> Void) {
         let context = self.context
         context.perform {

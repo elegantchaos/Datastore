@@ -91,7 +91,22 @@ class DatastoreTests: XCTestCase {
         }
         wait(for: [done], timeout: 1.0)
     }
-    
+
+    func testGetAllProperties() {
+        let done = expectation(description: "done")
+        loadJSON(name: "Simple", expectation: done) { datastore in
+            datastore.get(allEntitiesOfType: "person") { (people) in
+                datastore.get(allPropertiesOf: people) { (results) in
+                    XCTAssertEqual(results.count, 1)
+                    let properties = results[0]
+                    XCTAssertEqual(properties["foo"] as? String, "bar")
+                }
+                done.fulfill()
+            }
+        }
+        wait(for: [done], timeout: 1.0)
+    }
+
     func exampleProperties(date: Date = Date(), owner: EntityID, in store: Datastore) -> SemanticDictionary {
         var properties = SemanticDictionary()
         properties["address"] = store.value("123 New St", type: "address")
