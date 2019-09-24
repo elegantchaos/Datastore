@@ -111,10 +111,10 @@ internal struct OpaqueIdentifiedID: ResolvableID {
         if let object = type.withIdentifier(uuid, in: context) {
             return OpaqueCachedID(object)
         } else if let name = name {
-            let symbol = SymbolRecord(in: context)
-            symbol.name = name.lowercased()
-            symbol.uuid = uuid
-            return OpaqueCachedID(symbol)
+            let object = type.init(context: context)
+            object.setValue(name.lowercased(), forKey: "name")
+            object.setValue(uuid, forKey: "uuid")
+            return OpaqueCachedID(object)
         } else {
             return NullCachedID()
         }
@@ -180,25 +180,5 @@ public class GuaranteedWrappedID<T: NSManagedObject>: WrappedID<T> {
 }
 
 public typealias EntityID = WrappedID<EntityRecord>
-
-public class SymbolID: WrappedID<SymbolRecord>, ExpressibleByStringLiteral {
-    override init(_ symbol: SymbolRecord) {
-        super.init(symbol)
-    }
-    
-    public required init(named name: String) {
-        super.init(named: name, createIfMissing: true)
-    }
-
-    override init(uuid: UUID, name: String? = nil) {
-        super.init(uuid: uuid, name: name)
-    }
-    
-    public required init(stringLiteral value: String) {
-        super.init(named: value, createIfMissing: true)
-    }
-}
-
 public typealias Entity = GuaranteedWrappedID<EntityRecord>
-public typealias Symbol = GuaranteedWrappedID<SymbolRecord>
 

@@ -10,7 +10,6 @@ public protocol InterchangeEncoder {
     func encodePrimitive(_ uuid: UUID?) -> Any?
 
     func encode(_ date: DateProperty, into record: inout [String:Any])
-    func encode(_ symbol: SymbolRecord, into record: inout [String:Any])
     func encode(_ string: StringProperty, into record: inout [String:Any])
     func encode(_ integer: IntegerProperty, into record: inout [String:Any])
     func encode(_ double: DoubleProperty, into record: inout [String:Any])
@@ -26,18 +25,14 @@ public extension InterchangeEncoder {
         return uuid
     }
 
-    func encode(type: SymbolRecord?, datestamp: Date?, into record: inout [String:Any]) {
-        record["type"] = encodePrimitive(type?.uuid)
+    func encode(type: String?, datestamp: Date?, into record: inout [String:Any]) {
+        record["symbol"] = type
         record["datestamp"] = encodePrimitive(datestamp)
     }
     
     func encode(_ date: DateProperty, into record: inout [String:Any]) {
         record["date"] = encodePrimitive(date.value)
         encode(type: date.type, datestamp: date.datestamp, into: &record)
-    }
-    
-    func encode(_ symbol: SymbolRecord, into record: inout [String:Any]) {
-        record["uuid"] = encodePrimitive(symbol.uuid)
     }
     
     func encode(_ string: StringProperty, into record: inout [String:Any]) {

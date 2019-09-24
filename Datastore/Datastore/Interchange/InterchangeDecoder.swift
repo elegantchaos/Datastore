@@ -14,22 +14,18 @@ public protocol InterchangeDecoder {
     func decodePrimitive(uuid: Any?) -> UUID?
     
     // TODO: split decode functions into small helper objects so that we can iterate them
-    func decode(string: Any?, type: SymbolID?, store: Datastore) -> SemanticValue?
-    func decode(integer: Any?, type: SymbolID?, store: Datastore) -> SemanticValue?
-    func decode(double: Any?, type: SymbolID?, store: Datastore) -> SemanticValue?
-    func decode(date: Any?, type: SymbolID?, store: Datastore) -> SemanticValue?
-    func decode(entity: Any?, type: SymbolID?, store: Datastore) -> SemanticValue?
+    func decode(string: Any?, type: String?, store: Datastore) -> SemanticValue?
+    func decode(integer: Any?, type: String?, store: Datastore) -> SemanticValue?
+    func decode(double: Any?, type: String?, store: Datastore) -> SemanticValue?
+    func decode(date: Any?, type: String?, store: Datastore) -> SemanticValue?
+    func decode(entity: Any?, type: String?, store: Datastore) -> SemanticValue?
 }
 
 public extension InterchangeDecoder {
     func decode(_ value: Any?, store: Datastore) -> SemanticValue {
         var decoded: SemanticValue? = nil
         if let record = value as? [String:Any] {
-            var type: SymbolID? = nil
-            if let uuid = decodePrimitive(uuid: record["type"]) {
-                type = SymbolID(uuid: uuid)
-            }
-            
+            let type = record["type"] as? String
             if let string = record["string"] {
                 decoded = decode(string: string, type: type, store: store)
             } else if let integer = record["integer"] {
@@ -57,35 +53,35 @@ public extension InterchangeDecoder {
     }
     
     
-    func decode(string: Any?, type: SymbolID?, store: Datastore) -> SemanticValue? {
+    func decode(string: Any?, type: String?, store: Datastore) -> SemanticValue? {
         if let string = string as? String {
             return store.value(string, type: type ?? store.standardSymbols.string)
         }
         return nil
     }
     
-    func decode(integer: Any?, type: SymbolID?, store: Datastore) -> SemanticValue? {
+    func decode(integer: Any?, type: String?, store: Datastore) -> SemanticValue? {
         if let integer = integer as? Int {
             return store.value(integer, type: type ?? store.standardSymbols.integer)
         }
         return nil
     }
     
-    func decode(double: Any?, type: SymbolID?, store: Datastore) -> SemanticValue? {
+    func decode(double: Any?, type: String?, store: Datastore) -> SemanticValue? {
         if let double = double as? Double {
             return store.value(double, type: type ?? store.standardSymbols.double)
         }
         return nil
     }
     
-    func decode(date: Any?, type: SymbolID?, store: Datastore) -> SemanticValue? {
+    func decode(date: Any?, type: String?, store: Datastore) -> SemanticValue? {
         if let date = decodePrimitive(date: date) {
             return store.value(date, type: type ?? store.standardSymbols.date)
         }
         return nil
     }
     
-    func decode(entity: Any?, type: SymbolID?, store: Datastore) -> SemanticValue? {
+    func decode(entity: Any?, type: String?, store: Datastore) -> SemanticValue? {
         if let uuid = decodePrimitive(uuid: entity) {
             return store.value(EntityID(uuid: uuid), type: type ?? store.standardSymbols.entity)
         }

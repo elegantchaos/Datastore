@@ -19,53 +19,53 @@ public class EntityRecord: NSManagedObject {
         }
     }
     
-    func add(property symbolID: SymbolID, value: SemanticValue, store: Datastore) {
-        if let context = managedObjectContext, let symbol = symbolID.resolve(in: context) {
+    func add(property: String, value: SemanticValue, store: Datastore) {
+        if let context = managedObjectContext {
             switch value.value {
             case let string as String:
-                add(string, key: symbol, type: value.type, store: store)
+                add(string, key: property, type: value.type, store: store)
                 
             case let integer as Int16:
-                add(Int64(integer), key: symbol, type: value.type, store: store)
+                add(Int64(integer), key: property, type: value.type, store: store)
                 
             case let integer as Int32:
-                add(Int64(integer), key: symbol, type: value.type, store: store)
+                add(Int64(integer), key: property, type: value.type, store: store)
                 
             case let integer as Int64:
-                add(integer, key: symbol, type: value.type, store: store)
+                add(integer, key: property, type: value.type, store: store)
                 
             case let integer as Int:
-                add(Int64(integer), key: symbol, type: value.type, store: store)
+                add(Int64(integer), key: property, type: value.type, store: store)
                 
             case let integer as UInt16:
-                add(Int64(integer), key: symbol, type: value.type, store: store)
+                add(Int64(integer), key: property, type: value.type, store: store)
                 
             case let integer as UInt32:
-                add(Int64(integer), key: symbol, type: value.type, store: store)
+                add(Int64(integer), key: property, type: value.type, store: store)
                 
             case let integer as UInt64:
-                add(Int64(integer), key: symbol, type: value.type, store: store)
+                add(Int64(integer), key: property, type: value.type, store: store)
                 
             case let integer as UInt:
-                add(Int64(integer), key: symbol, type: value.type, store: store)
+                add(Int64(integer), key: property, type: value.type, store: store)
                 
             case let double as Double:
-                add(double, key: symbol, type: value.type, store: store)
+                add(double, key: property, type: value.type, store: store)
                 
             case let date as Date:
-                add(date, key: symbol, type: value.type, store: store)
+                add(date, key: property, type: value.type, store: store)
                 
             case let entity as EntityRecord:
-                add(entity, key: symbol, type: value.type, store: store)
+                add(entity, key: property, type: value.type, store: store)
                 
             case let entity as EntityID:
                 if let resolved = entity.resolve(in: context) {
-                    add(resolved, key: symbol, type: value.type, store: store)
+                    add(resolved, key: property, type: value.type, store: store)
                 }
 
             case let entity as Entity:
                 if let resolved = entity.resolve(in: context) {
-                    add(resolved, key: symbol, type: value.type, store: store)
+                    add(resolved, key: property, type: value.type, store: store)
                 }
 
             default:
@@ -75,31 +75,31 @@ public class EntityRecord: NSManagedObject {
             }
         }
     }
-    func add(_ value: String, key: SymbolRecord, type: SymbolID?, store: Datastore) {
+    func add(_ value: String, key: String, type: String?, store: Datastore) {
         if let property: StringProperty = add(key: key, type: type ?? store.standardSymbols.string) {
             property.value = value
         }
     }
     
-    func add(_ value: Int64, key: SymbolRecord, type: SymbolID?, store: Datastore) {
+    func add(_ value: Int64, key: String, type: String?, store: Datastore) {
         if let property: IntegerProperty = add(key: key, type: type ?? store.standardSymbols.integer) {
             property.value = value
         }
     }
     
-    func add(_ value: Double, key: SymbolRecord, type: SymbolID?, store: Datastore) {
+    func add(_ value: Double, key: String, type: String?, store: Datastore) {
         if let property: DoubleProperty = add(key: key, type: type ?? store.standardSymbols.double) {
             property.value = value
         }
     }
     
-    func add(_ value: Date, key: SymbolRecord, type: SymbolID?, store: Datastore) {
+    func add(_ value: Date, key: String, type: String?, store: Datastore) {
         if let property: DateProperty = add(key: key, type: type ?? store.standardSymbols.date) {
             property.value = value
         }
     }
     
-    func add(_ value: EntityRecord, key: SymbolRecord, type: SymbolID?, store: Datastore) {
+    func add(_ value: EntityRecord, key: String, type: String?, store: Datastore) {
         if let property: RelationshipProperty = add(key: key, type: type ?? store.standardSymbols.entity) {
             property.target = value
         }
@@ -115,7 +115,7 @@ public class EntityRecord: NSManagedObject {
             values[valueWithKey: "uuid"] = store.value(uuid, type: store.standardSymbols.identifier)
         }
         if names.contains("type") {
-            values[valueWithKey: "type"] = store.value(type?.uuid, type: store.standardSymbols.entity)
+            values[valueWithKey: "type"] = store.value(type, type: store.standardSymbols.entity)
         }
 
         read(names: names, from: strings, as: StringProperty.self, into: &values, store: store)
@@ -136,8 +136,8 @@ public class EntityRecord: NSManagedObject {
         return values
     }
     
-    func string(withKey keyID: SymbolID) -> String? {
-        if let context = managedObjectContext, let key = keyID.resolve(in: context), let strings = strings as? Set<StringProperty> {
+    func string(withKey key: String) -> String? {
+        if let strings = strings as? Set<StringProperty> {
             let names = strings.filter({ $0.name == key })
             let sorted = names.sorted(by: {$0.datestamp! > $1.datestamp! })
             return sorted.first?.value
@@ -155,7 +155,7 @@ public class EntityRecord: NSManagedObject {
     
     // MARK: - Generic Helpers
     
-    func add<R>(key: SymbolRecord, type: SymbolID) -> R? where R: NamedProperty {
+    func add<R>(key: String, type: String) -> R? where R: NamedProperty {
         guard let context = managedObjectContext else {
             return nil
         }
@@ -163,7 +163,7 @@ public class EntityRecord: NSManagedObject {
         let property = R(context: context)
         property.name = key
         property.owner = self
-        property.type = type.resolve(in: context)
+        property.type = type
         assert(property.type != nil)
         return property
     }
@@ -172,7 +172,7 @@ public class EntityRecord: NSManagedObject {
     func encode<T>(from properties: NSSet?, as: T.Type, into values: inout [String:Any], encoder: InterchangeEncoder) where T: NamedProperty {
         if let set = properties as? Set<T> {
             for property in set {
-                if let name = property.name?.name {
+                if let name = property.name {
                     values[name] = property.encode(with: encoder)
                 }
             }
@@ -186,7 +186,7 @@ public class EntityRecord: NSManagedObject {
             let sorted = set.sorted(by: { (p1, p2) in p1.datestamp! > p2.datestamp! })
             var remaining = names
             for property in sorted {
-                if let name = property.name?.name, remaining.contains(name) {
+                if let name = property.name, remaining.contains(name) {
                     let value = property.typedValue(in: store)
                     assert(value.type != nil)
                     values[valueWithKey: name] = value
@@ -203,7 +203,7 @@ public class EntityRecord: NSManagedObject {
             let sorted = set.sorted(by: { (p1, p2) in p1.datestamp! > p2.datestamp! })
             var done: Set<String> = []
             for property in sorted {
-                if let name = property.name?.name, !done.contains(name) {
+                if let name = property.name, !done.contains(name) {
                     let value = property.typedValue(in: store)
                     assert(value.type != nil)
                     values[valueWithKey: name] = value
@@ -216,7 +216,7 @@ public class EntityRecord: NSManagedObject {
     func remove<T>(names: Set<String>, from properties: NSSet?, as: T.Type, store: Datastore) where T: NamedProperty {
         if let set = properties as? Set<T> {
             for property in set {
-                if let name = property.name?.name, names.contains(name) {
+                if let name = property.name, names.contains(name) {
                     property.managedObjectContext?.delete(property)
                 }
             }

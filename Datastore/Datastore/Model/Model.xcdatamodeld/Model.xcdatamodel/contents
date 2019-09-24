@@ -2,20 +2,21 @@
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="14903" systemVersion="19A558d" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
     <entity name="DateProperty" representedClassName=".DateProperty" syncable="YES" codeGenerationType="class">
         <attribute name="datestamp" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="name" attributeType="String"/>
+        <attribute name="type" attributeType="String"/>
         <attribute name="value" attributeType="Date" usesScalarValueType="NO"/>
-        <relationship name="name" maxCount="1" deletionRule="Nullify" destinationEntity="SymbolRecord" inverseName="dateProperties" inverseEntity="SymbolRecord"/>
         <relationship name="owner" maxCount="1" deletionRule="Nullify" destinationEntity="EntityRecord" inverseName="dates" inverseEntity="EntityRecord"/>
-        <relationship name="type" maxCount="1" deletionRule="Nullify" destinationEntity="SymbolRecord" inverseName="dateTypes" inverseEntity="SymbolRecord"/>
     </entity>
     <entity name="DoubleProperty" representedClassName=".DoubleProperty" syncable="YES" codeGenerationType="class">
         <attribute name="datestamp" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="name" attributeType="String"/>
+        <attribute name="type" attributeType="String"/>
         <attribute name="value" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
-        <relationship name="name" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="SymbolRecord" inverseName="doubleProperties" inverseEntity="SymbolRecord"/>
         <relationship name="owner" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="EntityRecord" inverseName="doubles" inverseEntity="EntityRecord"/>
-        <relationship name="type" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="SymbolRecord" inverseName="doubleTypes" inverseEntity="SymbolRecord"/>
     </entity>
     <entity name="EntityRecord" representedClassName=".EntityRecord" syncable="YES" codeGenerationType="category">
         <attribute name="datestamp" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="type" attributeType="String"/>
         <attribute name="uuid" attributeType="UUID" usesScalarValueType="NO"/>
         <relationship name="dates" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="DateProperty" inverseName="owner" inverseEntity="DateProperty"/>
         <relationship name="doubles" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="DoubleProperty" inverseName="owner" inverseEntity="DoubleProperty"/>
@@ -23,43 +24,27 @@
         <relationship name="relationships" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="RelationshipProperty" inverseName="owner" inverseEntity="RelationshipProperty"/>
         <relationship name="strings" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="StringProperty" inverseName="owner" inverseEntity="StringProperty"/>
         <relationship name="targets" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="RelationshipProperty" inverseName="target" inverseEntity="RelationshipProperty"/>
-        <relationship name="type" maxCount="1" deletionRule="Nullify" destinationEntity="SymbolRecord" inverseName="entities" inverseEntity="SymbolRecord"/>
     </entity>
     <entity name="IntegerProperty" representedClassName=".IntegerProperty" syncable="YES" codeGenerationType="class">
         <attribute name="datestamp" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="name" attributeType="String"/>
+        <attribute name="type" attributeType="String"/>
         <attribute name="value" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
-        <relationship name="name" maxCount="1" deletionRule="Nullify" destinationEntity="SymbolRecord" inverseName="integerProperties" inverseEntity="SymbolRecord"/>
         <relationship name="owner" maxCount="1" deletionRule="Nullify" destinationEntity="EntityRecord" inverseName="integers" inverseEntity="EntityRecord"/>
-        <relationship name="type" maxCount="1" deletionRule="Nullify" destinationEntity="SymbolRecord" inverseName="integerTypes" inverseEntity="SymbolRecord"/>
     </entity>
     <entity name="RelationshipProperty" representedClassName="RelationshipProperty" syncable="YES" codeGenerationType="class">
         <attribute name="datestamp" attributeType="Date" usesScalarValueType="NO"/>
-        <relationship name="name" maxCount="1" deletionRule="Nullify" destinationEntity="SymbolRecord" inverseName="relationships" inverseEntity="SymbolRecord"/>
+        <attribute name="name" attributeType="String"/>
+        <attribute name="type" attributeType="String"/>
         <relationship name="owner" maxCount="1" deletionRule="Nullify" destinationEntity="EntityRecord" inverseName="relationships" inverseEntity="EntityRecord"/>
         <relationship name="target" maxCount="1" deletionRule="Nullify" destinationEntity="EntityRecord" inverseName="targets" inverseEntity="EntityRecord"/>
-        <relationship name="type" maxCount="1" deletionRule="Nullify" destinationEntity="SymbolRecord" inverseName="relationshipTypes" inverseEntity="SymbolRecord"/>
     </entity>
     <entity name="StringProperty" representedClassName=".StringProperty" syncable="YES" codeGenerationType="class">
         <attribute name="datestamp" attributeType="Date" usesScalarValueType="NO"/>
-        <attribute name="value" attributeType="String" defaultValueString=""/>
-        <relationship name="name" maxCount="1" deletionRule="Nullify" destinationEntity="SymbolRecord" inverseName="stringProperties" inverseEntity="SymbolRecord"/>
-        <relationship name="owner" maxCount="1" deletionRule="Nullify" destinationEntity="EntityRecord" inverseName="strings" inverseEntity="EntityRecord"/>
-        <relationship name="type" maxCount="1" deletionRule="Nullify" destinationEntity="SymbolRecord" inverseName="stringTypes" inverseEntity="SymbolRecord"/>
-    </entity>
-    <entity name="SymbolRecord" representedClassName=".SymbolRecord" syncable="YES" codeGenerationType="class">
         <attribute name="name" attributeType="String"/>
-        <attribute name="uuid" attributeType="UUID" usesScalarValueType="NO"/>
-        <relationship name="dateProperties" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="DateProperty" inverseName="name" inverseEntity="DateProperty"/>
-        <relationship name="dateTypes" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="DateProperty" inverseName="type" inverseEntity="DateProperty"/>
-        <relationship name="doubleProperties" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="DoubleProperty" inverseName="name" inverseEntity="DoubleProperty"/>
-        <relationship name="doubleTypes" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="DoubleProperty" inverseName="type" inverseEntity="DoubleProperty"/>
-        <relationship name="entities" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="EntityRecord" inverseName="type" inverseEntity="EntityRecord"/>
-        <relationship name="integerProperties" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="IntegerProperty" inverseName="name" inverseEntity="IntegerProperty"/>
-        <relationship name="integerTypes" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="IntegerProperty" inverseName="type" inverseEntity="IntegerProperty"/>
-        <relationship name="relationships" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="RelationshipProperty" inverseName="name" inverseEntity="RelationshipProperty"/>
-        <relationship name="relationshipTypes" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="RelationshipProperty" inverseName="type" inverseEntity="RelationshipProperty"/>
-        <relationship name="stringProperties" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="StringProperty" inverseName="name" inverseEntity="StringProperty"/>
-        <relationship name="stringTypes" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="StringProperty" inverseName="type" inverseEntity="StringProperty"/>
+        <attribute name="type" attributeType="String"/>
+        <attribute name="value" attributeType="String" defaultValueString=""/>
+        <relationship name="owner" maxCount="1" deletionRule="Nullify" destinationEntity="EntityRecord" inverseName="strings" inverseEntity="EntityRecord"/>
     </entity>
     <elements>
         <element name="DateProperty" positionX="0" positionY="0" width="128" height="118"/>
@@ -68,6 +53,5 @@
         <element name="IntegerProperty" positionX="0" positionY="0" width="128" height="118"/>
         <element name="RelationshipProperty" positionX="0" positionY="0" width="128" height="118"/>
         <element name="StringProperty" positionX="0" positionY="0" width="128" height="118"/>
-        <element name="SymbolRecord" positionX="0" positionY="0" width="128" height="238"/>
     </elements>
 </model>

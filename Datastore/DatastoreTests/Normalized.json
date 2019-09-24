@@ -2,68 +2,42 @@
     "entities" : [
         {
             "uuid" : "FE396F3F-A325-4F50-899C-F22308C97D12",
-            "type" : "09035403-D3AE-4076-A77C-0B5596E5E361",
+            "type" : "person",
             "name" : "Person 1",
             "datestamp" : { "date" : "1969-11-12T01:23:45Z" },
             "modified" : { "date" : "1963-09-21T01:23:45Z" },
             "address" : {
                 "string" : "123 New St",
-                "type" : "93E59849-0410-4390-AAE0-197FD3878223"
+                "type" : "address"
             },
             "owner" : {
                 "entity" : "FE396F3F-A325-4F50-899C-F22308C97D12",
-                "type" : "B9B994A8-B47E-4EF2-9440-0E7564CA5C6A"
+                "type" : "owner"
             },
         },
         
         {
             "address" : {
                 "string" : "456 Old St",
-                "type" : "93E59849-0410-4390-AAE0-197FD3878223"
+                "type" : "address"
             },
             "owner" : {
                 "entity" : "652A3D31-C409-4CBE-8469-6232D1EEBC96",
-                "type" : "B9B994A8-B47E-4EF2-9440-0E7564CA5C6A"
+                "type" : "owner"
             },
             "datestamp" : { "date" : "1969-11-12T01:23:45Z" },
             "modified" : { "date" : "1963-09-21T01:23:45Z" },
             "date" : {
                 "date" : "2019-09-19T16:14:58Z",
-                "type" : "C85E45D1-4F00-4A63-A2C9-0F8E2475A1DB"
+                "type" : "date"
             },
-            "type" : "09035403-D3AE-4076-A77C-0B5596E5E361",
+            "type" : "person",
             "uuid" : "652A3D31-C409-4CBE-8469-6232D1EEBC96",
             "number" : {
                 "integer" : 123,
-                "type" : "C85E45D1-4F00-4A63-A2C9-0F8E2475A1DB"
+                "type" : "integer"
             },
             "name" : "Person 2"
-        }
-    ],
-    "symbols" : [
-        {
-            "uuid" : "B9B994A8-B47E-4EF2-9440-0E7564CA5C6A",
-            "name" : "owner"
-        },
-        {
-            "name" : "null",
-            "uuid" : "C85E45D1-4F00-4A63-A2C9-0F8E2475A1DB"
-        },
-        {
-            "uuid" : "0D39C199-65BF-417F-BA22-077E1023A766",
-            "name" : "number"
-        },
-        {
-            "uuid" : "09035403-D3AE-4076-A77C-0B5596E5E361",
-            "name" : "person"
-        },
-        {
-            "name" : "address",
-            "uuid" : "93E59849-0410-4390-AAE0-197FD3878223"
-        },
-        {
-            "name" : "date",
-            "uuid" : "A697927C-2986-496A-815F-64120A5B2521"
         }
     ]
 }

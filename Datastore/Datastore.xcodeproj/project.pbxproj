@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		8B3B6B6C233389360098DAC1 /* SemanticValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B3B6B6B233389360098DAC1 /* SemanticValue.swift */; };
 		8B3B6B6E233389400098DAC1 /* SemanticDictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B3B6B6D233389400098DAC1 /* SemanticDictionary.swift */; };
-		8B3B6B7023339FC50098DAC1 /* SymbolRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B3B6B6F23339FC50098DAC1 /* SymbolRecord.swift */; };
 		8B40C3B9233251D000CC24E6 /* Identifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B40C3B8233251D000CC24E6 /* Identifier.swift */; };
 		8B41F50A23313FB20035081B /* Datastore+Interchange.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B41F50923313FB20035081B /* Datastore+Interchange.swift */; };
 		8B48FD79232FD98D00F37CF1 /* InterchangeEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B48FD78232FD98D00F37CF1 /* InterchangeEncoder.swift */; };
@@ -50,7 +49,6 @@
 /* Begin PBXFileReference section */
 		8B3B6B6B233389360098DAC1 /* SemanticValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SemanticValue.swift; sourceTree = "<group>"; };
 		8B3B6B6D233389400098DAC1 /* SemanticDictionary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SemanticDictionary.swift; sourceTree = "<group>"; };
-		8B3B6B6F23339FC50098DAC1 /* SymbolRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymbolRecord.swift; sourceTree = "<group>"; };
 		8B40C3B7233233D000CC24E6 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; wrapsLines = 1; };
 		8B40C3B8233251D000CC24E6 /* Identifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Identifier.swift; sourceTree = "<group>"; };
 		8B41F50923313FB20035081B /* Datastore+Interchange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Datastore+Interchange.swift"; sourceTree = "<group>"; };
@@ -128,7 +126,6 @@
 			isa = PBXGroup;
 			children = (
 				8BFF2E85232F8CD200D40D31 /* EntityRecord.swift */,
-				8B3B6B6F23339FC50098DAC1 /* SymbolRecord.swift */,
 				8BFF2E7A232F864200D40D31 /* Model.xcdatamodeld */,
 				8B54A7482338F50400F87365 /* Properties */,
 			);
@@ -316,7 +313,6 @@
 			files = (
 				8B64FD562333CBA2001A0BBD /* StringProperty.swift in Sources */,
 				8B41F50A23313FB20035081B /* Datastore+Interchange.swift in Sources */,
-				8B3B6B7023339FC50098DAC1 /* SymbolRecord.swift in Sources */,
 				8B3B6B6E233389400098DAC1 /* SemanticDictionary.swift in Sources */,
 				8B3B6B6C233389360098DAC1 /* SemanticValue.swift in Sources */,
 				8B64FD5A2333CBC9001A0BBD /* DateProperty.swift in Sources */,

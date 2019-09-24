@@ -99,42 +99,34 @@ public class Datastore {
         self.context = container.newBackgroundContext()
     }
     
-    public func value(_ value: Any?, type: SymbolID? = nil, datestamp: Date? = nil) -> SemanticValue {
+    public func value(_ value: Any?, type: String? = nil, datestamp: Date? = nil) -> SemanticValue {
         return SemanticValue(value: value, type: type ?? standardSymbols.value, datestamp: datestamp)
     }
     
-    public func value(_ value: Any?, type: SymbolRecord?, datestamp: Date? = nil) -> SemanticValue {
-        return SemanticValue(value: value, type: type == nil ? standardSymbols.value : SymbolID(type!), datestamp: datestamp)
-    }
-    
-    public func get(entities names: Set<String>, ofType typeID: SymbolID, createIfMissing: Bool = true, completion: @escaping EntitiesCompletion) {
+    public func get(entitiesOfType type: String, where key: String, contains: Set<String>, createIfMissing: Bool = true, completion: @escaping EntitiesCompletion) {
         let context = self.context
         
         context.perform {
             var result: [EntityRecord] = []
-            var create: Set<String> = names
-            guard let type = typeID.resolve(in: context) else {
-                completion([])
-                return
-            }
-            
-            if let entities = type.entities as? Set<EntityRecord> {
+            var create: Set<String> = contains
+
+            let request: NSFetchRequest<EntityRecord> = EntityRecord.fetcher(in: context)
+            if let entities = try? context.fetch(request) {
                 for entity in entities {
-                    if let name = entity.string(withKey: self.standardSymbols.name), names.contains(name) {
+                    if let value = entity.string(withKey: key), contains.contains(value) {
                         result.append(entity)
-                        create.remove(name)
+                        create.remove(value)
                     }
                 }
             }
             
-            let nameKey = self.standardSymbols.name.resolve(in: context)
             if createIfMissing {
                 for name in create {
                     let entity = EntityRecord(in: context)
                     entity.type = type
                     let property = StringProperty(in: context)
                     property.owner = entity
-                    property.name = nameKey
+                    property.name = key
                     property.value = name
                     result.append(entity)
                 }
@@ -143,11 +135,12 @@ public class Datastore {
         }
     }
     
-    public func get(allEntitiesOfType type: SymbolID, completion: @escaping EntitiesCompletion) {
+    public func get(allEntitiesOfType type: String, completion: @escaping EntitiesCompletion) {
         let context = self.context
         context.perform {
             
-            if let entities = type.resolve(in: context)?.entities as? Set<EntityRecord> {
+            let request: NSFetchRequest<EntityRecord> = EntityRecord.fetcher(in: context)
+            if let entities = try? context.fetch(request) {
                 completion(Array(entities.map({ Entity($0) })))
             } else {
                 completion([])

@@ -17,27 +17,23 @@ public struct SemanticDictionary {
         set {
             if let value = newValue as? SemanticValue {
                 values[key] = value
-            } else if let (value, type) = newValue as? (Any?, SymbolID) {
+            } else if let (value, type) = newValue as? (Any?, String) {
                 values[key] = SemanticValue(value: value, type: type, datestamp: nil)
             } else if let (value, type) = newValue as? (Any?, String) {
-                values[key] = SemanticValue(value: value, type: SymbolID(named: type), datestamp: nil)
+                values[key] = SemanticValue(value: value, type: type, datestamp: nil)
             } else {
                 values[key] = SemanticValue(value: newValue, type: nil, datestamp: nil)
             }
         }
     }
     
-    subscript(_ key: String, as type: SymbolID) -> Any? {
+    subscript(_ key: String, as type: String) -> Any? {
         get { return values[key]?.value }
         set { values[key] = SemanticValue(value: newValue, type: type, datestamp: nil) }
     }
     
-    subscript(typeWithKey key: String) -> SymbolID? {
+    subscript(typeWithKey key: String) -> String? {
         get { return values[key]?.type }
-    }
-
-    subscript(typeNameWithKey key: String, store: Datastore) -> String? {
-        get { return values[key]?.type?.resolve(in: store.context)?.name }
     }
 
     subscript(datestampWithKey key: String) -> Date? {
@@ -51,7 +47,7 @@ public struct SemanticDictionary {
     
     func add(to entity: EntityRecord, store: Datastore) {
         for (key, value) in values {
-            entity.add(property: SymbolID(named: key), value: value, store: store)
+            entity.add(property: key, value: value, store: store)
         }
     }
 }

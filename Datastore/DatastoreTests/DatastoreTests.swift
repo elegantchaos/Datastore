@@ -67,7 +67,7 @@ class DatastoreTests: XCTestCase {
     func testEntityCreation() {
         let created = expectation(description: "loaded")
         loadAndCheck { (datastore) in
-            datastore.get(entities: ["Person 1"], ofType: "Person") { (people) in
+            datastore.get(entitiesOfType: "Person", where: "name", contains: ["Person 1"]) { (people) in
                 XCTAssertEqual(people.count, 1)
                 let person = people[0].object
                 XCTAssertEqual(person.string(withKey: datastore.standardSymbols.name), "Person 1")
@@ -120,7 +120,7 @@ class DatastoreTests: XCTestCase {
     func testAddProperties() {
         let done = expectation(description: "loaded")
         loadAndCheck { (datastore) in
-            datastore.get(entities: ["Person 1"], ofType: "Person") { (people) in
+            datastore.get(entitiesOfType: "Person", where: "name", contains: ["Person 1"]) { (people) in
                 let person = people[0]
                 let now = Date()
                 datastore.add(properties: [person: self.exampleProperties(date: now, owner: person, in: datastore)]) { () in
@@ -159,22 +159,22 @@ class DatastoreTests: XCTestCase {
                     var n = 0
                     for result in results {
                         let name = result["name"] as! String
-                        XCTAssertEqual(result[typeNameWithKey: "name", store], "string")
+                        XCTAssertEqual(result[typeWithKey: "name"], "string")
                         let value = result["address"] as! String
                         if checkAddressType {
-                            XCTAssertEqual(result[typeNameWithKey: "address", store], "address")
+                            XCTAssertEqual(result[typeWithKey: "address"], "address")
                         }
                         let expectedValue = expected[name]
                         XCTAssertEqual(expectedValue, value, "\(name)")
                         let created = result["datestamp"] as! Date
                         XCTAssertEqual(created.description, "1969-11-12 01:23:45 +0000")
-                        XCTAssertEqual(result[typeNameWithKey: "datestamp", store], "date")
+                        XCTAssertEqual(result[typeWithKey: "datestamp"], "date")
                         let modified = result["modified"] as! Date
                         XCTAssertEqual(modified.description, "1963-09-21 01:23:45 +0000")
-                        XCTAssertEqual(result[typeNameWithKey: "modified", store], "date")
+                        XCTAssertEqual(result[typeWithKey: "modified"], "date")
                         let owner = result["owner"] as! Entity
                         XCTAssertEqual(owner, people[n])
-                        XCTAssertEqual(result[typeNameWithKey: "owner", store], "owner")
+                        XCTAssertEqual(result[typeWithKey: "owner"], "owner")
                         n += 1
                     }
                     loaded.fulfill()
@@ -188,7 +188,7 @@ class DatastoreTests: XCTestCase {
         let done = expectation(description: "loaded")
         loadAndCheck { (datastore) in
             let names = Set<String>(["Person 1", "Person 2"])
-            datastore.get(entities: names, ofType: "Person") { (people) in
+            datastore.get(entitiesOfType: "Person", where: "name", contains: names) { (people) in
                 let person = people[0]
                 datastore.add(properties: [person: self.exampleProperties(owner: people[1], in: datastore)]) { () in
                     datastore.encodeInterchange() { interchange in
@@ -211,7 +211,7 @@ class DatastoreTests: XCTestCase {
         let done = expectation(description: "loaded")
         loadAndCheck { (datastore) in
             let names = Set<String>(["Person 1", "Person 2"])
-            datastore.get(entities: names, ofType: "Person") { (people) in
+            datastore.get(entitiesOfType: "Person", where: "name", contains: names) { (people) in
                 let person = people[0]
                 datastore.add(properties: [person: self.exampleProperties(owner: people[1], in: datastore)]) { () in
                     datastore.encodeJSON() { json in
@@ -232,7 +232,7 @@ class DatastoreTests: XCTestCase {
     func testChangeName() {
         let created = expectation(description: "loaded")
         loadAndCheck { (datastore) in
-            datastore.get(entities: ["Person 1"], ofType: "Person") { (people) in
+            datastore.get(entitiesOfType: "Person", where: "name", contains: ["Person 1"]) { (people) in
                 let person = people[0]
                 var properties = SemanticDictionary()
                 properties["name"] = "New Name"
@@ -249,7 +249,7 @@ class DatastoreTests: XCTestCase {
     func testGetPropertyReturnsNewest() {
         let done = expectation(description: "loaded")
         loadAndCheck { (datastore) in
-            datastore.get(entities: ["test"], ofType: "test") { (entities) in
+            datastore.get(entitiesOfType: "test", where: "name", contains: ["test"]) { (entities) in
                 XCTAssertEqual(entities.count, 1)
                 let entity = entities[0]
                 var properties = SemanticDictionary()
@@ -273,7 +273,7 @@ class DatastoreTests: XCTestCase {
     func testDeletion() {
         let done = expectation(description: "done")
         loadJSON(name: "Deletion", expectation: done) { store in
-            store.get(entities: ["Test1"], ofType: "test") { (entities) in
+            store.get(entitiesOfType: "test", where: "name", contains: ["Test1"]) { (entities) in
                 store.get(properties: ["foo", "bar"], of: entities) { before in
                     let properties = before[0]
                     XCTAssertNotNil(properties["foo"])
