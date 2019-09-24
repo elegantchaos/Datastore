@@ -63,7 +63,6 @@ Combine support is being considered.
 
 ## To Do
 
-- read in type information from interchange
 - optimise interchange reading for compact values
 - optimise interchange writing for compact values
 - encoding/decoding relationships

@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		8B3B6B6C233389360098DAC1 /* SemanticValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B3B6B6B233389360098DAC1 /* SemanticValue.swift */; };
 		8B3B6B6E233389400098DAC1 /* SemanticDictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B3B6B6D233389400098DAC1 /* SemanticDictionary.swift */; };
+		8B4060CA233A60F30061C83A /* Relationships.json in Resources */ = {isa = PBXBuildFile; fileRef = 8B4060C9233A60F30061C83A /* Relationships.json */; };
 		8B40C3B9233251D000CC24E6 /* Identifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B40C3B8233251D000CC24E6 /* Identifier.swift */; };
 		8B41F50A23313FB20035081B /* Datastore+Interchange.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B41F50923313FB20035081B /* Datastore+Interchange.swift */; };
 		8B48FD79232FD98D00F37CF1 /* InterchangeEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B48FD78232FD98D00F37CF1 /* InterchangeEncoder.swift */; };
@@ -49,6 +50,7 @@
 /* Begin PBXFileReference section */
 		8B3B6B6B233389360098DAC1 /* SemanticValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SemanticValue.swift; sourceTree = "<group>"; };
 		8B3B6B6D233389400098DAC1 /* SemanticDictionary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SemanticDictionary.swift; sourceTree = "<group>"; };
+		8B4060C9233A60F30061C83A /* Relationships.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = Relationships.json; sourceTree = "<group>"; };
 		8B40C3B7233233D000CC24E6 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; wrapsLines = 1; };
 		8B40C3B8233251D000CC24E6 /* Identifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Identifier.swift; sourceTree = "<group>"; };
 		8B41F50923313FB20035081B /* Datastore+Interchange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Datastore+Interchange.swift"; sourceTree = "<group>"; };
@@ -186,6 +188,7 @@
 				8B8A6FED233A123C00EF615F /* Deletion.json */,
 				8B8A6FEF233A146500EF615F /* Simple.json */,
 				8B8A6FEB233A110E00EF615F /* Normalized.json */,
+				8B4060C9233A60F30061C83A /* Relationships.json */,
 				8BFF2E70232F85E200D40D31 /* Info.plist */,
 			);
 			path = DatastoreTests;
@@ -300,6 +303,7 @@
 				8B8A6FEE233A123C00EF615F /* Deletion.json in Resources */,
 				8B8A6FF0233A146500EF615F /* Simple.json in Resources */,
 				8B8A6FEC233A110E00EF615F /* Normalized.json in Resources */,
+				8B4060CA233A60F30061C83A /* Relationships.json in Resources */,
 				8B8A6FEA233A107B00EF615F /* Compact.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
