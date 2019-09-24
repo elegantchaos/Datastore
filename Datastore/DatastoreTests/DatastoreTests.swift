@@ -96,7 +96,8 @@ class DatastoreTests: XCTestCase {
         var properties = SemanticDictionary()
         properties["address"] = store.value("123 New St", type: "address")
         properties["date"] = date
-        properties["number"] = 123
+        properties["integer"] = 123
+        properties["double"] = 456.789
         properties["owner"] = (owner, "owner")
         return properties
     }
@@ -108,12 +109,13 @@ class DatastoreTests: XCTestCase {
                 let person = people[0]
                 let now = Date()
                 datastore.add(properties: [person: self.exampleProperties(date: now, owner: person, in: datastore)]) { () in
-                    datastore.get(properties : ["address", "date", "number"], of: [person]) { (results) in
+                    datastore.get(properties : ["address", "date", "integer", "double"], of: [person]) { (results) in
                         XCTAssertEqual(results.count, 1)
                         let properties = results[0]
                         XCTAssertEqual(properties["address"] as? String, "123 New St")
                         XCTAssertEqual(properties["date"] as? Date, now)
-                        XCTAssertEqual(properties["number"] as? Int64, 123)
+                        XCTAssertEqual(properties["integer"] as? Int64, 123)
+                        XCTAssertEqual(properties["double"] as? Double, 456.789)
                         done.fulfill()
                     }
                 }

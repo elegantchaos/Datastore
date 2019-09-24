@@ -24,6 +24,7 @@
 		8B8A6FEE233A123C00EF615F /* Deletion.json in Resources */ = {isa = PBXBuildFile; fileRef = 8B8A6FED233A123C00EF615F /* Deletion.json */; };
 		8B8A6FF0233A146500EF615F /* Simple.json in Resources */ = {isa = PBXBuildFile; fileRef = 8B8A6FEF233A146500EF615F /* Simple.json */; };
 		8B8A6FF2233A19C500EF615F /* StandardSymbols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B8A6FF1233A19C500EF615F /* StandardSymbols.swift */; };
+		8B8A6FF4233A1D5F00EF615F /* DoubleProperty.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B8A6FF3233A1D5F00EF615F /* DoubleProperty.swift */; };
 		8BFF2E6A232F85E200D40D31 /* Datastore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8BFF2E60232F85E200D40D31 /* Datastore.framework */; };
 		8BFF2E6F232F85E200D40D31 /* DatastoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFF2E6E232F85E200D40D31 /* DatastoreTests.swift */; };
 		8BFF2E71232F85E200D40D31 /* Datastore.h in Headers */ = {isa = PBXBuildFile; fileRef = 8BFF2E63232F85E200D40D31 /* Datastore.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -65,6 +66,7 @@
 		8B8A6FED233A123C00EF615F /* Deletion.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = Deletion.json; sourceTree = "<group>"; };
 		8B8A6FEF233A146500EF615F /* Simple.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = Simple.json; sourceTree = "<group>"; };
 		8B8A6FF1233A19C500EF615F /* StandardSymbols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StandardSymbols.swift; sourceTree = "<group>"; };
+		8B8A6FF3233A1D5F00EF615F /* DoubleProperty.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoubleProperty.swift; sourceTree = "<group>"; };
 		8BFF2E60232F85E200D40D31 /* Datastore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Datastore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		8BFF2E63232F85E200D40D31 /* Datastore.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Datastore.h; sourceTree = "<group>"; };
 		8BFF2E64232F85E200D40D31 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -104,6 +106,7 @@
 			children = (
 				8B64FD592333CBC9001A0BBD /* DateProperty.swift */,
 				8B64FD572333CBB4001A0BBD /* IntegerProperty.swift */,
+				8B8A6FF3233A1D5F00EF615F /* DoubleProperty.swift */,
 				8B64FD5D2333CBEB001A0BBD /* NamedProperty.swift */,
 				8B64FD5B2333CBD9001A0BBD /* RelationshipProperty.swift */,
 				8B64FD552333CBA2001A0BBD /* StringProperty.swift */,
@@ -326,6 +329,7 @@
 				8B64FD5C2333CBD9001A0BBD /* RelationshipProperty.swift in Sources */,
 				8BFF2E86232F8CD200D40D31 /* EntityRecord.swift in Sources */,
 				8B48FD79232FD98D00F37CF1 /* InterchangeEncoder.swift in Sources */,
+				8B8A6FF4233A1D5F00EF615F /* DoubleProperty.swift in Sources */,
 				8B64FD582333CBB4001A0BBD /* IntegerProperty.swift in Sources */,
 				8BFF2E7C232F864200D40D31 /* Model.xcdatamodeld in Sources */,
 				8BFF2E7E232F8A1D00D40D31 /* Datastore.swift in Sources */,

@@ -13,6 +13,7 @@ public protocol InterchangeEncoder {
     func encode(_ symbol: SymbolRecord, into record: inout [String:Any])
     func encode(_ string: StringProperty, into record: inout [String:Any])
     func encode(_ integer: IntegerProperty, into record: inout [String:Any])
+    func encode(_ double: DoubleProperty, into record: inout [String:Any])
     func encode(_ relationship: RelationshipProperty, into record: inout [String:Any])
 }
 
@@ -50,7 +51,12 @@ public extension InterchangeEncoder {
         record["integer"] = integer.value
         encode(type: integer.type, datestamp: integer.datestamp, into: &record)
     }
-    
+
+    func encode(_ double: DoubleProperty, into record: inout [String:Any]) {
+        record["double"] = double.value
+        encode(type: double.type, datestamp: double.datestamp, into: &record)
+    }
+
     func encode(_ relationship: RelationshipProperty, into record: inout [String:Any]) {
         if let value = relationship.target?.uuid {
             record["entity"] = encodePrimitive(value)

@@ -6,7 +6,9 @@
 import CoreData
 
 protocol NamedProperty: NSManagedObject {
-    var name: SymbolRecord? { get }
+    var name: SymbolRecord? { get set }
+    var owner: EntityRecord? { get set }
+    var type: SymbolRecord? { get set }
     var datestamp: Date? { get }
     func typedValue(in store: Datastore) -> SemanticValue
     func encode(with encoder: InterchangeEncoder) -> Any?

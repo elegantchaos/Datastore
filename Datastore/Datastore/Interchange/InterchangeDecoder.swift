@@ -16,6 +16,7 @@ public protocol InterchangeDecoder {
     // TODO: split decode functions into small helper objects so that we can iterate them
     func decode(string: Any?, type: SymbolID?, store: Datastore) -> SemanticValue?
     func decode(integer: Any?, type: SymbolID?, store: Datastore) -> SemanticValue?
+    func decode(double: Any?, type: SymbolID?, store: Datastore) -> SemanticValue?
     func decode(date: Any?, type: SymbolID?, store: Datastore) -> SemanticValue?
     func decode(entity: Any?, type: SymbolID?, store: Datastore) -> SemanticValue?
 }
@@ -33,6 +34,8 @@ public extension InterchangeDecoder {
                 decoded = decode(string: string, type: type, store: store)
             } else if let integer = record["integer"] {
                 decoded = decode(integer: integer, type: type, store: store)
+            } else if let double = record["double"] {
+                decoded = decode(double: double, type: type, store: store)
             } else if let date = record["date"] {
                 decoded = decode(date: date, type: type, store: store)
             } else if let entity = record["entity"] {
@@ -42,6 +45,8 @@ public extension InterchangeDecoder {
             decoded = string
         } else if let integer = decode(integer: value, type: nil, store: store) {
             decoded = integer
+        } else if let double = decode(double: value, type: nil, store: store) {
+            decoded = double
         } else if let date = decode(date: value, type: nil, store: store) {
             decoded = date
         } else if let uuid = decodePrimitive(uuid: value) {
@@ -66,6 +71,13 @@ public extension InterchangeDecoder {
         return nil
     }
     
+    func decode(double: Any?, type: SymbolID?, store: Datastore) -> SemanticValue? {
+        if let double = double as? Double {
+            return store.value(double, type: type ?? store.standardSymbols.double)
+        }
+        return nil
+    }
+    
     func decode(date: Any?, type: SymbolID?, store: Datastore) -> SemanticValue? {
         if let date = decodePrimitive(date: date) {
             return store.value(date, type: type ?? store.standardSymbols.date)
@@ -85,7 +97,7 @@ public struct NullInterchangeDecoder: InterchangeDecoder {
     public func decodePrimitive(date: Any?) -> Date? {
         return date as? Date
     }
-
+    
     public func decodePrimitive(uuid value: Any?) -> UUID? {
         switch value {
         case let uuid as UUID:
@@ -96,13 +108,13 @@ public struct NullInterchangeDecoder: InterchangeDecoder {
             return nil
         }
     }
-
+    
 }
 
 
 public struct JSONInterchangeDecoder: InterchangeDecoder {
     static let formatter = ISO8601DateFormatter()
-
+    
     public func decodePrimitive(date: Any?) -> Date? {
         if let string = date as? String {
             return JSONInterchangeDecoder.formatter.date(from: string)
