@@ -13,4 +13,5 @@ struct StandardSymbols {
     let date = SymbolID(named: "date")
     let entity = SymbolID(named: "entity")
     let name = SymbolID(named: "name")
+    let identifier = SymbolID(named: "identifier")
 }

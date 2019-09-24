@@ -142,14 +142,14 @@ class DatastoreTests: XCTestCase {
     
     
     func testCompactJSON() {
-        testReadJSON(name: "Compact")
+        testReadJSON(name: "Compact", checkAddressType: false)
     }
     
     func testNormalizedJSON() {
-        testReadJSON(name: "Normalized")
+        testReadJSON(name: "Normalized", checkAddressType: true)
     }
     
-    func testReadJSON(name: String) {
+    func testReadJSON(name: String, checkAddressType: Bool) {
         let loaded = expectation(description: "loaded")
         loadJSON(name: name, expectation: loaded) { store in
             let expected = ["Person 1": "123 New St", "Person 2": "456 Old St"]
@@ -159,15 +159,22 @@ class DatastoreTests: XCTestCase {
                     var n = 0
                     for result in results {
                         let name = result["name"] as! String
+                        XCTAssertEqual(result[typeNameWithKey: "name", store], "string")
                         let value = result["address"] as! String
+                        if checkAddressType {
+                            XCTAssertEqual(result[typeNameWithKey: "address", store], "address")
+                        }
                         let expectedValue = expected[name]
                         XCTAssertEqual(expectedValue, value, "\(name)")
                         let created = result["datestamp"] as! Date
                         XCTAssertEqual(created.description, "1969-11-12 01:23:45 +0000")
+                        XCTAssertEqual(result[typeNameWithKey: "datestamp", store], "date")
                         let modified = result["modified"] as! Date
                         XCTAssertEqual(modified.description, "1963-09-21 01:23:45 +0000")
+                        XCTAssertEqual(result[typeNameWithKey: "modified", store], "date")
                         let owner = result["owner"] as! Entity
                         XCTAssertEqual(owner, people[n])
+                        XCTAssertEqual(result[typeNameWithKey: "owner", store], "owner")
                         n += 1
                     }
                     loaded.fulfill()

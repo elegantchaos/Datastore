@@ -65,7 +65,7 @@ internal struct OpaqueCachedID: ResolvableID {
 
     func equal(to other: ResolvableID) -> Bool {
         if let other = other as? OpaqueCachedID {
-            return other.cached == cached
+            return (other.cached == cached) || (other.id == id)
         } else {
             return false
         }
@@ -190,7 +190,7 @@ public class SymbolID: WrappedID<SymbolRecord>, ExpressibleByStringLiteral {
         super.init(named: name, createIfMissing: true)
     }
 
-    override init(uuid: UUID, name: String?) {
+    override init(uuid: UUID, name: String? = nil) {
         super.init(uuid: uuid, name: name)
     }
     

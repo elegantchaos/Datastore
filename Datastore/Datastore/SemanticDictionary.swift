@@ -35,7 +35,11 @@ public struct SemanticDictionary {
     subscript(typeWithKey key: String) -> SymbolID? {
         get { return values[key]?.type }
     }
-    
+
+    subscript(typeNameWithKey key: String, store: Datastore) -> String? {
+        get { return values[key]?.type?.resolve(in: store.context)?.name }
+    }
+
     subscript(datestampWithKey key: String) -> Date? {
         get { return values[key]?.datestamp }
     }

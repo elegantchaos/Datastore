@@ -56,7 +56,6 @@ extension Datastore {
                         newEntity.uuid = uuid
                         newEntity.type = symbolIndex[type]
                         entity = newEntity
-                        print("made \(name)")
                         try? context.save()
                     }
                     if let entity = entity {
@@ -73,7 +72,6 @@ extension Datastore {
          for key in Datastore.specialProperties {
              entityProperties.removeValue(forKey: key)
          }
-         print("adding \(entityProperties)")
         decode(properties: entityProperties, of: entity, with: decoder)
      }
      

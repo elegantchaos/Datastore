@@ -26,8 +26,8 @@ public extension InterchangeDecoder {
         var decoded: SemanticValue? = nil
         if let record = value as? [String:Any] {
             var type: SymbolID? = nil
-            if let name = record["type"] as? String {
-                type = SymbolID(named: name)
+            if let uuid = decodePrimitive(uuid: record["type"]) {
+                type = SymbolID(uuid: uuid)
             }
             
             if let string = record["string"] {

@@ -108,11 +108,16 @@ public class EntityRecord: NSManagedObject {
     
     func read(properties names: Set<String>, store: Datastore) -> SemanticDictionary {
         var values = SemanticDictionary()
-        for property in Datastore.specialProperties {
-            if names.contains(property) {
-                values[valueWithKey: property] = store.value(value(forKey: property))
-            }
+        if names.contains("datestamp") {
+            values[valueWithKey: "datestamp"] = store.value(datestamp, type: store.standardSymbols.date)
         }
+        if names.contains("uuid") {
+            values[valueWithKey: "uuid"] = store.value(uuid, type: store.standardSymbols.identifier)
+        }
+        if names.contains("type") {
+            values[valueWithKey: "type"] = store.value(type?.uuid, type: store.standardSymbols.entity)
+        }
+
         read(names: names, from: strings, as: StringProperty.self, into: &values, store: store)
         read(names: names, from: integers, as: IntegerProperty.self, into: &values, store: store)
         read(names: names, from: doubles, as: DoubleProperty.self, into: &values, store: store)
