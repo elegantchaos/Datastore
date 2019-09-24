@@ -192,7 +192,16 @@ public class Datastore {
     public func update(properties: [EntityID: SemanticDictionary], completion: @escaping () -> Void) {
     }
     
-    public func remove(properties names: Set<String>, completion: @escaping () -> Void) {
+    public func remove(properties names: Set<String>, of entities: [EntityID], completion: @escaping () -> Void) {
+        let context = self.context
+        context.perform {
+            for entityID in entities {
+                if let entity = entityID.resolve(in: context) {
+                    entity.remove(properties: names, store: self)
+                 }
+            }
+            completion()
+        }
     }
     
     public class func model(bundle: Bundle = Bundle(for: Datastore.self), cached: Bool = true) -> NSManagedObjectModel? {

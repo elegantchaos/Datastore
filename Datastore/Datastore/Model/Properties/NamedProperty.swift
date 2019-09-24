@@ -3,9 +3,9 @@
 //  All code (c) 2019 - present day, Elegant Chaos Limited.
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-import Foundation
+import CoreData
 
-protocol NamedProperty {
+protocol NamedProperty: NSManagedObject {
     var name: SymbolRecord? { get }
     var datestamp: Date? { get }
     func typedValue(in store: Datastore) -> SemanticValue

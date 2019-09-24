@@ -90,7 +90,7 @@ public class EntityRecord: NSManagedObject {
         }
     }
 
-    func encode<T>(from properties: NSSet?, as: T.Type, into values: inout [String:Any], encoder: InterchangeEncoder) where T: NamedProperty, T: Hashable {
+    func encode<T>(from properties: NSSet?, as: T.Type, into values: inout [String:Any], encoder: InterchangeEncoder) where T: NamedProperty {
         if let set = properties as? Set<T> {
             for property in set {
                 if let name = property.name?.name {
@@ -114,7 +114,7 @@ public class EntityRecord: NSManagedObject {
         return values
     }
     
-    func read<T>(names: Set<String>, from properties: NSSet?, as: T.Type, into values: inout SemanticDictionary, store: Datastore) where T: NamedProperty, T: Hashable {
+    func read<T>(names: Set<String>, from properties: NSSet?, as: T.Type, into values: inout SemanticDictionary, store: Datastore) where T: NamedProperty {
         if let set = properties as? Set<T> {
             // there may be multiple entries for each property, so we sort them in date
             // order, and only return the newest one
@@ -130,7 +130,23 @@ public class EntityRecord: NSManagedObject {
             }
         }
     }
+
+    func remove(properties names: Set<String>, store: Datastore) {
+        remove(names: names, from: strings, as: StringProperty.self, store: store)
+        remove(names: names, from: integers, as: IntegerProperty.self, store: store)
+        remove(names: names, from: dates, as: DateProperty.self, store: store)
+        remove(names: names, from: relationships, as: RelationshipProperty.self, store: store)
+    }
     
+    func remove<T>(names: Set<String>, from properties: NSSet?, as: T.Type, store: Datastore) where T: NamedProperty {
+        if let set = properties as? Set<T> {
+            for property in set {
+                if let name = property.name?.name, names.contains(name) {
+                    property.managedObjectContext?.delete(property)
+                }
+            }
+        }
+    }
     func string(withKey keyID: SymbolID) -> String? {
         if let context = managedObjectContext, let key = keyID.resolve(in: context), let strings = strings as? Set<StringProperty> {
             let names = strings.filter({ $0.name == key })
