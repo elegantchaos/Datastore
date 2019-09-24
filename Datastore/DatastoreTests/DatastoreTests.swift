@@ -67,10 +67,8 @@ class DatastoreTests: XCTestCase {
     func testEntityCreation() {
         let created = expectation(description: "loaded")
         loadAndCheck { (datastore) in
-            datastore.get(entitiesOfType: "Person", where: "name", contains: ["Person 1"]) { (people) in
-                XCTAssertEqual(people.count, 1)
-                let person = people[0].object
-                XCTAssertEqual(person.string(withKey: datastore.standardSymbols.name), "Person 1")
+            datastore.get(entityOfType: "Person", where: "name", equals: "Person 1") { person in
+                XCTAssertEqual(person?.object.string(withKey: datastore.standardSymbols.name), "Person 1")
                 created.fulfill()
             }
         }
@@ -120,8 +118,13 @@ class DatastoreTests: XCTestCase {
     func testAddProperties() {
         let done = expectation(description: "loaded")
         loadAndCheck { (datastore) in
-            datastore.get(entitiesOfType: "Person", where: "name", contains: ["Person 1"]) { (people) in
-                let person = people[0]
+            datastore.get(entityOfType: "Person", where: "name", equals: "Person 1") { person in
+                guard let person = person else {
+                    XCTFail("missing person")
+                    done.fulfill()
+                    return
+                }
+                
                 let now = Date()
                 datastore.add(properties: [person: self.exampleProperties(date: now, owner: person, in: datastore)]) { () in
                     datastore.get(properties : ["address", "date", "integer", "double", "owner"], of: [person]) { (results) in
@@ -231,13 +234,17 @@ class DatastoreTests: XCTestCase {
     
     func testChangeName() {
         let created = expectation(description: "loaded")
-        loadAndCheck { (datastore) in
-            datastore.get(entitiesOfType: "Person", where: "name", contains: ["Person 1"]) { (people) in
-                let person = people[0]
+        loadAndCheck { datastore in
+            datastore.get(entityOfType: "Person", where: "name", equals: "Person 1") { person in
+                guard let person = person else {
+                    XCTFail("missing person")
+                    created.fulfill()
+                    return
+                }
+
                 var properties = SemanticDictionary()
                 properties["name"] = "New Name"
                 datastore.add(properties: [person : properties]) {
-                    XCTAssertEqual(people.count, 1)
                     XCTAssertEqual(person.object.string(withKey: datastore.standardSymbols.name), "New Name")
                     created.fulfill()
                 }

@@ -20,6 +20,7 @@ public class Datastore {
     public typealias LoadResult = Result<Datastore, Error>
     public typealias LoadCompletion = (LoadResult) -> Void
     public typealias EntitiesCompletion = ([Entity]) -> Void
+    public typealias EntityCompletion = (Entity?) -> Void
     public typealias InterchangeCompletion = ([String:Any]) -> Void
     
     struct LoadingModelError: Error { }
@@ -132,6 +133,12 @@ public class Datastore {
                 }
             }
             completion(result.map({ Entity($0) }))
+        }
+    }
+    
+    public func get(entityOfType type: String, where key: String, equals: String, createIfMissing: Bool = true, completion: @escaping EntityCompletion) {
+        get(entitiesOfType: type, where: key, contains: [equals], createIfMissing: createIfMissing) { entities in
+            completion(entities.first)
         }
     }
     
