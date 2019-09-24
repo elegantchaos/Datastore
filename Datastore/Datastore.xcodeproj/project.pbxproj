@@ -22,6 +22,8 @@
 		8B8A6FEA233A107B00EF615F /* Compact.json in Resources */ = {isa = PBXBuildFile; fileRef = 8B8A6FE9233A107B00EF615F /* Compact.json */; };
 		8B8A6FEC233A110E00EF615F /* Normalized.json in Resources */ = {isa = PBXBuildFile; fileRef = 8B8A6FEB233A110E00EF615F /* Normalized.json */; };
 		8B8A6FEE233A123C00EF615F /* Deletion.json in Resources */ = {isa = PBXBuildFile; fileRef = 8B8A6FED233A123C00EF615F /* Deletion.json */; };
+		8B8A6FF0233A146500EF615F /* Simple.json in Resources */ = {isa = PBXBuildFile; fileRef = 8B8A6FEF233A146500EF615F /* Simple.json */; };
+		8B8A6FF2233A19C500EF615F /* StandardSymbols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B8A6FF1233A19C500EF615F /* StandardSymbols.swift */; };
 		8BFF2E6A232F85E200D40D31 /* Datastore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8BFF2E60232F85E200D40D31 /* Datastore.framework */; };
 		8BFF2E6F232F85E200D40D31 /* DatastoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFF2E6E232F85E200D40D31 /* DatastoreTests.swift */; };
 		8BFF2E71232F85E200D40D31 /* Datastore.h in Headers */ = {isa = PBXBuildFile; fileRef = 8BFF2E63232F85E200D40D31 /* Datastore.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -61,6 +63,8 @@
 		8B8A6FE9233A107B00EF615F /* Compact.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = Compact.json; sourceTree = "<group>"; };
 		8B8A6FEB233A110E00EF615F /* Normalized.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = Normalized.json; sourceTree = "<group>"; };
 		8B8A6FED233A123C00EF615F /* Deletion.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = Deletion.json; sourceTree = "<group>"; };
+		8B8A6FEF233A146500EF615F /* Simple.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = Simple.json; sourceTree = "<group>"; };
+		8B8A6FF1233A19C500EF615F /* StandardSymbols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StandardSymbols.swift; sourceTree = "<group>"; };
 		8BFF2E60232F85E200D40D31 /* Datastore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Datastore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		8BFF2E63232F85E200D40D31 /* Datastore.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Datastore.h; sourceTree = "<group>"; };
 		8BFF2E64232F85E200D40D31 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -120,10 +124,10 @@
 		8B54A74A233900B900F87365 /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				8B54A7482338F50400F87365 /* Properties */,
 				8BFF2E85232F8CD200D40D31 /* EntityRecord.swift */,
-				8BFF2E7A232F864200D40D31 /* Model.xcdatamodeld */,
 				8B3B6B6F23339FC50098DAC1 /* SymbolRecord.swift */,
+				8BFF2E7A232F864200D40D31 /* Model.xcdatamodeld */,
+				8B54A7482338F50400F87365 /* Properties */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -166,6 +170,7 @@
 				8B40C3B8233251D000CC24E6 /* Identifier.swift */,
 				8B3B6B6D233389400098DAC1 /* SemanticDictionary.swift */,
 				8B3B6B6B233389360098DAC1 /* SemanticValue.swift */,
+				8B8A6FF1233A19C500EF615F /* StandardSymbols.swift */,
 				8B54A7492339009900F87365 /* Extensions */,
 				8B54A74B233900C700F87365 /* Interchange */,
 				8B54A74A233900B900F87365 /* Model */,
@@ -179,6 +184,7 @@
 				8BFF2E6E232F85E200D40D31 /* DatastoreTests.swift */,
 				8B8A6FE9233A107B00EF615F /* Compact.json */,
 				8B8A6FED233A123C00EF615F /* Deletion.json */,
+				8B8A6FEF233A146500EF615F /* Simple.json */,
 				8B8A6FEB233A110E00EF615F /* Normalized.json */,
 				8BFF2E70232F85E200D40D31 /* Info.plist */,
 			);
@@ -292,6 +298,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8B8A6FEE233A123C00EF615F /* Deletion.json in Resources */,
+				8B8A6FF0233A146500EF615F /* Simple.json in Resources */,
 				8B8A6FEC233A110E00EF615F /* Normalized.json in Resources */,
 				8B8A6FEA233A107B00EF615F /* Compact.json in Resources */,
 			);
@@ -310,6 +317,7 @@
 				8B3B6B6E233389400098DAC1 /* SemanticDictionary.swift in Sources */,
 				8B3B6B6C233389360098DAC1 /* SemanticValue.swift in Sources */,
 				8B64FD5A2333CBC9001A0BBD /* DateProperty.swift in Sources */,
+				8B8A6FF2233A19C500EF615F /* StandardSymbols.swift in Sources */,
 				8B55DF0723328AF600B99383 /* InterchangeDecoder.swift in Sources */,
 				8B40C3B9233251D000CC24E6 /* Identifier.swift in Sources */,
 				8B64FD5E2333CBEB001A0BBD /* NamedProperty.swift in Sources */,

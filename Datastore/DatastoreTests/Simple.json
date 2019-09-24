@@ -1,0 +1,20 @@
+{
+  "entities" : [
+    {
+      "name" : "Test",
+      "uuid" : "C41DB873-323D-4026-95D1-603120B9ADF6",
+      "type" : "F9B7D73D-2020-49AD-B85D-4BBD62CCA80B",
+      "foo" : "bar",
+    },
+  ],
+  "symbols" : [
+    {
+      "name" : "foo",
+      "uuid" : "078D9906-F26D-4028-99E6-880B32398C37"
+    },
+    {
+      "uuid" : "F9B7D73D-2020-49AD-B85D-4BBD62CCA80B",
+      "name" : "person"
+    }
+  ]
+}

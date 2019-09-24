@@ -40,6 +40,22 @@ class DatastoreTests: XCTestCase {
         }
     }
     
+    func check<Output, Failure>(action: String, future: Future<Output, Failure>) {
+        let done = expectation(description: action)
+        let _ = future.sink(
+            receiveCompletion: { (completion) in
+                switch completion {
+                case .failure(let error):
+                    XCTFail("\(action) error: \(error)")
+                case .finished:
+                    break
+                }
+                done.fulfill()
+        }, receiveValue: { (store) in
+        })
+        wait(for: [done], timeout: 1.0)
+    }
+    
     func testCreation() {
         let loaded = expectation(description: "loaded")
         loadAndCheck { (datastore) in
@@ -54,7 +70,7 @@ class DatastoreTests: XCTestCase {
             datastore.get(entities: ["Person 1"], ofType: "Person") { (people) in
                 XCTAssertEqual(people.count, 1)
                 let person = people[0].object
-                XCTAssertEqual(person.string(withKey: datastore.nameSymbol), "Person 1")
+                XCTAssertEqual(person.string(withKey: datastore.standardSymbols.name), "Person 1")
                 created.fulfill()
             }
         }
@@ -62,13 +78,10 @@ class DatastoreTests: XCTestCase {
     }
     
     func testGetProperties() {
-        let done = expectation(description: "loaded")
-        loadAndCheck { (datastore) in
-            datastore.get(entities: ["Person 1"], ofType: "Person") { (people) in
-                let person = people[0]
-                
-                person.object.add(property: "foo", value: datastore.value("bar"), store: datastore)
-                datastore.get(properties : ["foo"], of: [person]) { (results) in
+        let done = expectation(description: "done")
+        loadJSON(name: "Simple", expectation: done) { datastore in
+            datastore.get(allEntitiesOfType: "person") { (people) in
+                datastore.get(properties : ["foo"], of: people) { (results) in
                     XCTAssertEqual(results.count, 1)
                     let properties = results[0]
                     XCTAssertEqual(properties["foo"] as? String, "bar")
@@ -185,23 +198,7 @@ class DatastoreTests: XCTestCase {
         }
         wait(for: [done], timeout: 1.0)
     }
-    
-    func check<Output, Failure>(action: String, future: Future<Output, Failure>) {
-        let done = expectation(description: action)
-        let _ = future.sink(
-            receiveCompletion: { (completion) in
-                switch completion {
-                case .failure(let error):
-                    XCTFail("\(action) error: \(error)")
-                case .finished:
-                    break
-                }
-                done.fulfill()
-        }, receiveValue: { (store) in
-        })
-        wait(for: [done], timeout: 1.0)
-    }
-    
+
     func testLoadFuture() {
         let future = Datastore.loadCombine(name: "test")
         check(action: "load", future: future)
@@ -216,7 +213,7 @@ class DatastoreTests: XCTestCase {
                 properties["name"] = "New Name"
                 datastore.add(properties: [person : properties]) {
                     XCTAssertEqual(people.count, 1)
-                    XCTAssertEqual(person.object.string(withKey: datastore.nameSymbol), "New Name")
+                    XCTAssertEqual(person.object.string(withKey: datastore.standardSymbols.name), "New Name")
                     created.fulfill()
                 }
             }

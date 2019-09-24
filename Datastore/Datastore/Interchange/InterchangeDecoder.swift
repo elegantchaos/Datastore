@@ -54,28 +54,28 @@ public extension InterchangeDecoder {
     
     func decode(string: Any?, type: SymbolID?, store: Datastore) -> SemanticValue? {
         if let string = string as? String {
-            return store.value(string, type: type ?? store.stringSymbol)
+            return store.value(string, type: type ?? store.standardSymbols.string)
         }
         return nil
     }
     
     func decode(integer: Any?, type: SymbolID?, store: Datastore) -> SemanticValue? {
         if let integer = integer as? Int {
-            return store.value(integer, type: type ?? store.numberSymbol)
+            return store.value(integer, type: type ?? store.standardSymbols.integer)
         }
         return nil
     }
     
     func decode(date: Any?, type: SymbolID?, store: Datastore) -> SemanticValue? {
         if let date = decodePrimitive(date: date) {
-            return store.value(date, type: type ?? store.dateSymbol)
+            return store.value(date, type: type ?? store.standardSymbols.date)
         }
         return nil
     }
     
     func decode(entity: Any?, type: SymbolID?, store: Datastore) -> SemanticValue? {
         if let uuid = decodePrimitive(uuid: entity) {
-            return store.value(EntityID(uuid: uuid), type: type ?? store.entitySymbol)
+            return store.value(EntityID(uuid: uuid), type: type ?? store.standardSymbols.entity)
         }
         return nil
     }

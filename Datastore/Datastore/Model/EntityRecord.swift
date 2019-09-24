@@ -52,7 +52,7 @@ public class EntityRecord: NSManagedObject {
             property.value = value
             property.name = key
             property.owner = self
-            property.type = (type ?? store.stringSymbol).resolve(in: context)
+            property.type = (type ?? store.standardSymbols.string).resolve(in: context)
             assert(property.type != nil)
         }
     }
@@ -63,7 +63,7 @@ public class EntityRecord: NSManagedObject {
             property.value = Int64(value)
             property.name = key
             property.owner = self
-            property.type = (type ?? store.numberSymbol).resolve(in: context)
+            property.type = (type ?? store.standardSymbols.integer).resolve(in: context)
             assert(property.type != nil)
         }
     }
@@ -74,7 +74,7 @@ public class EntityRecord: NSManagedObject {
             property.value = value
             property.name = key
             property.owner = self
-            property.type = (type ?? store.dateSymbol).resolve(in: context)
+            property.type = (type ?? store.standardSymbols.date).resolve(in: context)
             assert(property.type != nil)
         }
     }
@@ -85,7 +85,7 @@ public class EntityRecord: NSManagedObject {
             property.target = entity
             property.name = key
             property.owner = self
-            property.type = (type ?? store.entitySymbol).resolve(in: context)
+            property.type = (type ?? store.standardSymbols.entity).resolve(in: context)
             assert(property.type != nil)
         }
     }

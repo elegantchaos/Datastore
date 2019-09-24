@@ -15,12 +15,7 @@ public class Datastore {
     static var cachedModel: NSManagedObjectModel!
     internal let container: NSPersistentContainer
     internal let context: NSManagedObjectContext
-    internal let valueSymbol = SymbolID(named: "value")
-    internal let stringSymbol = SymbolID(named: "string")
-    internal let numberSymbol = SymbolID(named: "number")
-    internal let dateSymbol = SymbolID(named: "date")
-    internal let entitySymbol = SymbolID(named: "entity")
-    internal let nameSymbol = SymbolID(named: "name")
+    internal let standardSymbols = StandardSymbols()
     
     public typealias LoadResult = Result<Datastore, Error>
     public typealias LoadCompletion = (LoadResult) -> Void
@@ -105,11 +100,11 @@ public class Datastore {
     }
     
     public func value(_ value: Any?, type: SymbolID? = nil, datestamp: Date? = nil) -> SemanticValue {
-        return SemanticValue(value: value, type: type ?? valueSymbol, datestamp: datestamp)
+        return SemanticValue(value: value, type: type ?? standardSymbols.value, datestamp: datestamp)
     }
     
     public func value(_ value: Any?, type: SymbolRecord?, datestamp: Date? = nil) -> SemanticValue {
-        return SemanticValue(value: value, type: type == nil ? valueSymbol : SymbolID(type!), datestamp: datestamp)
+        return SemanticValue(value: value, type: type == nil ? standardSymbols.value : SymbolID(type!), datestamp: datestamp)
     }
     
     public func get(entities names: Set<String>, ofType typeID: SymbolID, createIfMissing: Bool = true, completion: @escaping EntitiesCompletion) {
@@ -125,14 +120,14 @@ public class Datastore {
             
             if let entities = type.entities as? Set<EntityRecord> {
                 for entity in entities {
-                    if let name = entity.string(withKey: self.nameSymbol), names.contains(name) {
+                    if let name = entity.string(withKey: self.standardSymbols.name), names.contains(name) {
                         result.append(entity)
                         create.remove(name)
                     }
                 }
             }
             
-            let nameKey = self.nameSymbol.resolve(in: context)
+            let nameKey = self.standardSymbols.name.resolve(in: context)
             if createIfMissing {
                 for name in create {
                     let entity = EntityRecord(in: context)

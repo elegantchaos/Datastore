@@ -7,10 +7,18 @@
         <relationship name="owner" maxCount="1" deletionRule="Nullify" destinationEntity="EntityRecord" inverseName="dates" inverseEntity="EntityRecord"/>
         <relationship name="type" maxCount="1" deletionRule="Nullify" destinationEntity="SymbolRecord" inverseName="dateTypes" inverseEntity="SymbolRecord"/>
     </entity>
+    <entity name="DoubleProperty" representedClassName="DoubleProperty" syncable="YES" codeGenerationType="class">
+        <attribute name="datestamp" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="value" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <relationship name="name" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="SymbolRecord" inverseName="doubleProperties" inverseEntity="SymbolRecord"/>
+        <relationship name="owner" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="EntityRecord" inverseName="doubles" inverseEntity="EntityRecord"/>
+        <relationship name="type" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="SymbolRecord" inverseName="doubleTypes" inverseEntity="SymbolRecord"/>
+    </entity>
     <entity name="EntityRecord" representedClassName=".EntityRecord" syncable="YES" codeGenerationType="category">
         <attribute name="datestamp" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="uuid" attributeType="UUID" usesScalarValueType="NO"/>
         <relationship name="dates" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="DateProperty" inverseName="owner" inverseEntity="DateProperty"/>
+        <relationship name="doubles" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="DoubleProperty" inverseName="owner" inverseEntity="DoubleProperty"/>
         <relationship name="integers" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="IntegerProperty" inverseName="owner" inverseEntity="IntegerProperty"/>
         <relationship name="relationships" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="RelationshipProperty" inverseName="owner" inverseEntity="RelationshipProperty"/>
         <relationship name="strings" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="StringProperty" inverseName="owner" inverseEntity="StringProperty"/>
@@ -43,6 +51,8 @@
         <attribute name="uuid" attributeType="UUID" usesScalarValueType="NO"/>
         <relationship name="dateProperties" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="DateProperty" inverseName="name" inverseEntity="DateProperty"/>
         <relationship name="dateTypes" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="DateProperty" inverseName="type" inverseEntity="DateProperty"/>
+        <relationship name="doubleProperties" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="DoubleProperty" inverseName="name" inverseEntity="DoubleProperty"/>
+        <relationship name="doubleTypes" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="DoubleProperty" inverseName="type" inverseEntity="DoubleProperty"/>
         <relationship name="entities" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="EntityRecord" inverseName="type" inverseEntity="EntityRecord"/>
         <relationship name="integerProperties" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="IntegerProperty" inverseName="name" inverseEntity="IntegerProperty"/>
         <relationship name="integerTypes" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="IntegerProperty" inverseName="type" inverseEntity="IntegerProperty"/>
@@ -53,10 +63,11 @@
     </entity>
     <elements>
         <element name="DateProperty" positionX="0" positionY="0" width="128" height="118"/>
-        <element name="EntityRecord" positionX="0" positionY="0" width="128" height="163"/>
+        <element name="EntityRecord" positionX="0" positionY="0" width="128" height="178"/>
         <element name="IntegerProperty" positionX="0" positionY="0" width="128" height="118"/>
         <element name="RelationshipProperty" positionX="0" positionY="0" width="128" height="118"/>
         <element name="StringProperty" positionX="0" positionY="0" width="128" height="118"/>
-        <element name="SymbolRecord" positionX="0" positionY="0" width="128" height="208"/>
+        <element name="SymbolRecord" positionX="0" positionY="0" width="128" height="238"/>
+        <element name="DoubleProperty" positionX="9" positionY="90" width="128" height="118"/>
     </elements>
 </model>
