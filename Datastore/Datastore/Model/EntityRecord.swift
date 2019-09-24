@@ -62,9 +62,15 @@ public class EntityRecord: NSManagedObject {
                 if let resolved = entity.resolve(in: context) {
                     add(resolved, key: symbol, type: value.type, store: store)
                 }
-                
+
+            case let entity as Entity:
+                if let resolved = entity.resolve(in: context) {
+                    add(resolved, key: symbol, type: value.type, store: store)
+                }
+
             default:
-                print("unknown value type \(value)")
+                let unknown = Swift.type(of: value.value)
+                print("unknown value type \(unknown) \(value.value)")
                 break
             }
         }

@@ -109,13 +109,14 @@ class DatastoreTests: XCTestCase {
                 let person = people[0]
                 let now = Date()
                 datastore.add(properties: [person: self.exampleProperties(date: now, owner: person, in: datastore)]) { () in
-                    datastore.get(properties : ["address", "date", "integer", "double"], of: [person]) { (results) in
+                    datastore.get(properties : ["address", "date", "integer", "double", "owner"], of: [person]) { (results) in
                         XCTAssertEqual(results.count, 1)
                         let properties = results[0]
                         XCTAssertEqual(properties["address"] as? String, "123 New St")
                         XCTAssertEqual(properties["date"] as? Date, now)
                         XCTAssertEqual(properties["integer"] as? Int64, 123)
                         XCTAssertEqual(properties["double"] as? Double, 456.789)
+                        XCTAssertEqual(properties["owner"] as? Entity, person)
                         done.fulfill()
                     }
                 }

@@ -11,31 +11,35 @@ import Foundation
 
 public struct SemanticDictionary {
     var values: [String:SemanticValue] = [:]
-
+    
     subscript(_ key: String) -> Any? {
         get { return values[key]?.value }
         set {
             if let value = newValue as? SemanticValue {
                 values[key] = value
+            } else if let (value, type) = newValue as? (Any?, SymbolID) {
+                values[key] = SemanticValue(value: value, type: type, datestamp: nil)
+            } else if let (value, type) = newValue as? (Any?, String) {
+                values[key] = SemanticValue(value: value, type: SymbolID(named: type), datestamp: nil)
             } else {
                 values[key] = SemanticValue(value: newValue, type: nil, datestamp: nil)
             }
         }
     }
-
+    
     subscript(_ key: String, as type: SymbolID) -> Any? {
         get { return values[key]?.value }
         set { values[key] = SemanticValue(value: newValue, type: type, datestamp: nil) }
     }
-
+    
     subscript(typeWithKey key: String) -> SymbolID? {
         get { return values[key]?.type }
     }
-
+    
     subscript(datestampWithKey key: String) -> Date? {
         get { return values[key]?.datestamp }
     }
-
+    
     subscript(valueWithKey key: String) -> SemanticValue? {
         get { return values[key] }
         set { values[key] = newValue }
