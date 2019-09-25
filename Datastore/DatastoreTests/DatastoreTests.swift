@@ -67,9 +67,7 @@ class DatastoreTests: XCTestCase {
             store.decode(json: json) { decodeResult in
                 XCTAssertSuccess(decodeResult, expectation: created) { _ in
                     store.save() { saveResult in
-                        XCTAssertSuccess(saveResult, expectation: created) { _ in
-                            created.fulfill()
-                        }
+                        XCTAssertSuccess(saveResult, expectation: created)
                     }
                 }
             }
