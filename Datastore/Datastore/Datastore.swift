@@ -60,16 +60,18 @@ public class Datastore {
         
         let container = NSPersistentContainer(name: name, managedObjectModel: model)
         let description = container.persistentStoreDescriptions[0]
-        description.setOption(true as NSValue, forKey: NSMigratePersistentStoresAutomaticallyOption)
-        description.setOption(true as NSValue, forKey: NSInferMappingModelAutomaticallyOption)
-        description.type = NSSQLiteStoreType
-        
         if let explicitURL = url {
             assert((explicitURL.pathExtension == "sqlite") || (explicitURL.path == "/dev/null"))
             description.url = explicitURL
+            try? FileManager.default.createDirectory(at: explicitURL.deletingLastPathComponent(), withIntermediateDirectories: true, attributes: nil)
         } else {
             description.url = URL(fileURLWithPath: "/dev/null")
         }
+
+        description.setOption(true as NSValue, forKey: NSMigratePersistentStoresAutomaticallyOption)
+        description.setOption(true as NSValue, forKey: NSInferMappingModelAutomaticallyOption)
+        description.type = NSSQLiteStoreType
+
         
         container.loadPersistentStores { (description, error) in
             if let error = error {

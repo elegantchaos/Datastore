@@ -4,4 +4,7 @@
    <FileRef
       location = "group:Datastore/Datastore.xcodeproj">
    </FileRef>
+   <FileRef
+      location = "group:../XCTestExtensions">
+   </FileRef>
 </Workspace>

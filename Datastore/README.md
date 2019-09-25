@@ -1,4 +1,4 @@
-#  An asynchronous no-schema object store
+#  An asynchronous schema-less object store
 
 The goal is for a flexible object store which can be implemented efficiently using threading. 
 
@@ -63,6 +63,6 @@ Combine support is being considered.
 
 ## To Do
 
-- optimise interchange reading for compact values
+- add compact interchange output: drops older values, writes simplified properties when possible
 - optimise interchange writing for compact values
 - encoding/decoding relationships

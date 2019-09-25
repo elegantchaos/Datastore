@@ -9,6 +9,9 @@
 /* Begin PBXBuildFile section */
 		8B3B6B6C233389360098DAC1 /* SemanticValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B3B6B6B233389360098DAC1 /* SemanticValue.swift */; };
 		8B3B6B6E233389400098DAC1 /* SemanticDictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B3B6B6D233389400098DAC1 /* SemanticDictionary.swift */; };
+		8B3E97AE233BC02100F47D94 /* XCTestExtensions in Frameworks */ = {isa = PBXBuildFile; productRef = 8B3E97AD233BC02100F47D94 /* XCTestExtensions */; };
+		8B3E97B0233BC65500F47D94 /* Test.json in Resources */ = {isa = PBXBuildFile; fileRef = 8B3E97AF233BC65500F47D94 /* Test.json */; };
+		8B3E97B3233BC9DA00F47D94 /* Test.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 8B3E97B2233BC9DA00F47D94 /* Test.sqlite */; };
 		8B4060CA233A60F30061C83A /* Relationships.json in Resources */ = {isa = PBXBuildFile; fileRef = 8B4060C9233A60F30061C83A /* Relationships.json */; };
 		8B40C3B9233251D000CC24E6 /* Identifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B40C3B8233251D000CC24E6 /* Identifier.swift */; };
 		8B41F50A23313FB20035081B /* Datastore+Interchange.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B41F50923313FB20035081B /* Datastore+Interchange.swift */; };
@@ -50,6 +53,8 @@
 /* Begin PBXFileReference section */
 		8B3B6B6B233389360098DAC1 /* SemanticValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SemanticValue.swift; sourceTree = "<group>"; };
 		8B3B6B6D233389400098DAC1 /* SemanticDictionary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SemanticDictionary.swift; sourceTree = "<group>"; };
+		8B3E97AF233BC65500F47D94 /* Test.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = Test.json; sourceTree = "<group>"; };
+		8B3E97B2233BC9DA00F47D94 /* Test.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = Test.sqlite; sourceTree = "<group>"; };
 		8B4060C9233A60F30061C83A /* Relationships.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = Relationships.json; sourceTree = "<group>"; };
 		8B40C3B7233233D000CC24E6 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; wrapsLines = 1; };
 		8B40C3B8233251D000CC24E6 /* Identifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Identifier.swift; sourceTree = "<group>"; };
@@ -95,12 +100,28 @@
 			buildActionMask = 2147483647;
 			files = (
 				8BFF2E6A232F85E200D40D31 /* Datastore.framework in Frameworks */,
+				8B3E97AE233BC02100F47D94 /* XCTestExtensions in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		8B3E97B1233BC9C000F47D94 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				8B8A6FE9233A107B00EF615F /* Compact.json */,
+				8BFF2E70232F85E200D40D31 /* Info.plist */,
+				8B3E97B2233BC9DA00F47D94 /* Test.sqlite */,
+				8B8A6FED233A123C00EF615F /* Deletion.json */,
+				8B8A6FEF233A146500EF615F /* Simple.json */,
+				8B8A6FEB233A110E00EF615F /* Normalized.json */,
+				8B3E97AF233BC65500F47D94 /* Test.json */,
+				8B4060C9233A60F30061C83A /* Relationships.json */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
 		8B54A7482338F50400F87365 /* Properties */ = {
 			isa = PBXGroup;
 			children = (
@@ -184,12 +205,7 @@
 			isa = PBXGroup;
 			children = (
 				8BFF2E6E232F85E200D40D31 /* DatastoreTests.swift */,
-				8B8A6FE9233A107B00EF615F /* Compact.json */,
-				8B8A6FED233A123C00EF615F /* Deletion.json */,
-				8B8A6FEF233A146500EF615F /* Simple.json */,
-				8B8A6FEB233A110E00EF615F /* Normalized.json */,
-				8B4060C9233A60F30061C83A /* Relationships.json */,
-				8BFF2E70232F85E200D40D31 /* Info.plist */,
+				8B3E97B1233BC9C000F47D94 /* Resources */,
 			);
 			path = DatastoreTests;
 			sourceTree = "<group>";
@@ -243,6 +259,9 @@
 				8BFF2E6C232F85E200D40D31 /* PBXTargetDependency */,
 			);
 			name = DatastoreTests;
+			packageProductDependencies = (
+				8B3E97AD233BC02100F47D94 /* XCTestExtensions */,
+			);
 			productName = DatastoreTests;
 			productReference = 8BFF2E69232F85E200D40D31 /* DatastoreTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -277,6 +296,7 @@
 			mainGroup = 8BFF2E56232F85E200D40D31;
 			packageReferences = (
 				8BFF2E87232F90EF00D40D31 /* XCRemoteSwiftPackageReference "Logger" */,
+				8B3E97AC233BC02100F47D94 /* XCRemoteSwiftPackageReference "XCTestExtensions" */,
 			);
 			productRefGroup = 8BFF2E61232F85E200D40D31 /* Products */;
 			projectDirPath = "";
@@ -303,6 +323,8 @@
 				8B8A6FEE233A123C00EF615F /* Deletion.json in Resources */,
 				8B8A6FF0233A146500EF615F /* Simple.json in Resources */,
 				8B8A6FEC233A110E00EF615F /* Normalized.json in Resources */,
+				8B3E97B3233BC9DA00F47D94 /* Test.sqlite in Resources */,
+				8B3E97B0233BC65500F47D94 /* Test.json in Resources */,
 				8B4060CA233A60F30061C83A /* Relationships.json in Resources */,
 				8B8A6FEA233A107B00EF615F /* Compact.json in Resources */,
 			);
@@ -533,7 +555,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 2H48644JM2;
-				INFOPLIST_FILE = DatastoreTests/Info.plist;
+				INFOPLIST_FILE = DatastoreTests/Resources/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -552,7 +574,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 2H48644JM2;
-				INFOPLIST_FILE = DatastoreTests/Info.plist;
+				INFOPLIST_FILE = DatastoreTests/Resources/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -598,6 +620,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		8B3E97AC233BC02100F47D94 /* XCRemoteSwiftPackageReference "XCTestExtensions" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "git@github.com:elegantchaos/XCTestExtensions.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.1;
+			};
+		};
 		8BFF2E87232F90EF00D40D31 /* XCRemoteSwiftPackageReference "Logger" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "git@github.com:elegantchaos/Logger.git";
@@ -609,6 +639,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		8B3E97AD233BC02100F47D94 /* XCTestExtensions */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8B3E97AC233BC02100F47D94 /* XCRemoteSwiftPackageReference "XCTestExtensions" */;
+			productName = XCTestExtensions;
+		};
 		8BFF2E88232F90EF00D40D31 /* Logger */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 8BFF2E87232F90EF00D40D31 /* XCRemoteSwiftPackageReference "Logger" */;

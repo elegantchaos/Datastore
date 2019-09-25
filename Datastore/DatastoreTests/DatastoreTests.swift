@@ -7,55 +7,15 @@
 //
 
 import XCTest
+import XCTestExtensions
 import Combine
 
 @testable import Datastore
 
+// MARK: - Tests
+
 class DatastoreTests: XCTestCase {
-    
-    func loadAndCheck(completion: @escaping (Datastore) -> Void) {
-        Datastore.load(name: "Test") { (result) in
-            switch result {
-            case .failure(let error):
-                XCTFail("\(error)")
-                
-            case .success(let store):
-                completion(store)
-            }
-        }
-    }
-    
-    func loadJSON(name: String, expectation: XCTestExpectation, completion: @escaping (Datastore) -> Void) {
-        let url = Bundle(for: type(of: self)).url(forResource: name, withExtension: "json")!
-        let json = String(data: try! Data(contentsOf: url), encoding: .utf8)!
-        Datastore.load(name: name, json: json) { (result) in
-            switch result {
-            case .failure(let error):
-                XCTFail("\(error)")
-                expectation.fulfill()
-                
-            case .success(let store):
-                completion(store)
-            }
-        }
-    }
-    
-    func check<Output, Failure>(action: String, future: Future<Output, Failure>) {
-        let done = expectation(description: action)
-        let _ = future.sink(
-            receiveCompletion: { (completion) in
-                switch completion {
-                case .failure(let error):
-                    XCTFail("\(action) error: \(error)")
-                case .finished:
-                    break
-                }
-                done.fulfill()
-        }, receiveValue: { (store) in
-        })
-        wait(for: [done], timeout: 1.0)
-    }
-    
+  
     func testCreation() {
         let loaded = expectation(description: "loaded")
         loadAndCheck { (datastore) in
@@ -64,6 +24,20 @@ class DatastoreTests: XCTestCase {
         wait(for: [loaded], timeout: 1.0)
     }
     
+
+    func testLoadFromFile() {
+
+//        createTestFile() // uncomment to recreate the test sqlite database from Test.json
+        
+        let url = testURL(named: "Test", withExtension: "sqlite")
+        let loaded = expectation(description: "loaded")
+        loadAndCheck(url: url) { store in
+            loaded.fulfill()
+            try! store.container.viewContext.save()
+        }
+        wait(for: [loaded], timeout: 1.0)
+    }
+
     func testEntityCreation() {
         let created = expectation(description: "loaded")
         loadAndCheck { (datastore) in
@@ -298,4 +272,71 @@ class DatastoreTests: XCTestCase {
         }
         wait(for: [done], timeout: 1.0)
     }
+    
+}
+
+// MARK: - Test Support
+
+extension DatastoreTests {
+    fileprivate func loadAndCheck(url: URL? = nil, completion: @escaping (Datastore) -> Void) {
+          Datastore.load(name: "Test", url: url) { (result) in
+              switch result {
+              case .failure(let error):
+                  XCTFail("\(error)")
+                  
+              case .success(let store):
+                  completion(store)
+              }
+          }
+      }
+      
+      fileprivate func loadJSON(name: String, expectation: XCTestExpectation, completion: @escaping (Datastore) -> Void) {
+          let json = testString(named: name, withExtension: "json")
+          Datastore.load(name: name, json: json) { (result) in
+              switch result {
+              case .failure(let error):
+                  XCTFail("\(error)")
+                  expectation.fulfill()
+                  
+              case .success(let store):
+                  completion(store)
+              }
+          }
+      }
+      
+      fileprivate func check<Output, Failure>(action: String, future: Future<Output, Failure>) {
+          let done = expectation(description: action)
+          let _ = future.sink(
+              receiveCompletion: { (completion) in
+                  switch completion {
+                  case .failure(let error):
+                      XCTFail("\(action) error: \(error)")
+                  case .finished:
+                      break
+                  }
+                  done.fulfill()
+          }, receiveValue: { (store) in
+          })
+          wait(for: [done], timeout: 1.0)
+      }
+
+      fileprivate func createTestFile() {
+          let created = expectation(description: "created")
+          let container = URL(fileURLWithPath: #file).deletingLastPathComponent()
+          let url = container.appendingPathComponent("Test.sqlite")
+          let json = testString(named: "Test", withExtension: "json")
+          loadAndCheck(url: url) { store in
+              store.decode(json: json) { result in
+                  switch result {
+                  case .failure(let error):
+                      XCTFail("decoding failed \(error)")
+                  case .success(let store):
+                      try! store.container.viewContext.save()
+                  }
+                  created.fulfill()
+              }
+          }
+          wait(for: [created], timeout: 1.0)
+      }
+      
 }
