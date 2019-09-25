@@ -11,7 +11,7 @@
 		8B3B6B6E233389400098DAC1 /* SemanticDictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B3B6B6D233389400098DAC1 /* SemanticDictionary.swift */; };
 		8B3E97AE233BC02100F47D94 /* XCTestExtensions in Frameworks */ = {isa = PBXBuildFile; productRef = 8B3E97AD233BC02100F47D94 /* XCTestExtensions */; };
 		8B3E97B0233BC65500F47D94 /* Test.json in Resources */ = {isa = PBXBuildFile; fileRef = 8B3E97AF233BC65500F47D94 /* Test.json */; };
-		8B3E97B3233BC9DA00F47D94 /* Test.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 8B3E97B2233BC9DA00F47D94 /* Test.sqlite */; };
+		8B3E97B4233BCF0200F47D94 /* Test.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 8B3E97B2233BC9DA00F47D94 /* Test.sqlite */; };
 		8B4060CA233A60F30061C83A /* Relationships.json in Resources */ = {isa = PBXBuildFile; fileRef = 8B4060C9233A60F30061C83A /* Relationships.json */; };
 		8B40C3B9233251D000CC24E6 /* Identifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B40C3B8233251D000CC24E6 /* Identifier.swift */; };
 		8B41F50A23313FB20035081B /* Datastore+Interchange.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B41F50923313FB20035081B /* Datastore+Interchange.swift */; };
@@ -111,13 +111,13 @@
 			isa = PBXGroup;
 			children = (
 				8B8A6FE9233A107B00EF615F /* Compact.json */,
-				8BFF2E70232F85E200D40D31 /* Info.plist */,
-				8B3E97B2233BC9DA00F47D94 /* Test.sqlite */,
 				8B8A6FED233A123C00EF615F /* Deletion.json */,
-				8B8A6FEF233A146500EF615F /* Simple.json */,
+				8BFF2E70232F85E200D40D31 /* Info.plist */,
 				8B8A6FEB233A110E00EF615F /* Normalized.json */,
-				8B3E97AF233BC65500F47D94 /* Test.json */,
 				8B4060C9233A60F30061C83A /* Relationships.json */,
+				8B8A6FEF233A146500EF615F /* Simple.json */,
+				8B3E97AF233BC65500F47D94 /* Test.json */,
+				8B3E97B2233BC9DA00F47D94 /* Test.sqlite */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -323,7 +323,7 @@
 				8B8A6FEE233A123C00EF615F /* Deletion.json in Resources */,
 				8B8A6FF0233A146500EF615F /* Simple.json in Resources */,
 				8B8A6FEC233A110E00EF615F /* Normalized.json in Resources */,
-				8B3E97B3233BC9DA00F47D94 /* Test.sqlite in Resources */,
+				8B3E97B4233BCF0200F47D94 /* Test.sqlite in Resources */,
 				8B3E97B0233BC65500F47D94 /* Test.json in Resources */,
 				8B4060CA233A60F30061C83A /* Relationships.json in Resources */,
 				8B8A6FEA233A107B00EF615F /* Compact.json in Resources */,
@@ -625,7 +625,7 @@
 			repositoryURL = "git@github.com:elegantchaos/XCTestExtensions.git";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.1;
+				minimumVersion = 1.0.2;
 			};
 		};
 		8BFF2E87232F90EF00D40D31 /* XCRemoteSwiftPackageReference "Logger" */ = {

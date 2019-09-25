@@ -47,6 +47,8 @@ public extension InterchangeDecoder {
             decoded = date
         } else if let uuid = decodePrimitive(uuid: value) {
             decoded = decode(entity: uuid, type: nil, store: store) // we assume that raw uuids refer to entities
+        } else if value != nil {
+            print("couldn't decode \(String(describing: value))")
         }
         
         return decoded ?? store.value(value)

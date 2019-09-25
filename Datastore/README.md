@@ -63,6 +63,7 @@ Combine support is being considered.
 
 ## To Do
 
+- support reading/writing arrays (and dictionaries?)
 - add compact interchange output: drops older values, writes simplified properties when possible
 - optimise interchange writing for compact values
 - encoding/decoding relationships

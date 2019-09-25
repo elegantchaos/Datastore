@@ -4,7 +4,7 @@
       "name" : "Test",
       "uuid" : "C41DB873-323D-4026-95D1-603120B9ADF6",
       "type" : "person",
-      "foo" : "bar",
+      "age" : 21,
     },
   ]
 }

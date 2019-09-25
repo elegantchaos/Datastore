@@ -12,10 +12,76 @@ import Combine
 
 @testable import Datastore
 
-// MARK: - Tests
+// MARK: - Test Support
 
 class DatastoreTests: XCTestCase {
-  
+    func loadAndCheck(url: URL? = nil, completion: @escaping (Datastore) -> Void) {
+        Datastore.load(name: "Test", url: url) { (result) in
+            switch result {
+            case .failure(let error):
+                XCTFail("\(error)")
+                
+            case .success(let store):
+                completion(store)
+            }
+        }
+    }
+    
+    func loadJSON(name: String, expectation: XCTestExpectation, completion: @escaping (Datastore) -> Void) {
+        let json = testString(named: name, withExtension: "json")
+        Datastore.load(name: name, json: json) { (result) in
+            switch result {
+            case .failure(let error):
+                XCTFail("\(error)")
+                expectation.fulfill()
+                
+            case .success(let store):
+                completion(store)
+            }
+        }
+    }
+    
+    func check<Output, Failure>(action: String, future: Future<Output, Failure>) {
+        let done = expectation(description: action)
+        let _ = future.sink(
+            receiveCompletion: { (completion) in
+                switch completion {
+                case .failure(let error):
+                    XCTFail("\(action) error: \(error)")
+                case .finished:
+                    break
+                }
+                done.fulfill()
+        }, receiveValue: { (store) in
+        })
+        wait(for: [done], timeout: 1.0)
+    }
+    
+    func createTestFile() {
+        let created = expectation(description: "created")
+        let container = URL(fileURLWithPath: #file).deletingLastPathComponent().appendingPathComponent("Resources")
+        let url = container.appendingPathComponent("Test.sqlite")
+        try? FileManager.default.removeItem(at: url)
+        let json = testString(named: "Test", withExtension: "json")
+        loadAndCheck(url: url) { store in
+            store.decode(json: json) { decodeResult in
+                XCTAssertSuccess(decodeResult, expectation: created) { _ in
+                    store.save() { saveResult in
+                        XCTAssertSuccess(saveResult, expectation: created) { _ in
+                            created.fulfill()
+                        }
+                    }
+                }
+            }
+        }
+        wait(for: [created], timeout: 1.0)
+    }
+    
+}
+
+// MARK: - Tests
+
+extension DatastoreTests {
     func testCreation() {
         let loaded = expectation(description: "loaded")
         loadAndCheck { (datastore) in
@@ -24,20 +90,27 @@ class DatastoreTests: XCTestCase {
         wait(for: [loaded], timeout: 1.0)
     }
     
-
+    
     func testLoadFromFile() {
-
+        
 //        createTestFile() // uncomment to recreate the test sqlite database from Test.json
         
         let url = testURL(named: "Test", withExtension: "sqlite")
         let loaded = expectation(description: "loaded")
         loadAndCheck(url: url) { store in
-            loaded.fulfill()
-            try! store.container.viewContext.save()
+            store.get(allEntitiesOfType: "person") { (people) in
+                XCTAssertEqual(people.count, 1)
+                store.get(properties: ["name", "age"], of: people) { results in
+                    let properties = results[0]
+                    XCTAssertEqual(properties["name"] as? String, "Test")
+                    XCTAssertEqual(properties["age"] as? Int, 21)
+                    loaded.fulfill()
+                }
+            }
         }
         wait(for: [loaded], timeout: 1.0)
     }
-
+    
     func testEntityCreation() {
         let created = expectation(description: "loaded")
         loadAndCheck { (datastore) in
@@ -63,7 +136,7 @@ class DatastoreTests: XCTestCase {
         }
         wait(for: [done], timeout: 1.0)
     }
-
+    
     func testGetAllProperties() {
         let done = expectation(description: "done")
         loadJSON(name: "Simple", expectation: done) { datastore in
@@ -78,7 +151,7 @@ class DatastoreTests: XCTestCase {
         }
         wait(for: [done], timeout: 1.0)
     }
-
+    
     func exampleProperties(date: Date = Date(), owner: EntityID, in store: Datastore) -> SemanticDictionary {
         var properties = SemanticDictionary()
         properties["address"] = store.value("123 New St", type: "address")
@@ -106,7 +179,7 @@ class DatastoreTests: XCTestCase {
                         let properties = results[0]
                         XCTAssertEqual(properties["address"] as? String, "123 New St")
                         XCTAssertEqual(properties["date"] as? Date, now)
-                        XCTAssertEqual(properties["integer"] as? Int64, 123)
+                        XCTAssertEqual(properties["integer"] as? Int, 123)
                         XCTAssertEqual(properties["double"] as? Double, 456.789)
                         XCTAssertEqual(properties["owner"] as? Entity, person)
                         done.fulfill()
@@ -200,7 +273,7 @@ class DatastoreTests: XCTestCase {
         }
         wait(for: [done], timeout: 1.0)
     }
-
+    
     func testLoadFuture() {
         let future = Datastore.loadCombine(name: "test")
         check(action: "load", future: future)
@@ -215,7 +288,7 @@ class DatastoreTests: XCTestCase {
                     created.fulfill()
                     return
                 }
-
+                
                 var properties = SemanticDictionary()
                 properties["name"] = "New Name"
                 datastore.add(properties: [person : properties]) {
@@ -273,70 +346,4 @@ class DatastoreTests: XCTestCase {
         wait(for: [done], timeout: 1.0)
     }
     
-}
-
-// MARK: - Test Support
-
-extension DatastoreTests {
-    fileprivate func loadAndCheck(url: URL? = nil, completion: @escaping (Datastore) -> Void) {
-          Datastore.load(name: "Test", url: url) { (result) in
-              switch result {
-              case .failure(let error):
-                  XCTFail("\(error)")
-                  
-              case .success(let store):
-                  completion(store)
-              }
-          }
-      }
-      
-      fileprivate func loadJSON(name: String, expectation: XCTestExpectation, completion: @escaping (Datastore) -> Void) {
-          let json = testString(named: name, withExtension: "json")
-          Datastore.load(name: name, json: json) { (result) in
-              switch result {
-              case .failure(let error):
-                  XCTFail("\(error)")
-                  expectation.fulfill()
-                  
-              case .success(let store):
-                  completion(store)
-              }
-          }
-      }
-      
-      fileprivate func check<Output, Failure>(action: String, future: Future<Output, Failure>) {
-          let done = expectation(description: action)
-          let _ = future.sink(
-              receiveCompletion: { (completion) in
-                  switch completion {
-                  case .failure(let error):
-                      XCTFail("\(action) error: \(error)")
-                  case .finished:
-                      break
-                  }
-                  done.fulfill()
-          }, receiveValue: { (store) in
-          })
-          wait(for: [done], timeout: 1.0)
-      }
-
-      fileprivate func createTestFile() {
-          let created = expectation(description: "created")
-          let container = URL(fileURLWithPath: #file).deletingLastPathComponent()
-          let url = container.appendingPathComponent("Test.sqlite")
-          let json = testString(named: "Test", withExtension: "json")
-          loadAndCheck(url: url) { store in
-              store.decode(json: json) { result in
-                  switch result {
-                  case .failure(let error):
-                      XCTFail("decoding failed \(error)")
-                  case .success(let store):
-                      try! store.container.viewContext.save()
-                  }
-                  created.fulfill()
-              }
-          }
-          wait(for: [created], timeout: 1.0)
-      }
-      
 }

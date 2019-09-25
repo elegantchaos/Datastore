@@ -7,7 +7,7 @@ import Foundation
 
 extension IntegerProperty: NamedProperty {
     func typedValue(in store: Datastore) -> SemanticValue {
-        return store.value(value, type: type, datestamp: datestamp)
+        return store.value(Int(value), type: type, datestamp: datestamp)
     }
 
     func encode(with encoder: InterchangeEncoder, into record: inout [String:Any]) {
