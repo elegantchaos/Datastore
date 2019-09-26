@@ -13,7 +13,7 @@ public struct SemanticValue {
     let type: String?
     let datestamp: Date?
     
-    init(_ value: Any?, type: String? = Datastore.standardSymbols.value, datestamp: Date? = Date()) {
+    init(_ value: Any?, type: String? = Datastore.standardNames.value, datestamp: Date? = Date()) {
         self.value = value
         self.type = type
         self.datestamp = datestamp

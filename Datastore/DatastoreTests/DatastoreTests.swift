@@ -117,7 +117,7 @@ extension DatastoreTests {
         let created = expectation(description: "loaded")
         loadAndCheck { (datastore) in
             datastore.get(entityOfType: "Person", where: "name", equals: "Person 1") { person in
-                XCTAssertEqual(person?.object.string(withKey: Datastore.standardSymbols.name), "Person 1")
+                XCTAssertEqual(person?.object.string(withKey: Datastore.standardNames.name), "Person 1")
                 created.fulfill()
             }
         }
@@ -206,7 +206,7 @@ extension DatastoreTests {
         let loaded = expectation(description: "loaded")
         loadJSON(name: name, expectation: loaded) { store in
             let expected = ["Person 1": "123 New St", "Person 2": "456 Old St"]
-            store.get(allEntitiesOfType: "person") { (people) in
+            store.get(allEntitiesOfType: "test") { (people) in
                 XCTAssertEqual(people.count, 2)
                 store.get(properties : ["name", "address", "datestamp", "modified", "owner", "data"], of: people) { results in
                     var n = 0
@@ -298,7 +298,7 @@ extension DatastoreTests {
                 var properties = SemanticDictionary()
                 properties["name"] = "New Name"
                 datastore.add(properties: [person : properties]) {
-                    XCTAssertEqual(person.object.string(withKey: Datastore.standardSymbols.name), "New Name")
+                    XCTAssertEqual(person.object.string(withKey: Datastore.standardNames.name), "New Name")
                     created.fulfill()
                 }
             }

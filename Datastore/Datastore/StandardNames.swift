@@ -5,14 +5,18 @@
 
 import Foundation
 
-struct StandardSymbols {
+struct StandardNames {
     let data = "data"
     let date = "date"
+    let datestamp = "datestamp"
     let double = "double"
     let entity = "entity"
+    let entities = "entities"
     let identifier = "identifier"
     let integer = "integer"
     let name = "name"
     let string = "string"
+    let type = "type"
     let value = "value"
+    let uuid = "uuid"
 }

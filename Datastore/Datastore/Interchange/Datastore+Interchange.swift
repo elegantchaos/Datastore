@@ -33,9 +33,9 @@ extension Datastore {
 
  
     fileprivate func decodeEntities(from interchange: [String : Any], with decoder: InterchangeDecoder) {
-        if let entities = interchange["entities"] as? [[String:Any]] {
+        if let entities = interchange[Datastore.standardNames.entities] as? [[String:Any]] {
             for entityRecord in entities {
-                if let name = entityRecord["name"] as? String, let uuid = decoder.decodePrimitive(uuid: entityRecord["uuid"]), let type = entityRecord["type"] as? String {
+                if let uuid = decoder.decodePrimitive(uuid: entityRecord[Datastore.standardNames.uuid]), let type = entityRecord[Datastore.standardNames.type] as? String {
                     var entity = EntityRecord.withIdentifier(uuid, in: context)
                     if entity == nil {
                         let newEntity = EntityRecord(in: context)
@@ -45,15 +45,15 @@ extension Datastore {
                         try? context.save()
                     }
                     if let entity = entity {
-                        decodeEntity(entity, name: name, with: decoder, values: entityRecord)
+                        decodeEntity(entity, with: decoder, values: entityRecord)
                     }
                 }
             }
         }
     }
     
-    fileprivate func decodeEntity(_ entity: EntityRecord, name: String, with decoder: InterchangeDecoder, values entityRecord: [String : Any]) {
-         entity.datestamp = decoder.decode(entityRecord["datestamp"], store: self).coerced(or: Date())
+    fileprivate func decodeEntity(_ entity: EntityRecord, with decoder: InterchangeDecoder, values entityRecord: [String : Any]) {
+         entity.datestamp = decoder.decode(entityRecord[Datastore.standardNames.datestamp], store: self).coerced(or: Date())
          var entityProperties = entityRecord
          for key in Datastore.specialProperties {
              entityProperties.removeValue(forKey: key)
@@ -75,9 +75,9 @@ extension Datastore {
             if let entities = try? context.fetch(request) {
                 for entity in entities {
                     var record: [String:Any] = [:]
-                    record["type"] = entity.type
-                    record["datestamp"] = encoder.encodePrimitive(entity.datestamp)
-                    record["uuid"] = encoder.encodePrimitive(entity.uuid)
+                    record[Datastore.standardNames.type] = entity.type
+                    record[Datastore.standardNames.datestamp] = encoder.encodePrimitive(entity.datestamp)
+                    record[Datastore.standardNames.uuid] = encoder.encodePrimitive(entity.uuid)
                     entity.encode(from: entity.strings, as: StringProperty.self, into: &record, encoder: encoder)
                     entity.encode(from: entity.integers, as: IntegerProperty.self, into: &record, encoder: encoder)
                     entity.encode(from: entity.dates, as: DateProperty.self, into: &record, encoder: encoder)
@@ -87,7 +87,7 @@ extension Datastore {
                 }
             }
             let result = [
-                "entities" : entityResults
+                Datastore.standardNames.entities : entityResults
             ]
             completion(result)
         }

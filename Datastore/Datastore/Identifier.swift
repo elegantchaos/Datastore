@@ -112,8 +112,8 @@ internal struct OpaqueIdentifiedID: ResolvableID {
             return OpaqueCachedID(object)
         } else if let name = name {
             let object = type.init(context: context)
-            object.setValue(name.lowercased(), forKey: "name")
-            object.setValue(uuid, forKey: "uuid")
+            object.setValue(name.lowercased(), forKey: Datastore.standardNames.name)
+            object.setValue(uuid, forKey: Datastore.standardNames.uuid)
             return OpaqueCachedID(object)
         } else {
             return NullCachedID()

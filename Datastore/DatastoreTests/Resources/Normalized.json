@@ -1,45 +1,77 @@
 {
     "entities" : [
         {
+            "type" : "test",
             "uuid" : "FE396F3F-A325-4F50-899C-F22308C97D12",
-            "type" : "person",
-            "name" : "Person 1",
             "datestamp" : { "date" : "1969-11-12T01:23:45Z" },
-            "modified" : { "date" : "1963-09-21T01:23:45Z" },
+            
+            "name" : {
+                "string": "Person 1",
+                "type": "string",
+                "datestamp" : "1969-11-12T01:23:45Z"
+            },
+            "modified" : {
+                "date" : "1963-09-21T01:23:45Z",
+                "type": "date",
+                "datestamp" : "1969-11-12T01:23:45Z"
+            },
             "address" : {
                 "string" : "123 New St",
-                "type" : "address"
+                "type" : "address",
+                "datestamp" : "1969-11-12T01:23:45Z"
             },
             "owner" : {
                 "entity" : "FE396F3F-A325-4F50-899C-F22308C97D12",
-                "type" : "owner"
+                "type" : "owner",
+                "datestamp" : "1969-11-12T01:23:45Z"
             },
-            "data" : { "data": "ZW5jb2RlZCBzdHJpbmc=" }
+            "data" : {
+                "data": "ZW5jb2RlZCBzdHJpbmc=",
+                "type": "data",
+                "datestamp" : "1969-11-12T01:23:45Z"
+            }
         },
         
         {
+            "type" : "test",
+            "uuid" : "652A3D31-C409-4CBE-8469-6232D1EEBC96",
+            "datestamp" : { "date" : "1969-11-12T01:23:45Z" },
+            
             "address" : {
                 "string" : "456 Old St",
-                "type" : "address"
+                "type" : "address",
+                "datestamp" : "1969-11-12T01:23:45Z"
             },
-            "data" : { "data": "ZW5jb2RlZCBzdHJpbmc=" },
+            "data" : {
+                "data": "ZW5jb2RlZCBzdHJpbmc=",
+                "type": "data",
+                "datestamp" : "1969-11-12T01:23:45Z"
+            },
             "owner" : {
                 "entity" : "652A3D31-C409-4CBE-8469-6232D1EEBC96",
-                "type" : "owner"
+                "type" : "owner",
+                "datestamp" : "1969-11-12T01:23:45Z"
             },
-            "datestamp" : { "date" : "1969-11-12T01:23:45Z" },
-            "modified" : { "date" : "1963-09-21T01:23:45Z" },
+            "modified" : {
+                "date" : "1963-09-21T01:23:45Z",
+                "type": "date",
+                "datestamp" : "1969-11-12T01:23:45Z"
+            },
             "date" : {
                 "date" : "2019-09-19T16:14:58Z",
-                "type" : "date"
+                "type" : "date",
+                "datestamp" : "1969-11-12T01:23:45Z"
             },
-            "type" : "person",
-            "uuid" : "652A3D31-C409-4CBE-8469-6232D1EEBC96",
             "number" : {
                 "integer" : 123,
-                "type" : "integer"
+                "type" : "integer",
+                "datestamp" : "1969-11-12T01:23:45Z"
             },
-            "name" : "Person 2"
+            "name" : {
+                "string": "Person 2",
+                "type": "string",
+                "datestamp" : "1969-11-12T01:23:45Z"
+            }
         }
     ]
 }

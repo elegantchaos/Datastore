@@ -32,40 +32,40 @@ public extension InterchangeEncoder {
     }
 
     func encode(type: String?, datestamp: Date?, into record: inout [String:Any]) {
-        record["symbol"] = type
-        record["datestamp"] = encodePrimitive(datestamp)
+        record[Datastore.standardNames.type] = type
+        record[Datastore.standardNames.datestamp] = encodePrimitive(datestamp)
     }
     
     func encode(_ date: DateProperty, into record: inout [String:Any]) {
-        record["date"] = encodePrimitive(date.value)
+        record[Datastore.standardNames.date] = encodePrimitive(date.value)
         encode(type: date.type, datestamp: date.datestamp, into: &record)
     }
 
     func encode(_ data: DataProperty, into record: inout [String:Any]) {
-        record["data"] = encodePrimitive(data.value)
+        record[Datastore.standardNames.data] = encodePrimitive(data.value)
         encode(type: data.type, datestamp: data.datestamp, into: &record)
     }
 
     func encode(_ string: StringProperty, into record: inout [String:Any]) {
         if let string = string.value {
-            record["string"] = string
+            record[Datastore.standardNames.string] = string
         }
         encode(type: string.type, datestamp: string.datestamp, into: &record)
     }
     
     func encode(_ integer: IntegerProperty, into record: inout [String:Any]) {
-        record["integer"] = integer.value
+        record[Datastore.standardNames.integer] = integer.value
         encode(type: integer.type, datestamp: integer.datestamp, into: &record)
     }
 
     func encode(_ double: DoubleProperty, into record: inout [String:Any]) {
-        record["double"] = double.value
+        record[Datastore.standardNames.double] = double.value
         encode(type: double.type, datestamp: double.datestamp, into: &record)
     }
 
     func encode(_ relationship: RelationshipProperty, into record: inout [String:Any]) {
         if let value = relationship.target?.uuid {
-            record["entity"] = encodePrimitive(value)
+            record[Datastore.standardNames.entity] = encodePrimitive(value)
         }
         encode(type: relationship.type, datestamp: relationship.datestamp, into: &record)
     }

@@ -13,7 +13,7 @@ let datastoreChannel = Channel("com.elegantchaos.datastore")
 
 public class Datastore {
     static var cachedModel: NSManagedObjectModel!
-    static let standardSymbols = StandardSymbols()
+    static let standardNames = StandardNames()
     
     internal let container: NSPersistentContainer
     internal let context: NSManagedObjectContext
@@ -32,7 +32,7 @@ public class Datastore {
     
     public typealias ApplyResult = Result<Void, Error>
     
-    static let specialProperties = ["uuid", "datestamp", "type"]
+    static let specialProperties = [Datastore.standardNames.uuid, Datastore.standardNames.datestamp, Datastore.standardNames.type]
     
     public class func loadCombine(name: String, url: URL? = nil) -> Future<Datastore, Error> {
         let future = Future<Datastore, Error>() { promise in
@@ -146,6 +146,7 @@ public class Datastore {
         context.perform {
             
             let request: NSFetchRequest<EntityRecord> = EntityRecord.fetcher(in: context)
+            request.predicate = NSPredicate(format: "type = %@", type)
             if let entities = try? context.fetch(request) {
                 completion(Array(entities.map({ Entity($0) })))
             } else {

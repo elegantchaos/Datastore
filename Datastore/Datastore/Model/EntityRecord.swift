@@ -80,51 +80,51 @@ public class EntityRecord: NSManagedObject {
     }
     
     func add(_ value: String, key: String, type: String?, store: Datastore) {
-        if let property: StringProperty = add(key: key, type: type ?? Datastore.standardSymbols.string) {
+        if let property: StringProperty = add(key: key, type: type ?? Datastore.standardNames.string) {
             property.value = value
         }
     }
     
     func add(_ value: Int64, key: String, type: String?, store: Datastore) {
-        if let property: IntegerProperty = add(key: key, type: type ?? Datastore.standardSymbols.integer) {
+        if let property: IntegerProperty = add(key: key, type: type ?? Datastore.standardNames.integer) {
             property.value = value
         }
     }
     
     func add(_ value: Double, key: String, type: String?, store: Datastore) {
-        if let property: DoubleProperty = add(key: key, type: type ?? Datastore.standardSymbols.double) {
+        if let property: DoubleProperty = add(key: key, type: type ?? Datastore.standardNames.double) {
             property.value = value
         }
     }
     
     func add(_ value: Date, key: String, type: String?, store: Datastore) {
-        if let property: DateProperty = add(key: key, type: type ?? Datastore.standardSymbols.date) {
+        if let property: DateProperty = add(key: key, type: type ?? Datastore.standardNames.date) {
             property.value = value
         }
     }
 
     func add(_ value: Data, key: String, type: String?, store: Datastore) {
-        if let property: DataProperty = add(key: key, type: type ?? Datastore.standardSymbols.data) {
+        if let property: DataProperty = add(key: key, type: type ?? Datastore.standardNames.data) {
             property.value = value
         }
     }
 
     func add(_ value: EntityRecord, key: String, type: String?, store: Datastore) {
-        if let property: RelationshipProperty = add(key: key, type: type ?? Datastore.standardSymbols.entity) {
+        if let property: RelationshipProperty = add(key: key, type: type ?? Datastore.standardNames.entity) {
             property.target = value
         }
     }
         
     func read(properties names: Set<String>, store: Datastore) -> SemanticDictionary {
         var values = SemanticDictionary()
-        if names.contains("datestamp") {
-            values[valueWithKey: "datestamp"] = SemanticValue(datestamp, type: Datastore.standardSymbols.date)
+        if names.contains(Datastore.standardNames.datestamp) {
+            values[valueWithKey: Datastore.standardNames.datestamp] = SemanticValue(datestamp, type: Datastore.standardNames.date)
         }
-        if names.contains("uuid") {
-            values[valueWithKey: "uuid"] = SemanticValue(uuid, type: Datastore.standardSymbols.identifier)
+        if names.contains(Datastore.standardNames.uuid) {
+            values[valueWithKey: Datastore.standardNames.uuid] = SemanticValue(uuid, type: Datastore.standardNames.identifier)
         }
-        if names.contains("type") {
-            values[valueWithKey: "type"] = SemanticValue(type, type: Datastore.standardSymbols.entity)
+        if names.contains(Datastore.standardNames.type) {
+            values[valueWithKey: Datastore.standardNames.type] = SemanticValue(type, type: Datastore.standardNames.entity)
         }
 
         read(names: names, from: strings, as: StringProperty.self, into: &values, store: store)
