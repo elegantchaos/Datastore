@@ -80,37 +80,37 @@ public class EntityRecord: NSManagedObject {
     }
     
     func add(_ value: String, key: String, type: String?, store: Datastore) {
-        if let property: StringProperty = add(key: key, type: type ?? store.standardSymbols.string) {
+        if let property: StringProperty = add(key: key, type: type ?? Datastore.standardSymbols.string) {
             property.value = value
         }
     }
     
     func add(_ value: Int64, key: String, type: String?, store: Datastore) {
-        if let property: IntegerProperty = add(key: key, type: type ?? store.standardSymbols.integer) {
+        if let property: IntegerProperty = add(key: key, type: type ?? Datastore.standardSymbols.integer) {
             property.value = value
         }
     }
     
     func add(_ value: Double, key: String, type: String?, store: Datastore) {
-        if let property: DoubleProperty = add(key: key, type: type ?? store.standardSymbols.double) {
+        if let property: DoubleProperty = add(key: key, type: type ?? Datastore.standardSymbols.double) {
             property.value = value
         }
     }
     
     func add(_ value: Date, key: String, type: String?, store: Datastore) {
-        if let property: DateProperty = add(key: key, type: type ?? store.standardSymbols.date) {
+        if let property: DateProperty = add(key: key, type: type ?? Datastore.standardSymbols.date) {
             property.value = value
         }
     }
 
     func add(_ value: Data, key: String, type: String?, store: Datastore) {
-        if let property: DataProperty = add(key: key, type: type ?? store.standardSymbols.data) {
+        if let property: DataProperty = add(key: key, type: type ?? Datastore.standardSymbols.data) {
             property.value = value
         }
     }
 
     func add(_ value: EntityRecord, key: String, type: String?, store: Datastore) {
-        if let property: RelationshipProperty = add(key: key, type: type ?? store.standardSymbols.entity) {
+        if let property: RelationshipProperty = add(key: key, type: type ?? Datastore.standardSymbols.entity) {
             property.target = value
         }
     }
@@ -118,13 +118,13 @@ public class EntityRecord: NSManagedObject {
     func read(properties names: Set<String>, store: Datastore) -> SemanticDictionary {
         var values = SemanticDictionary()
         if names.contains("datestamp") {
-            values[valueWithKey: "datestamp"] = store.value(datestamp, type: store.standardSymbols.date)
+            values[valueWithKey: "datestamp"] = SemanticValue(datestamp, type: Datastore.standardSymbols.date)
         }
         if names.contains("uuid") {
-            values[valueWithKey: "uuid"] = store.value(uuid, type: store.standardSymbols.identifier)
+            values[valueWithKey: "uuid"] = SemanticValue(uuid, type: Datastore.standardSymbols.identifier)
         }
         if names.contains("type") {
-            values[valueWithKey: "type"] = store.value(type, type: store.standardSymbols.entity)
+            values[valueWithKey: "type"] = SemanticValue(type, type: Datastore.standardSymbols.entity)
         }
 
         read(names: names, from: strings, as: StringProperty.self, into: &values, store: store)
@@ -197,7 +197,7 @@ public class EntityRecord: NSManagedObject {
             var remaining = names
             for property in sorted {
                 if let name = property.name, remaining.contains(name) {
-                    let value = property.typedValue(in: store)
+                    let value = property.semanticValue
                     assert(value.type != nil)
                     values[valueWithKey: name] = value
                     remaining.remove(name)
@@ -214,7 +214,7 @@ public class EntityRecord: NSManagedObject {
             var done: Set<String> = []
             for property in sorted {
                 if let name = property.name, !done.contains(name) {
-                    let value = property.typedValue(in: store)
+                    let value = property.semanticValue
                     assert(value.type != nil)
                     values[valueWithKey: name] = value
                     done.insert(name)

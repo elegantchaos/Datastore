@@ -13,9 +13,10 @@ let datastoreChannel = Channel("com.elegantchaos.datastore")
 
 public class Datastore {
     static var cachedModel: NSManagedObjectModel!
+    static let standardSymbols = StandardSymbols()
+    
     internal let container: NSPersistentContainer
     internal let context: NSManagedObjectContext
-    internal let standardSymbols = StandardSymbols()
     
     public typealias LoadResult = Result<Datastore, Error>
     public typealias SaveResult = Result<Void, Error>
@@ -33,18 +34,6 @@ public class Datastore {
     
     static let specialProperties = ["uuid", "datestamp", "type"]
     
-//    struct Publisher: Combine.Publisher {
-//        typealias Output = Datastore
-//        typealias Failure = Error
-//        init(url: URL? = nil) {
-//            
-//        }
-//        func receive<S>(subscriber: S) where S : Subscriber, Error == S.Failure, Datastore == S.Input {
-//            
-//        }
-//        
-//    }
-//    
     public class func loadCombine(name: String, url: URL? = nil) -> Future<Datastore, Error> {
         let future = Future<Datastore, Error>() { promise in
             load(name: name, url: url) { result in
@@ -112,10 +101,6 @@ public class Datastore {
         } catch {
             completion(.failure(error))
         }
-    }
-    
-    public func value(_ value: Any?, type: String? = nil, datestamp: Date? = nil) -> SemanticValue { // TODO: refactor this away
-        return SemanticValue(value: value, type: type ?? standardSymbols.value, datestamp: datestamp)
     }
     
     public func get(entitiesOfType type: String, where key: String, contains: Set<String>, createIfMissing: Bool = true, completion: @escaping EntitiesCompletion) {

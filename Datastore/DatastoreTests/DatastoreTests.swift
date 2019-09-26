@@ -117,7 +117,7 @@ extension DatastoreTests {
         let created = expectation(description: "loaded")
         loadAndCheck { (datastore) in
             datastore.get(entityOfType: "Person", where: "name", equals: "Person 1") { person in
-                XCTAssertEqual(person?.object.string(withKey: datastore.standardSymbols.name), "Person 1")
+                XCTAssertEqual(person?.object.string(withKey: Datastore.standardSymbols.name), "Person 1")
                 created.fulfill()
             }
         }
@@ -156,7 +156,7 @@ extension DatastoreTests {
     
     func exampleProperties(date: Date = Date(), owner: EntityID, in store: Datastore) -> SemanticDictionary {
         var properties = SemanticDictionary()
-        properties["address"] = store.value("123 New St", type: "address")
+        properties["address"] = SemanticValue("123 New St", type: "address")
         properties["date"] = date
         properties["integer"] = 123
         properties["double"] = 456.789
@@ -298,7 +298,7 @@ extension DatastoreTests {
                 var properties = SemanticDictionary()
                 properties["name"] = "New Name"
                 datastore.add(properties: [person : properties]) {
-                    XCTAssertEqual(person.object.string(withKey: datastore.standardSymbols.name), "New Name")
+                    XCTAssertEqual(person.object.string(withKey: Datastore.standardSymbols.name), "New Name")
                     created.fulfill()
                 }
             }

@@ -57,48 +57,48 @@ public extension InterchangeDecoder {
             print("couldn't decode \(String(describing: value))")
         }
         
-        return decoded ?? store.value(value)
+        return decoded ?? SemanticValue(value)
     }
     
     
     func decode(string: Any?, type: String?, store: Datastore) -> SemanticValue? {
         if let string = string as? String {
-            return store.value(string, type: type ?? store.standardSymbols.string)
+            return SemanticValue(string, type: type ?? Datastore.standardSymbols.string)
         }
         return nil
     }
     
     func decode(integer: Any?, type: String?, store: Datastore) -> SemanticValue? {
         if let integer = integer as? Int {
-            return store.value(integer, type: type ?? store.standardSymbols.integer)
+            return SemanticValue(integer, type: type ?? Datastore.standardSymbols.integer)
         }
         return nil
     }
     
     func decode(double: Any?, type: String?, store: Datastore) -> SemanticValue? {
         if let double = double as? Double {
-            return store.value(double, type: type ?? store.standardSymbols.double)
+            return SemanticValue(double, type: type ?? Datastore.standardSymbols.double)
         }
         return nil
     }
     
     func decode(date: Any?, type: String?, store: Datastore) -> SemanticValue? {
         if let date = decodePrimitive(date: date) {
-            return store.value(date, type: type ?? store.standardSymbols.date)
+            return SemanticValue(date, type: type ?? Datastore.standardSymbols.date)
         }
         return nil
     }
 
     func decode(data: Any?, type: String?, store: Datastore) -> SemanticValue? {
         if let data = decodePrimitive(data: data) {
-            return store.value(data, type: type ?? store.standardSymbols.data)
+            return SemanticValue(data, type: type ?? Datastore.standardSymbols.data)
         }
         return nil
     }
 
     func decode(entity: Any?, type: String?, store: Datastore) -> SemanticValue? {
         if let uuid = decodePrimitive(uuid: entity) {
-            return store.value(EntityID(uuid: uuid), type: type ?? store.standardSymbols.entity)
+            return SemanticValue(EntityID(uuid: uuid), type: type ?? Datastore.standardSymbols.entity)
         }
         return nil
     }

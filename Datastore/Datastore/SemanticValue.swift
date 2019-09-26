@@ -13,6 +13,12 @@ public struct SemanticValue {
     let type: String?
     let datestamp: Date?
     
+    init(_ value: Any?, type: String? = Datastore.standardSymbols.value, datestamp: Date? = Date()) {
+        self.value = value
+        self.type = type
+        self.datestamp = datestamp
+    }
+    
     public func coerced<T>(or defaultValue: @autoclosure () -> T) -> T {
         return (value as? T) ?? defaultValue()
     }

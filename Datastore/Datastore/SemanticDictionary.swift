@@ -18,18 +18,18 @@ public struct SemanticDictionary {
             if let value = newValue as? SemanticValue {
                 values[key] = value
             } else if let (value, type) = newValue as? (Any?, String) {
-                values[key] = SemanticValue(value: value, type: type, datestamp: nil)
+                values[key] = SemanticValue(value, type: type, datestamp: nil)
             } else if let (value, type) = newValue as? (Any?, String) {
-                values[key] = SemanticValue(value: value, type: type, datestamp: nil)
+                values[key] = SemanticValue(value, type: type, datestamp: nil)
             } else {
-                values[key] = SemanticValue(value: newValue, type: nil, datestamp: nil)
+                values[key] = SemanticValue(newValue, type: nil, datestamp: nil)
             }
         }
     }
     
     subscript(_ key: String, as type: String) -> Any? {
         get { return values[key]?.value }
-        set { values[key] = SemanticValue(value: newValue, type: type, datestamp: nil) }
+        set { values[key] = SemanticValue(newValue, type: type, datestamp: nil) }
     }
     
     subscript(typeWithKey key: String) -> String? {

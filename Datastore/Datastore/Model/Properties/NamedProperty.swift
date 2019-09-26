@@ -10,7 +10,7 @@ protocol NamedProperty: NSManagedObject {
     var owner: EntityRecord? { get set }
     var type: String? { get set }
     var datestamp: Date? { get }
-    func typedValue(in store: Datastore) -> SemanticValue
+    var semanticValue: SemanticValue { get }
     func encode(with encoder: InterchangeEncoder) -> Any?
     func encode(with encoder: InterchangeEncoder, into record: inout [String:Any])
 }
