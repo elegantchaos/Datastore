@@ -7,6 +7,7 @@
       "modified" : { "date" : "1963-09-21T01:23:45Z" },
       "type" : "test",
       "address" : "123 New St",
+      "data" : { "data": "ZW5jb2RlZCBzdHJpbmc=" },
       "owner" : {
         "entity" : "C41DB873-323D-4026-95D1-603120B9ADF6",
         "type" : "owner"
@@ -19,6 +20,7 @@
       "modified" : { "date" : "1963-09-21T01:23:45Z" },
       "type" : "test",
       "address" : "456 Old St",
+      "data" : { "data": "ZW5jb2RlZCBzdHJpbmc=" },
       "owner" : {
         "entity" : "ADDD557A-668E-4C6B-A9A0-3BCF099646E8",
         "type" : "owner"

@@ -91,22 +91,26 @@ extension DatastoreTests {
     
     func testLoadFromFile() {
         
-//        createTestFile() // uncomment to recreate the test sqlite database from Test.json
-        
-        let url = testURL(named: "Test", withExtension: "sqlite")
-        let loaded = expectation(description: "loaded")
-        loadAndCheck(url: url) { store in
-            store.get(allEntitiesOfType: "person") { (people) in
-                XCTAssertEqual(people.count, 1)
-                store.get(properties: ["name", "age"], of: people) { results in
-                    let properties = results[0]
-                    XCTAssertEqual(properties["name"] as? String, "Test")
-                    XCTAssertEqual(properties["age"] as? Int, 21)
-                    loaded.fulfill()
+        // set the REBUILD_TEST_FILE environment variable to recreate the test sqlite database from Test.json
+        if testFlag("REBUILD_TEST_FILE") {
+            createTestFile()
+            XCTFail("rebuilt test file; run again without REBUILD_TEST_FILE to run the actual test")
+        } else {
+            let url = testURL(named: "Test", withExtension: "sqlite")
+            let loaded = expectation(description: "loaded")
+            loadAndCheck(url: url) { store in
+                store.get(allEntitiesOfType: "person") { (people) in
+                    XCTAssertEqual(people.count, 1)
+                    store.get(properties: ["name", "age"], of: people) { results in
+                        let properties = results[0]
+                        XCTAssertEqual(properties["name"] as? String, "Test")
+                        XCTAssertEqual(properties["age"] as? Int, 21)
+                        loaded.fulfill()
+                    }
                 }
             }
+            wait(for: [loaded], timeout: 1.0)
         }
-        wait(for: [loaded], timeout: 1.0)
     }
     
     func testEntityCreation() {
@@ -157,6 +161,7 @@ extension DatastoreTests {
         properties["integer"] = 123
         properties["double"] = 456.789
         properties["owner"] = (owner, "owner")
+        properties["data"] = "encoded string".data(using: .utf8)
         return properties
     }
     
@@ -203,7 +208,7 @@ extension DatastoreTests {
             let expected = ["Person 1": "123 New St", "Person 2": "456 Old St"]
             store.get(allEntitiesOfType: "person") { (people) in
                 XCTAssertEqual(people.count, 2)
-                store.get(properties : ["name", "address", "datestamp", "modified", "owner"], of: people) { results in
+                store.get(properties : ["name", "address", "datestamp", "modified", "owner", "data"], of: people) { results in
                     var n = 0
                     for result in results {
                         let name = result["name"] as! String
@@ -212,6 +217,9 @@ extension DatastoreTests {
                         if checkAddressType {
                             XCTAssertEqual(result[typeWithKey: "address"], "address")
                         }
+                        let data = result["data"] as! Data
+                        XCTAssertEqual(String(data: data, encoding: .utf8), "encoded string")
+                        XCTAssertEqual(result[typeWithKey: "data"], "data")
                         let expectedValue = expected[name]
                         XCTAssertEqual(expectedValue, value, "\(name)")
                         let created = result["datestamp"] as! Date

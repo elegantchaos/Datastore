@@ -14,6 +14,7 @@
                 "entity" : "FE396F3F-A325-4F50-899C-F22308C97D12",
                 "type" : "owner"
             },
+            "data" : { "data": "ZW5jb2RlZCBzdHJpbmc=" }
         },
         
         {
@@ -21,6 +22,7 @@
                 "string" : "456 Old St",
                 "type" : "address"
             },
+            "data" : { "data": "ZW5jb2RlZCBzdHJpbmc=" },
             "owner" : {
                 "entity" : "652A3D31-C409-4CBE-8469-6232D1EEBC96",
                 "type" : "owner"

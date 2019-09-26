@@ -114,7 +114,7 @@ public class Datastore {
         }
     }
     
-    public func value(_ value: Any?, type: String? = nil, datestamp: Date? = nil) -> SemanticValue {
+    public func value(_ value: Any?, type: String? = nil, datestamp: Date? = nil) -> SemanticValue { // TODO: refactor this away
         return SemanticValue(value: value, type: type ?? standardSymbols.value, datestamp: datestamp)
     }
     

@@ -12,12 +12,14 @@ public protocol InterchangeDecoder {
     
     func decodePrimitive(date: Any?) -> Date?
     func decodePrimitive(uuid: Any?) -> UUID?
+    func decodePrimitive(data: Any?) -> Data?
     
     // TODO: split decode functions into small helper objects so that we can iterate them
     func decode(string: Any?, type: String?, store: Datastore) -> SemanticValue?
     func decode(integer: Any?, type: String?, store: Datastore) -> SemanticValue?
     func decode(double: Any?, type: String?, store: Datastore) -> SemanticValue?
     func decode(date: Any?, type: String?, store: Datastore) -> SemanticValue?
+    func decode(data: Any?, type: String?, store: Datastore) -> SemanticValue?
     func decode(entity: Any?, type: String?, store: Datastore) -> SemanticValue?
 }
 
@@ -36,6 +38,8 @@ public extension InterchangeDecoder {
                 decoded = decode(date: date, type: type, store: store)
             } else if let entity = record["entity"] {
                 decoded = decode(entity: entity, type: type, store: store)
+            } else if let data = record["data"] {
+                decoded = decode(data: data, type: type, store: store)
             }
         } else if let string = decode(string: value, type: nil, store: store) {
             decoded = string
@@ -47,6 +51,8 @@ public extension InterchangeDecoder {
             decoded = date
         } else if let uuid = decodePrimitive(uuid: value) {
             decoded = decode(entity: uuid, type: nil, store: store) // we assume that raw uuids refer to entities
+        } else if let data = decodePrimitive(data: value) {
+            decoded = decode(data: data, type: nil, store: store)
         } else if value != nil {
             print("couldn't decode \(String(describing: value))")
         }
@@ -82,7 +88,14 @@ public extension InterchangeDecoder {
         }
         return nil
     }
-    
+
+    func decode(data: Any?, type: String?, store: Datastore) -> SemanticValue? {
+        if let data = decodePrimitive(data: data) {
+            return store.value(data, type: type ?? store.standardSymbols.data)
+        }
+        return nil
+    }
+
     func decode(entity: Any?, type: String?, store: Datastore) -> SemanticValue? {
         if let uuid = decodePrimitive(uuid: entity) {
             return store.value(EntityID(uuid: uuid), type: type ?? store.standardSymbols.entity)
@@ -91,7 +104,7 @@ public extension InterchangeDecoder {
     }
 }
 
-public struct NullInterchangeDecoder: InterchangeDecoder {
+public struct BasicInterchangeDecoder: InterchangeDecoder {
     public func decodePrimitive(date: Any?) -> Date? {
         return date as? Date
     }
@@ -107,24 +120,7 @@ public struct NullInterchangeDecoder: InterchangeDecoder {
         }
     }
     
-}
-
-
-public struct JSONInterchangeDecoder: InterchangeDecoder {
-    static let formatter = ISO8601DateFormatter()
-    
-    public func decodePrimitive(date: Any?) -> Date? {
-        if let string = date as? String {
-            return JSONInterchangeDecoder.formatter.date(from: string)
-        }
-        return nil
-    }
-    
-    public func decodePrimitive(uuid: Any?) -> UUID? {
-        if let string = uuid as? String {
-            return UUID(uuidString: string)
-        }
-        return nil
+    public func decodePrimitive(data: Any?) -> Data? {
+        return data as? Data
     }
 }
-

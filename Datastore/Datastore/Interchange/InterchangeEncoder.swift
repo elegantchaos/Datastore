@@ -7,9 +7,11 @@ import Foundation
 
 public protocol InterchangeEncoder {
     func encodePrimitive(_ date: Date?) -> Any?
+    func encodePrimitive(_ data: Data?) -> Any?
     func encodePrimitive(_ uuid: UUID?) -> Any?
 
     func encode(_ date: DateProperty, into record: inout [String:Any])
+    func encode(_ data: DataProperty, into record: inout [String:Any])
     func encode(_ string: StringProperty, into record: inout [String:Any])
     func encode(_ integer: IntegerProperty, into record: inout [String:Any])
     func encode(_ double: DoubleProperty, into record: inout [String:Any])
@@ -25,6 +27,10 @@ public extension InterchangeEncoder {
         return uuid
     }
 
+    func encodePrimitive(_ data: Data?) -> Any? {
+        return data
+    }
+
     func encode(type: String?, datestamp: Date?, into record: inout [String:Any]) {
         record["symbol"] = type
         record["datestamp"] = encodePrimitive(datestamp)
@@ -34,7 +40,12 @@ public extension InterchangeEncoder {
         record["date"] = encodePrimitive(date.value)
         encode(type: date.type, datestamp: date.datestamp, into: &record)
     }
-    
+
+    func encode(_ data: DataProperty, into record: inout [String:Any]) {
+        record["data"] = encodePrimitive(data.value)
+        encode(type: data.type, datestamp: data.datestamp, into: &record)
+    }
+
     func encode(_ string: StringProperty, into record: inout [String:Any]) {
         if let string = string.value {
             record["string"] = string
@@ -62,23 +73,6 @@ public extension InterchangeEncoder {
 
 public struct NullInterchangeEncoder: InterchangeEncoder {
     public init() {
-    }
-}
-
-
-public struct JSONInterchangeEncoder: InterchangeEncoder {
-    static let formatter = ISO8601DateFormatter()
-
-    public func encodePrimitive(_ date: Date?) -> Any? {
-        guard let date = date else {
-            return nil
-        }
-        
-        return JSONInterchangeEncoder.formatter.string(from: date)
-    }
-
-    public func encodePrimitive(_ uuid: UUID?) -> Any? {
-        return uuid?.uuidString
     }
 }
 

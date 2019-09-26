@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8B3B2C98233CB87A001BBC57 /* DataProperty.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B3B2C97233CB87A001BBC57 /* DataProperty.swift */; };
+		8B3B2C9A233CC48A001BBC57 /* JSONDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B3B2C99233CC48A001BBC57 /* JSONDecoder.swift */; };
+		8B3B2C9C233CC494001BBC57 /* JSONEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B3B2C9B233CC494001BBC57 /* JSONEncoder.swift */; };
 		8B3B6B6C233389360098DAC1 /* SemanticValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B3B6B6B233389360098DAC1 /* SemanticValue.swift */; };
 		8B3B6B6E233389400098DAC1 /* SemanticDictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B3B6B6D233389400098DAC1 /* SemanticDictionary.swift */; };
 		8B3E97AE233BC02100F47D94 /* XCTestExtensions in Frameworks */ = {isa = PBXBuildFile; productRef = 8B3E97AD233BC02100F47D94 /* XCTestExtensions */; };
@@ -51,6 +54,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		8B3B2C97233CB87A001BBC57 /* DataProperty.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataProperty.swift; sourceTree = "<group>"; };
+		8B3B2C99233CC48A001BBC57 /* JSONDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONDecoder.swift; sourceTree = "<group>"; };
+		8B3B2C9B233CC494001BBC57 /* JSONEncoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONEncoder.swift; sourceTree = "<group>"; };
 		8B3B6B6B233389360098DAC1 /* SemanticValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SemanticValue.swift; sourceTree = "<group>"; };
 		8B3B6B6D233389400098DAC1 /* SemanticDictionary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SemanticDictionary.swift; sourceTree = "<group>"; };
 		8B3E97AF233BC65500F47D94 /* Test.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = Test.json; sourceTree = "<group>"; };
@@ -126,6 +132,7 @@
 			isa = PBXGroup;
 			children = (
 				8B64FD592333CBC9001A0BBD /* DateProperty.swift */,
+				8B3B2C97233CB87A001BBC57 /* DataProperty.swift */,
 				8B64FD572333CBB4001A0BBD /* IntegerProperty.swift */,
 				8B8A6FF3233A1D5F00EF615F /* DoubleProperty.swift */,
 				8B64FD5D2333CBEB001A0BBD /* NamedProperty.swift */,
@@ -160,6 +167,8 @@
 			children = (
 				8B41F50923313FB20035081B /* Datastore+Interchange.swift */,
 				8B55DF0623328AF600B99383 /* InterchangeDecoder.swift */,
+				8B3B2C99233CC48A001BBC57 /* JSONDecoder.swift */,
+				8B3B2C9B233CC494001BBC57 /* JSONEncoder.swift */,
 				8B48FD78232FD98D00F37CF1 /* InterchangeEncoder.swift */,
 			);
 			path = Interchange;
@@ -343,12 +352,15 @@
 				8B3B6B6C233389360098DAC1 /* SemanticValue.swift in Sources */,
 				8B64FD5A2333CBC9001A0BBD /* DateProperty.swift in Sources */,
 				8B8A6FF2233A19C500EF615F /* StandardSymbols.swift in Sources */,
+				8B3B2C9A233CC48A001BBC57 /* JSONDecoder.swift in Sources */,
 				8B55DF0723328AF600B99383 /* InterchangeDecoder.swift in Sources */,
 				8B40C3B9233251D000CC24E6 /* Identifier.swift in Sources */,
 				8B64FD5E2333CBEB001A0BBD /* NamedProperty.swift in Sources */,
 				8BFF2E83232F8B2B00D40D31 /* NSEntityDescriptionExtensions.swift in Sources */,
 				8BFF2E82232F8B2B00D40D31 /* NSManagedObjectExtensions.swift in Sources */,
 				8B64FD5C2333CBD9001A0BBD /* RelationshipProperty.swift in Sources */,
+				8B3B2C98233CB87A001BBC57 /* DataProperty.swift in Sources */,
+				8B3B2C9C233CC494001BBC57 /* JSONEncoder.swift in Sources */,
 				8BFF2E86232F8CD200D40D31 /* EntityRecord.swift in Sources */,
 				8B48FD79232FD98D00F37CF1 /* InterchangeEncoder.swift in Sources */,
 				8B8A6FF4233A1D5F00EF615F /* DoubleProperty.swift in Sources */,
@@ -625,7 +637,7 @@
 			repositoryURL = "git@github.com:elegantchaos/XCTestExtensions.git";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.2;
+				minimumVersion = 1.0.3;
 			};
 		};
 		8BFF2E87232F90EF00D40D31 /* XCRemoteSwiftPackageReference "Logger" */ = {

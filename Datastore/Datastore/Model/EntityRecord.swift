@@ -55,6 +55,9 @@ public class EntityRecord: NSManagedObject {
             case let date as Date:
                 add(date, key: property, type: value.type, store: store)
                 
+            case let data as Data:
+                add(data, key: property, type: value.type, store: store)
+                
             case let entity as EntityRecord:
                 add(entity, key: property, type: value.type, store: store)
                 
@@ -75,6 +78,7 @@ public class EntityRecord: NSManagedObject {
             }
         }
     }
+    
     func add(_ value: String, key: String, type: String?, store: Datastore) {
         if let property: StringProperty = add(key: key, type: type ?? store.standardSymbols.string) {
             property.value = value
@@ -98,14 +102,19 @@ public class EntityRecord: NSManagedObject {
             property.value = value
         }
     }
-    
+
+    func add(_ value: Data, key: String, type: String?, store: Datastore) {
+        if let property: DataProperty = add(key: key, type: type ?? store.standardSymbols.data) {
+            property.value = value
+        }
+    }
+
     func add(_ value: EntityRecord, key: String, type: String?, store: Datastore) {
         if let property: RelationshipProperty = add(key: key, type: type ?? store.standardSymbols.entity) {
             property.target = value
         }
     }
-    
-    
+        
     func read(properties names: Set<String>, store: Datastore) -> SemanticDictionary {
         var values = SemanticDictionary()
         if names.contains("datestamp") {
@@ -123,6 +132,7 @@ public class EntityRecord: NSManagedObject {
         read(names: names, from: doubles, as: DoubleProperty.self, into: &values, store: store)
         read(names: names, from: dates, as: DateProperty.self, into: &values, store: store)
         read(names: names, from: relationships, as: RelationshipProperty.self, into: &values, store: store)
+        read(names: names, from: datas, as: DataProperty.self, into: &values, store: store)
         return values
     }
     

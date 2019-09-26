@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="14903" systemVersion="19A558d" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="DataProperty" representedClassName=".DataProperty" syncable="YES" codeGenerationType="class">
+        <attribute name="datestamp" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="name" optional="YES" attributeType="String"/>
+        <attribute name="type" optional="YES" attributeType="String"/>
+        <attribute name="value" optional="YES" attributeType="Binary"/>
+        <relationship name="owner" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="EntityRecord" inverseName="datas" inverseEntity="EntityRecord"/>
+    </entity>
     <entity name="DateProperty" representedClassName=".DateProperty" syncable="YES" codeGenerationType="class">
         <attribute name="datestamp" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="name" attributeType="String"/>
@@ -18,6 +25,7 @@
         <attribute name="datestamp" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="type" attributeType="String"/>
         <attribute name="uuid" attributeType="UUID" usesScalarValueType="NO"/>
+        <relationship name="datas" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="DataProperty" inverseName="owner" inverseEntity="DataProperty"/>
         <relationship name="dates" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="DateProperty" inverseName="owner" inverseEntity="DateProperty"/>
         <relationship name="doubles" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="DoubleProperty" inverseName="owner" inverseEntity="DoubleProperty"/>
         <relationship name="integers" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="IntegerProperty" inverseName="owner" inverseEntity="IntegerProperty"/>
@@ -49,9 +57,10 @@
     <elements>
         <element name="DateProperty" positionX="0" positionY="0" width="128" height="118"/>
         <element name="DoubleProperty" positionX="9" positionY="90" width="128" height="118"/>
-        <element name="EntityRecord" positionX="0" positionY="0" width="128" height="178"/>
+        <element name="EntityRecord" positionX="0" positionY="0" width="128" height="193"/>
         <element name="IntegerProperty" positionX="0" positionY="0" width="128" height="118"/>
         <element name="RelationshipProperty" positionX="0" positionY="0" width="128" height="118"/>
         <element name="StringProperty" positionX="0" positionY="0" width="128" height="118"/>
+        <element name="DataProperty" positionX="9" positionY="90" width="128" height="118"/>
     </elements>
 </model>

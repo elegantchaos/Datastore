@@ -82,6 +82,7 @@ extension Datastore {
                     entity.encode(from: entity.integers, as: IntegerProperty.self, into: &record, encoder: encoder)
                     entity.encode(from: entity.dates, as: DateProperty.self, into: &record, encoder: encoder)
                     entity.encode(from: entity.relationships, as: RelationshipProperty.self, into: &record, encoder: encoder)
+                    entity.encode(from: entity.datas, as: DataProperty.self, into: &record, encoder: encoder)
                     entityResults.append(record)
                 }
             }
