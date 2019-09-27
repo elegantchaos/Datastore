@@ -1,14 +1,12 @@
-- os: osx
-  osx_image: xcode11
-  language: swift
-  install:
-    - sudo gem install xcpretty-travis-formatter
-
-  script:
-    - xcodebuild -workspace Datastore.xcworkspace -scheme Datastore test | xcpretty-travis-formatter
-
+os: osx
+osx_image: xcode11
+language: swift
+install:
+- sudo gem install xcpretty-travis-formatter
+script:
+- xcodebuild -workspace Datastore.xcworkspace -scheme Datastore test | xcpretty-travis-formatter
 notifications:
   email: false
   slack:
     rooms:
-      secure: d1idbHYYMnE1o+Mu0PJWuYo6lFTJNEMe0yLb3dpYWb18ZWVvwgrKWxFYI7WHQSWEJBNsIyTu4wfArBoFqccphEPS7qTQ6rFaFzS6ktC+XNx7DouBHJQmlXBaWQlQiC3CQnMFIBq9/yjlcAUgE80ltt48jdk2tVw33EJGIe1PPo+7GqF1vTeQmkYuqXdpvwba5YL9kCsFr6MHHeB/TEy/J57kei22L5flDYP2DanhsAl0XsXPIwSZkrzcSvG18gckdkR+PVw1xBnDtFknmSvvhlMRRytqZNBnZ4gExr7Mp/lzFj6WiayLyx95FmUp0yLPf2Dr8CDlD8kJPIG/SQnD46+rMRxMRnOMEg02MOxN8v2zc6HAjLTAJr0WRKtRqW+QCik1Z+Bp/g2Cap7O3qaAZx2JQ6hHdLAOh7PvobeN/j7DN/cDCmbhlCJdwx/n/Mn34NYq4H8X8lGtWtXxSk5YPpQEj0WfY14JYiRDhU2a85KuOcNq4dxx/1INHS+PCfbAEt0w60I2MKayg/CfHyWsOgNXyB7K4wbaa/C4KAYr0Nyx9d9kP+/YoOMNykZCasEm8LY9Woqc5tX7wvu6BBZXImiHcKHY7v0RCLN3K5bpboYzGt7znBCHqk+9a2MF822H4JpvUx9l6MglVWS+cYhmMXhBkdGXZyFwHw+A3Rqms+8=
+      secure: VY98dlPexEIbCLMvucp9q7Qt/jOnAyntKfSEPXNdfAsdFKQfMwFUqUZ3v9ePj2RRh+vRdd7+ip1kn6cR5sQwc7Bn+HUIJVE6X1Z4BVKYYQH/5O12gXlvDnNIB2tFGVK7jPIPABNb+XtH5XLeLhAHqIBZZpQz+9ZZoJmKJ22fXqof/a+9dLFGu4o0J2ckuaQjpAXsg8ZSTp+Vvg2JrgrEkRpvuTq5zwBPHub9ZlYSNveIjKXHThZrL8v6TgzLc4eF/p/2t5Wj0ZEs3r+ashLkoXO1kuwMqx0pNYxgUL1HnItO3bf03RNurpGX6BUqIDoq4GMTxmufOoPbE+gXov2RxRTC5ujtMvsLuAfuOxF/pJNRpmeo43GVaQtfq4DRA2bcg1/zsa7fMRJ5qC08QmimjBNzQSGAfaGaigP3apt1DliCT3SNWMAGq4jV+0e9AnSECErPgpXYOSAFScP5c0iqp3nkH1lqFTlHRBnk3m4qHKuaQkmEJQUac1+4kf8DJSgZyesoldXYKd3zbAu/wx7h12q/N57AE4Vbijowcak7dc3Tf/QR3mnHNXDW/3/X7glIyWwUhJHaQEK6oihvY1R2CiTlHAtuoBInzJogZlZleV7N+U3MJ77glm6khDLrNkByc7r90gMyE6ZFb1+4Abc+BGYlahqJiGiNpZU86p187IE=
