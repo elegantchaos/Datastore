@@ -4,7 +4,7 @@ language: swift
 install:
 - sudo gem install xcpretty-travis-formatter
 script:
-- xcodebuild -workspace Datastore.xcworkspace -scheme Datastore test | xcpretty-travis-formatter
+- xcodebuild -workspace Datastore.xcworkspace -scheme Datastore test | xcpretty -f `xcpretty-travis-formatter`
 notifications:
   email: false
   slack:
