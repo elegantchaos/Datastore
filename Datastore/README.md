@@ -63,9 +63,8 @@ Combine support is being considered.
 
 ## To Do
 
-- add data property type
 - implement special modified property for entities (read-only, date of most recently modified property)
 - support reading/writing arrays (and dictionaries?)
 - add compact interchange output: drops older values, writes simplified properties when possible
 - optimise interchange writing for compact values
-- encoding/decoding relationships
+- add prototypes?

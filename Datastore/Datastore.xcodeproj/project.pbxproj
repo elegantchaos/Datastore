@@ -31,6 +31,8 @@
 		8B8A6FF0233A146500EF615F /* Simple.json in Resources */ = {isa = PBXBuildFile; fileRef = 8B8A6FEF233A146500EF615F /* Simple.json */; };
 		8B8A6FF2233A19C500EF615F /* StandardNames.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B8A6FF1233A19C500EF615F /* StandardNames.swift */; };
 		8B8A6FF4233A1D5F00EF615F /* DoubleProperty.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B8A6FF3233A1D5F00EF615F /* DoubleProperty.swift */; };
+		8B95FA68233E084D00B335E0 /* .travis.yml in Resources */ = {isa = PBXBuildFile; fileRef = 8B95FA66233E084D00B335E0 /* .travis.yml */; };
+		8B95FA69233E084D00B335E0 /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 8B95FA67233E084D00B335E0 /* .gitignore */; };
 		8BFF2E6A232F85E200D40D31 /* Datastore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8BFF2E60232F85E200D40D31 /* Datastore.framework */; };
 		8BFF2E6F232F85E200D40D31 /* DatastoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFF2E6E232F85E200D40D31 /* DatastoreTests.swift */; };
 		8BFF2E71232F85E200D40D31 /* Datastore.h in Headers */ = {isa = PBXBuildFile; fileRef = 8BFF2E63232F85E200D40D31 /* Datastore.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -78,6 +80,8 @@
 		8B8A6FEF233A146500EF615F /* Simple.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = Simple.json; sourceTree = "<group>"; };
 		8B8A6FF1233A19C500EF615F /* StandardNames.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StandardNames.swift; sourceTree = "<group>"; };
 		8B8A6FF3233A1D5F00EF615F /* DoubleProperty.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoubleProperty.swift; sourceTree = "<group>"; };
+		8B95FA66233E084D00B335E0 /* .travis.yml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.yaml; name = .travis.yml; path = ../.travis.yml; sourceTree = "<group>"; };
+		8B95FA67233E084D00B335E0 /* .gitignore */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = .gitignore; path = ../.gitignore; sourceTree = "<group>"; };
 		8BFF2E60232F85E200D40D31 /* Datastore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Datastore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		8BFF2E63232F85E200D40D31 /* Datastore.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Datastore.h; sourceTree = "<group>"; };
 		8BFF2E64232F85E200D40D31 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -178,6 +182,8 @@
 			isa = PBXGroup;
 			children = (
 				8B40C3B7233233D000CC24E6 /* README.md */,
+				8B95FA67233E084D00B335E0 /* .gitignore */,
+				8B95FA66233E084D00B335E0 /* .travis.yml */,
 				8BFF2E62232F85E200D40D31 /* Datastore */,
 				8BFF2E6D232F85E200D40D31 /* DatastoreTests */,
 				8BFF2E61232F85E200D40D31 /* Products */,
@@ -322,6 +328,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8B95FA69233E084D00B335E0 /* .gitignore in Resources */,
+				8B95FA68233E084D00B335E0 /* .travis.yml in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
