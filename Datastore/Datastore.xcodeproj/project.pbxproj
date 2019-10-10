@@ -64,7 +64,7 @@
 		8B3E97AF233BC65500F47D94 /* Test.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = Test.json; sourceTree = "<group>"; };
 		8B3E97B2233BC9DA00F47D94 /* Test.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = Test.sqlite; sourceTree = "<group>"; };
 		8B4060C9233A60F30061C83A /* Relationships.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = Relationships.json; sourceTree = "<group>"; };
-		8B40C3B7233233D000CC24E6 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; wrapsLines = 1; };
+		8B40C3B7233233D000CC24E6 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; wrapsLines = 1; };
 		8B40C3B8233251D000CC24E6 /* Identifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Identifier.swift; sourceTree = "<group>"; };
 		8B41F50923313FB20035081B /* Datastore+Interchange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Datastore+Interchange.swift"; sourceTree = "<group>"; };
 		8B48FD78232FD98D00F37CF1 /* InterchangeEncoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterchangeEncoder.swift; sourceTree = "<group>"; };
