@@ -2,7 +2,7 @@
 
 The goal is for a flexible object store which can be implemented efficiently using threading. 
 
-It forces asynchronous usage patterns by no supplying synchronous ones! 
+It forces asynchronous usage patterns by not supplying synchronous ones! 
 
 ## Structure
 
