@@ -11,8 +11,8 @@ let package = Package(
         .library(name: "Datastore", targets: ["Datastore"]),
         ],
     dependencies: [
-        .package(url: "git@github.com:elegantchaos/Logger.git", from: "1.3.6"),
-        .package(url: "git@github.com:elegantchaos/XCTestExtensions.git", from: "1.0.4"),
+        .package(url: "https://github.com/elegantchaos/Logger.git", from: "1.3.6"),
+        .package(url: "https://github.com/elegantchaos/XCTestExtensions.git", from: "1.0.4"),
     ],
     targets: [
         .target(
