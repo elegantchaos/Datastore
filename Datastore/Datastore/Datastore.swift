@@ -59,11 +59,11 @@ public class Datastore {
         } else {
             description.url = URL(fileURLWithPath: "/dev/null")
         }
-
+        
         description.setOption(true as NSValue, forKey: NSMigratePersistentStoresAutomaticallyOption)
         description.setOption(true as NSValue, forKey: NSInferMappingModelAutomaticallyOption)
         description.type = NSSQLiteStoreType
-
+        
         
         container.loadPersistentStores { (description, error) in
             if let error = error {
@@ -109,7 +109,7 @@ public class Datastore {
         context.perform {
             var result: [EntityRecord] = []
             var create: Set<String> = contains
-
+            
             let request: NSFetchRequest<EntityRecord> = EntityRecord.fetcher(in: context)
             if let entities = try? context.fetch(request) {
                 for entity in entities {
@@ -171,7 +171,7 @@ public class Datastore {
             completion(result)
         }
     }
-
+    
     public func get(allPropertiesOf entities: [EntityID], completion: @escaping ([SemanticDictionary]) -> Void) {
         let context = self.context
         context.perform {
@@ -188,7 +188,7 @@ public class Datastore {
             completion(result)
         }
     }
-
+    
     public func add(properties: [EntityID: SemanticDictionary], completion: @escaping () -> Void) {
         let context = self.context
         context.perform {
@@ -210,7 +210,7 @@ public class Datastore {
             for entityID in entities {
                 if let entity = entityID.resolve(in: context) {
                     entity.remove(properties: names, store: self)
-                 }
+                }
             }
             completion()
         }
@@ -221,21 +221,84 @@ public class Datastore {
             return cachedModel
         }
         
-        guard let url = bundle.url(forResource: "Model", withExtension: "momd") else {
-            datastoreChannel.debug("failed to locate model")
-            return nil
-        }
+        cachedModel = makeModel()
+        return cachedModel
         
-        guard let model = NSManagedObjectModel(contentsOf: url) else {
-            datastoreChannel.debug("failed to load model")
-            return nil
-        }
+//        guard let url = bundle.url(forResource: "Model", withExtension: "momd") else {
+//            datastoreChannel.debug("failed to locate model")
+//            return nil
+//        }
+//
+//        guard let model = NSManagedObjectModel(contentsOf: url) else {
+//            datastoreChannel.debug("failed to load model")
+//            return nil
+//        }
+//
+//        datastoreChannel.debug("loaded collection model")
+//        if (cached) {
+//            cachedModel = model
+//        }
+//
+//        return model
+    }
+    
+    private class func makeModel() -> NSManagedObjectModel {
+        let model = NSManagedObjectModel()
+        let entityRecord = NSEntityDescription()
+        entityRecord.name = "EntityRecord"
+        let datestamp = NSAttributeDescription()
+        datestamp.name = "datestamp"
+        datestamp.attributeType = .dateAttributeType
+        let type = NSAttributeDescription()
+        type.name = "type"
+        type.attributeType = .stringAttributeType
+        let uuid = NSAttributeDescription()
+        uuid.name = "uuid"
+        type.attributeType = .UUIDAttributeType
+        entityRecord.properties = [datestamp, type, uuid]
         
-        datastoreChannel.debug("loaded collection model")
-        if (cached) {
-            cachedModel = model
-        }
+        model.entities = [
+            entityRecord,
+            makeEntity(for: Double.self, ownerEntity: entityRecord),
+            makeEntity(for: Int.self, ownerEntity: entityRecord),
+            makeEntity(for: Date.self, ownerEntity: entityRecord),
+            makeEntity(for: String.self, ownerEntity: entityRecord),
+            makeEntity(for: Data.self, ownerEntity: entityRecord)
+        ]
         
         return model
     }
+    
+    private class func makeEntity<EntityType>(for type: EntityType, ownerEntity: NSEntityDescription) -> NSEntityDescription {
+        let entity = NSEntityDescription()
+        let typeName = String(describing: EntityType.self)
+        entity.name =  typeName + "Property"
+        let datestamp = NSAttributeDescription()
+        datestamp.name = "datestamp"
+        datestamp.attributeType = .dateAttributeType
+        let name = NSAttributeDescription()
+        name.name = "name"
+        name.attributeType = .stringAttributeType
+        let type = NSAttributeDescription()
+        type.name = "type"
+        type.attributeType = .stringAttributeType
+        let value = NSAttributeDescription()
+        value.name = "value"
+        value.attributeType = .binaryDataAttributeType
+        let owner = NSRelationshipDescription()
+        owner.name = "owner"
+        owner.destinationEntity = ownerEntity
+        owner.deleteRule = .nullifyDeleteRule
+        owner.maxCount = 1
+        let ownerInverse = NSRelationshipDescription()
+        ownerInverse.name = typeName + "s"
+        ownerInverse.destinationEntity = entity
+        owner.inverseRelationship = ownerInverse
+        ownerInverse.inverseRelationship = owner
+        ownerEntity.properties.append(ownerInverse)
+        entity.properties = [datestamp, name, type, value, owner]
+        
+        return entity
+    }
+    
 }
