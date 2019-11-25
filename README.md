@@ -4,6 +4,7 @@ The goal is for a flexible object store which can be implemented efficiently usi
 
 It forces asynchronous usage patterns by not supplying synchronous ones! 
 
+
 ## Structure
 
 The datastore contains *entities*, which have *properties* and *relationships*.
@@ -23,6 +24,7 @@ Property values have a datestamp. An entity can have more than one entry for the
 What multiple entries for the same property means is up to interpretation - it can either indicate a change history (with the newest entry being the current value),
 or it can indicate that the entity does indeed have multiple values for that property. 
 
+
 ## Access
 
 All access operations are asynchronous, and backing-store neutral.
@@ -35,15 +37,18 @@ Results are returned using callback blocks.
 
 The API is designed for bulk operations; it takes a list of entities/properties to operate on, and returns lists or dictionaries of the combined results. 
 
+
 ## Backing Store
 
 Current backing store is CoreData, but the intention is to make this completely opaque.
 
 The main reason for using CoreData initially is to allow leverage of other solutions which provide automatic synchronisation of CoreData across devices.
 
+
 ## Interchange
 
 The store can be read from, and written to, a dictionary-based interchange format. This only uses JSON-legal types, hence can be easily converted into JSON/XML/whatever.
+
 
 ## Efficiency
 
@@ -57,9 +62,15 @@ Right now I'm not too worried about this - I'm more interested in other aspects 
 
 I'm fairly sure that a custom implementation could greatly improve efficiency if required.
 
+
 ## Future
 
 Combine support is being considered.
+
+I've got a proof of concept test in `DatastoreCombineTests.swift`, but I need to think a little bit about whether it's a natural fit.
+
+All suggestions on this front gratefully received.
+
 
 ## To Do
 
