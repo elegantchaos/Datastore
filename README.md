@@ -39,7 +39,7 @@ The API is designed for bulk operations; it takes a list of entities/properties 
 
 Current backing store is CoreData, but the intention is to make this completely opaque.
 
-The main reason for using CoreData is to allow leverage of other solutions which provide automatic synchronisation of CoreData across devices.
+The main reason for using CoreData initially is to allow leverage of other solutions which provide automatic synchronisation of CoreData across devices.
 
 ## Interchange
 
