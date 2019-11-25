@@ -36,7 +36,6 @@
 		8BFF2E6A232F85E200D40D31 /* Datastore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8BFF2E60232F85E200D40D31 /* Datastore.framework */; };
 		8BFF2E6F232F85E200D40D31 /* DatastoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFF2E6E232F85E200D40D31 /* DatastoreTests.swift */; };
 		8BFF2E71232F85E200D40D31 /* Datastore.h in Headers */ = {isa = PBXBuildFile; fileRef = 8BFF2E63232F85E200D40D31 /* Datastore.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		8BFF2E7C232F864200D40D31 /* Model.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 8BFF2E7A232F864200D40D31 /* Model.xcdatamodeld */; };
 		8BFF2E7E232F8A1D00D40D31 /* Datastore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFF2E7D232F8A1D00D40D31 /* Datastore.swift */; };
 		8BFF2E82232F8B2B00D40D31 /* NSManagedObjectExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFF2E7F232F8B2B00D40D31 /* NSManagedObjectExtensions.swift */; };
 		8BFF2E83232F8B2B00D40D31 /* NSEntityDescriptionExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFF2E80232F8B2B00D40D31 /* NSEntityDescriptionExtensions.swift */; };
@@ -373,7 +372,6 @@
 				8B48FD79232FD98D00F37CF1 /* InterchangeEncoder.swift in Sources */,
 				8B8A6FF4233A1D5F00EF615F /* DoubleProperty.swift in Sources */,
 				8B64FD582333CBB4001A0BBD /* IntegerProperty.swift in Sources */,
-				8BFF2E7C232F864200D40D31 /* Model.xcdatamodeld in Sources */,
 				8BFF2E7E232F8A1D00D40D31 /* Datastore.swift in Sources */,
 				8BFF2E84232F8B2B00D40D31 /* NSManagedObjectContextExtensions.swift in Sources */,
 			);

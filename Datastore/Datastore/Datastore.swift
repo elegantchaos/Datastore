@@ -1,5 +1,5 @@
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-//  Created by Developer on 16/09/2019.
+//  Created by Sam Deane on 16/09/2019.
 //  All code (c) 2019 - present day, Elegant Chaos Limited.
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
@@ -45,12 +45,12 @@ public class Datastore {
     }
     
     public class func load(name: String, url: URL? = nil, container: NSPersistentContainer.Type = NSPersistentContainer.self, completion: @escaping LoadCompletion) {
-        guard let model = Datastore.model() else {
-            completion(.failure(LoadingModelError()))
-            return
-        }
+//        guard let model = Datastore.model() else {
+//            completion(.failure(LoadingModelError()))
+//            return
+//        }
         
-        let container = container.init(name: name, managedObjectModel: model)
+        let container = container.init(name: name, managedObjectModel: Datastore.model)
         let description = container.persistentStoreDescriptions[0]
         if let explicitURL = url {
             assert((explicitURL.pathExtension == "sqlite") || (explicitURL.path == "/dev/null"))
@@ -216,31 +216,36 @@ public class Datastore {
         }
     }
     
-    public class func model(bundle: Bundle = Bundle(for: Datastore.self), cached: Bool = true) -> NSManagedObjectModel? {
-        if cached && (cachedModel != nil) {
-            return cachedModel
-        }
-        
-        cachedModel = makeModel()
-        return cachedModel
-        
-//        guard let url = bundle.url(forResource: "Model", withExtension: "momd") else {
-//            datastoreChannel.debug("failed to locate model")
-//            return nil
+    public static var model: NSManagedObjectModel = makeModel()
+//    {
+//        if cached && (cachedModel != nil) {
+//            return cachedModel
 //        }
 //
-//        guard let model = NSManagedObjectModel(contentsOf: url) else {
-//            datastoreChannel.debug("failed to load model")
-//            return nil
-//        }
+//        let loadModel = false
 //
-//        datastoreChannel.debug("loaded collection model")
-//        if (cached) {
-//            cachedModel = model
-//        }
+//        if loadModel {
+//                    guard let url = bundle.url(forResource: "Model", withExtension: "momd") else {
+//                        datastoreChannel.debug("failed to locate model")
+//                        return nil
+//                    }
 //
-//        return model
-    }
+//                    guard let model = NSManagedObjectModel(contentsOf: url) else {
+//                        datastoreChannel.debug("failed to load model")
+//                        return nil
+//                    }
+//
+//                    datastoreChannel.debug("loaded collection model")
+//                    if (cached) {
+//                        cachedModel = model
+//                    }
+//
+//                    return model
+//        } else {
+//            cachedModel = makeModel()
+//            return cachedModel
+//        }
+//    }
     
     private class func makeModel() -> NSManagedObjectModel {
         let model = NSManagedObjectModel()
@@ -254,25 +259,25 @@ public class Datastore {
         type.attributeType = .stringAttributeType
         let uuid = NSAttributeDescription()
         uuid.name = "uuid"
-        type.attributeType = .UUIDAttributeType
+        uuid.attributeType = .UUIDAttributeType
         entityRecord.properties = [datestamp, type, uuid]
-        
+
         model.entities = [
             entityRecord,
-            makeEntity(for: Double.self, ownerEntity: entityRecord),
-            makeEntity(for: Int.self, ownerEntity: entityRecord),
-            makeEntity(for: Date.self, ownerEntity: entityRecord),
-            makeEntity(for: String.self, ownerEntity: entityRecord),
-            makeEntity(for: Data.self, ownerEntity: entityRecord)
+            makeEntity("Data", type: .binaryDataAttributeType, ownerEntity: entityRecord),
+            makeEntity("Date", type: .dateAttributeType, ownerEntity: entityRecord),
+            makeEntity("Double", type: .doubleAttributeType, ownerEntity: entityRecord),
+            makeEntity("Integer", type: .integer64AttributeType, ownerEntity: entityRecord),
+            makeRelationshipEntity(ownerEntity: entityRecord),
+            makeEntity("String", type: .stringAttributeType, ownerEntity: entityRecord)
         ]
         
         return model
     }
     
-    private class func makeEntity<EntityType>(for type: EntityType, ownerEntity: NSEntityDescription) -> NSEntityDescription {
+    private class func makeEntity(_ entityName: String, type attributeType: NSAttributeType?, ownerEntity: NSEntityDescription) -> NSEntityDescription {
         let entity = NSEntityDescription()
-        let typeName = String(describing: EntityType.self)
-        entity.name =  typeName + "Property"
+        entity.name =  entityName + "Property"
         let datestamp = NSAttributeDescription()
         datestamp.name = "datestamp"
         datestamp.attributeType = .dateAttributeType
@@ -282,23 +287,44 @@ public class Datastore {
         let type = NSAttributeDescription()
         type.name = "type"
         type.attributeType = .stringAttributeType
-        let value = NSAttributeDescription()
-        value.name = "value"
-        value.attributeType = .binaryDataAttributeType
         let owner = NSRelationshipDescription()
         owner.name = "owner"
         owner.destinationEntity = ownerEntity
         owner.deleteRule = .nullifyDeleteRule
         owner.maxCount = 1
         let ownerInverse = NSRelationshipDescription()
-        ownerInverse.name = typeName + "s"
+        ownerInverse.name = entityName.lowercased() + "s"
         ownerInverse.destinationEntity = entity
         owner.inverseRelationship = ownerInverse
         ownerInverse.inverseRelationship = owner
         ownerEntity.properties.append(ownerInverse)
-        entity.properties = [datestamp, name, type, value, owner]
-        
+        entity.properties = [datestamp, name, type, owner]
+
+        if let attributeType = attributeType {
+            let value = NSAttributeDescription()
+            value.name = "value"
+            value.attributeType = attributeType
+            entity.properties.append(value)
+        }
+
         return entity
     }
     
+    private class func makeRelationshipEntity(ownerEntity: NSEntityDescription) -> NSEntityDescription {
+        let relationship = makeEntity("Relationship", type: .binaryDataAttributeType, ownerEntity: ownerEntity)
+
+        let target = NSRelationshipDescription()
+        target.name = "target"
+        target.destinationEntity = ownerEntity
+        target.deleteRule = .nullifyDeleteRule
+        target.maxCount = 1
+        let targetInverse = NSRelationshipDescription()
+        targetInverse.name = "targets"
+        targetInverse.destinationEntity = ownerEntity
+        target.inverseRelationship = targetInverse
+        targetInverse.inverseRelationship = target
+        ownerEntity.properties.append(targetInverse)
+
+        return relationship
+    }
 }

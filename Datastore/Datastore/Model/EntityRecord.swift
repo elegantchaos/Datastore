@@ -1,5 +1,5 @@
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-//  Created by Developer on 16/09/2019.
+//  Created by Sam Deane on 16/09/2019.
 //  All code (c) 2019 - present day, Elegant Chaos Limited.
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
@@ -9,7 +9,18 @@ import CoreData
 
 
 public class EntityRecord: NSManagedObject {
+    @NSManaged public var datestamp: Date?
+    @NSManaged public var type: String?
+    @NSManaged public var uuid: UUID?
     
+    @NSManaged public var datas: NSSet?
+    @NSManaged public var dates: NSSet?
+    @NSManaged public var doubles: NSSet?
+    @NSManaged public var integers: NSSet?
+    @NSManaged public var strings: NSSet?
+    @NSManaged public var relationships: NSSet?
+    @NSManaged public var targets: NSSet?
+
     public override func awakeFromInsert() {
         if uuid == nil {
             uuid = UUID()

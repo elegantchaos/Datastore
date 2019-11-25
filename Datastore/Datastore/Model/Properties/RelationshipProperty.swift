@@ -1,16 +1,18 @@
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-//  Created by Developer on 19/09/2019.
+//  Created by Sam Deane on 19/09/2019.
 //  All code (c) 2019 - present day, Elegant Chaos Limited.
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 import Foundation
 
-extension RelationshipProperty: NamedProperty {
-    var semanticValue: SemanticValue {
+public class RelationshipProperty: NamedProperty {
+    @NSManaged public var target: EntityRecord?
+    
+    override var semanticValue: SemanticValue {
         return SemanticValue(GuaranteedWrappedID(target!), type: type, datestamp: datestamp)
     }
     
-    func encode(with encoder: InterchangeEncoder, into record: inout [String:Any]) {
+    override func encode(with encoder: InterchangeEncoder, into record: inout [String:Any]) {
         encoder.encode(self, into: &record)
     }
     

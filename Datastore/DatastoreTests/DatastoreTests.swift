@@ -2,7 +2,7 @@
 //  DatastoreTests.swift
 //  DatastoreTests
 //
-//  Created by Developer on 16/09/2019.
+//  Created by Sam Deane on 16/09/2019.
 //  Copyright © 2019 Developer. All rights reserved.
 //
 

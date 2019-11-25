@@ -36,9 +36,7 @@
       </EnvironmentVariables>
       <Testables>
          <TestableReference
-            skipped = "NO"
-            parallelizable = "YES"
-            testExecutionOrdering = "random">
+            skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "8BFF2E68232F85E200D40D31"
