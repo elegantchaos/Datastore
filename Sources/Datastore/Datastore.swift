@@ -14,7 +14,8 @@ let datastoreChannel = Channel("com.elegantchaos.datastore")
 public class Datastore {
     static var cachedModel: NSManagedObjectModel!
     static let standardNames = StandardNames()
-    
+    static let model = DatastoreModel()
+
     internal let container: NSPersistentContainer
     internal let context: NSManagedObjectContext
     
@@ -45,20 +46,7 @@ public class Datastore {
     }
     
     public class func load(name: String, url: URL? = nil, container: NSPersistentContainer.Type = NSPersistentContainer.self, completion: @escaping LoadCompletion) {
-//        guard let model = Datastore.model() else {
-//            completion(.failure(LoadingModelError()))
-//            return
-//        }
-        
-        let model = Datastore.model
-//        for entity in model.entities.sorted(by: { $0.name! < $1.name! }) {
-//            print(entity.name!)
-//            for property in entity.properties.sorted(by: { $0.name < $1.name }) {
-//                print("- \(property.name) \(property)")
-//            }
-//        }
-        
-        let container = container.init(name: name, managedObjectModel: model)
+        let container = container.init(name: name, managedObjectModel: Datastore.model)
         let description = container.persistentStoreDescriptions[0]
         if let explicitURL = url {
             assert((explicitURL.pathExtension == "sqlite") || (explicitURL.path == "/dev/null"))
@@ -224,123 +212,5 @@ public class Datastore {
         }
     }
     
-    public static var model: NSManagedObjectModel = makeModel()
-    
-    private class func loadModel() -> NSManagedObjectModel {
-        let bundle = Bundle(for: Datastore.self)
-        guard let url = bundle.url(forResource: "Model", withExtension: "momd") else {
-            datastoreChannel.fatal("failed to locate model")
-        }
-        
-        guard let model = NSManagedObjectModel(contentsOf: url) else {
-            datastoreChannel.fatal("failed to load model")
-        }
-        
-        datastoreChannel.debug("loaded collection model")
-        
-        return model
-    }
-    
-    private class func makeModel() -> NSManagedObjectModel {
-        let entityRecord = NSEntityDescription()
-        entityRecord.name = "EntityRecord"
-        entityRecord.managedObjectClassName = "Datastore.EntityRecord"
-        
-        let datestamp = NSAttributeDescription()
-        datestamp.name = "datestamp"
-        datestamp.attributeType = .dateAttributeType
-        datestamp.isOptional = false
-        
-        let type = NSAttributeDescription()
-        type.name = "type"
-        type.attributeType = .stringAttributeType
-        type.isOptional = false
-        
-        let uuid = NSAttributeDescription()
-        uuid.name = "uuid"
-        uuid.attributeType = .UUIDAttributeType
-        uuid.isOptional = false
-        
-        entityRecord.properties = [datestamp, type, uuid]
-
-        let model = NSManagedObjectModel()
-        model.entities = [
-            entityRecord,
-            makeEntity("Data", type: .binaryDataAttributeType, ownerEntity: entityRecord),
-            makeEntity("Date", type: .dateAttributeType, ownerEntity: entityRecord),
-            makeEntity("Double", type: .doubleAttributeType, ownerEntity: entityRecord),
-            makeEntity("Integer", type: .integer64AttributeType, ownerEntity: entityRecord),
-            makeRelationshipEntity(ownerEntity: entityRecord),
-            makeEntity("String", type: .stringAttributeType, ownerEntity: entityRecord)
-        ]
-        
-        return model
-    }
-    
-    private class func makeEntity(_ entityName: String, type attributeType: NSAttributeType?, ownerEntity: NSEntityDescription) -> NSEntityDescription {
-        let entity = NSEntityDescription()
-        entity.name =  "\(entityName)Property"
-        entity.managedObjectClassName = "Datastore.\(entityName)Property"
-        let datestamp = NSAttributeDescription()
-        datestamp.name = "datestamp"
-        datestamp.attributeType = .dateAttributeType
-        datestamp.isOptional = true
-        
-        let name = NSAttributeDescription()
-        name.name = "name"
-        name.attributeType = .stringAttributeType
-        name.isOptional = true
-        
-        let type = NSAttributeDescription()
-        type.name = "type"
-        type.attributeType = .stringAttributeType
-        type.isOptional = true
-        
-        let owner = NSRelationshipDescription()
-        owner.name = "owner"
-        owner.destinationEntity = ownerEntity
-        owner.deleteRule = .nullifyDeleteRule
-        owner.maxCount = 1
-        owner.isOptional = true
-        
-        let ownerInverse = NSRelationshipDescription()
-        ownerInverse.name = entityName.lowercased() + "s"
-        ownerInverse.destinationEntity = entity
-        owner.inverseRelationship = ownerInverse
-        ownerInverse.inverseRelationship = owner
-        ownerEntity.properties.append(ownerInverse)
-        entity.properties = [datestamp, name, type, owner]
-
-        if let attributeType = attributeType {
-            let value = NSAttributeDescription()
-            value.name = "value"
-            value.attributeType = attributeType
-            value.isOptional = true
-            entity.properties.append(value)
-        }
-
-        return entity
-    }
-    
-    private class func makeRelationshipEntity(ownerEntity: NSEntityDescription) -> NSEntityDescription {
-        let relationship = makeEntity("Relationship", type: nil, ownerEntity: ownerEntity)
-
-        let target = NSRelationshipDescription()
-        target.name = "target"
-        target.destinationEntity = ownerEntity
-        target.deleteRule = .nullifyDeleteRule
-        target.maxCount = 1
-        
-        let targetInverse = NSRelationshipDescription()
-        targetInverse.name = "targets"
-        targetInverse.destinationEntity = relationship
-        
-        target.inverseRelationship = targetInverse
-        targetInverse.inverseRelationship = target
-
-        relationship.properties.append(target)
-        ownerEntity.properties.append(targetInverse)
-
-        return relationship
-    }
+  
 }

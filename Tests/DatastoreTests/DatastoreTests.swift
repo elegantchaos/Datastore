@@ -271,7 +271,8 @@ extension DatastoreTests {
                 let person = people[0]
                 datastore.add(properties: [person: self.exampleProperties(owner: people[1], in: datastore)]) { () in
                     datastore.encodeJSON() { json in
-                        print(json)
+                        // print(json)
+                        // TODO: test this!
                         done.fulfill()
                     }
                 }
