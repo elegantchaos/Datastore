@@ -31,8 +31,7 @@
 		8B8A6FF0233A146500EF615F /* Simple.json in Resources */ = {isa = PBXBuildFile; fileRef = 8B8A6FEF233A146500EF615F /* Simple.json */; };
 		8B8A6FF2233A19C500EF615F /* StandardNames.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B8A6FF1233A19C500EF615F /* StandardNames.swift */; };
 		8B8A6FF4233A1D5F00EF615F /* DoubleProperty.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B8A6FF3233A1D5F00EF615F /* DoubleProperty.swift */; };
-		8B95FA68233E084D00B335E0 /* .travis.yml in Resources */ = {isa = PBXBuildFile; fileRef = 8B95FA66233E084D00B335E0 /* .travis.yml */; };
-		8B95FA69233E084D00B335E0 /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 8B95FA67233E084D00B335E0 /* .gitignore */; };
+		8BF829C5238C1F3D00B3583C /* Model.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 8BFF2E7A232F864200D40D31 /* Model.xcdatamodeld */; };
 		8BFF2E6A232F85E200D40D31 /* Datastore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8BFF2E60232F85E200D40D31 /* Datastore.framework */; };
 		8BFF2E6F232F85E200D40D31 /* DatastoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFF2E6E232F85E200D40D31 /* DatastoreTests.swift */; };
 		8BFF2E71232F85E200D40D31 /* Datastore.h in Headers */ = {isa = PBXBuildFile; fileRef = 8BFF2E63232F85E200D40D31 /* Datastore.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -327,8 +326,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8B95FA69233E084D00B335E0 /* .gitignore in Resources */,
-				8B95FA68233E084D00B335E0 /* .travis.yml in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -362,6 +359,7 @@
 				8B3B2C9A233CC48A001BBC57 /* JSONDecoder.swift in Sources */,
 				8B55DF0723328AF600B99383 /* InterchangeDecoder.swift in Sources */,
 				8B40C3B9233251D000CC24E6 /* Identifier.swift in Sources */,
+				8BF829C5238C1F3D00B3583C /* Model.xcdatamodeld in Sources */,
 				8B64FD5E2333CBEB001A0BBD /* NamedProperty.swift in Sources */,
 				8BFF2E83232F8B2B00D40D31 /* NSEntityDescriptionExtensions.swift in Sources */,
 				8BFF2E82232F8B2B00D40D31 /* NSManagedObjectExtensions.swift in Sources */,
