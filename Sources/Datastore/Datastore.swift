@@ -51,6 +51,13 @@ public class Datastore {
 //        }
         
         let model = Datastore.model
+//        for entity in model.entities.sorted(by: { $0.name! < $1.name! }) {
+//            print(entity.name!)
+//            for property in entity.properties.sorted(by: { $0.name < $1.name }) {
+//                print("- \(property.name) \(property)")
+//            }
+//        }
+        
         let container = container.init(name: name, managedObjectModel: model)
         let description = container.persistentStoreDescriptions[0]
         if let explicitURL = url {
@@ -217,7 +224,7 @@ public class Datastore {
         }
     }
     
-    public static var model: NSManagedObjectModel = loadModel()
+    public static var model: NSManagedObjectModel = makeModel()
     
     private class func loadModel() -> NSManagedObjectModel {
         let bundle = Bundle(for: Datastore.self)
@@ -277,24 +284,24 @@ public class Datastore {
         let datestamp = NSAttributeDescription()
         datestamp.name = "datestamp"
         datestamp.attributeType = .dateAttributeType
-        datestamp.isOptional = false
+        datestamp.isOptional = true
         
         let name = NSAttributeDescription()
         name.name = "name"
         name.attributeType = .stringAttributeType
-        name.isOptional = false
+        name.isOptional = true
         
         let type = NSAttributeDescription()
         type.name = "type"
         type.attributeType = .stringAttributeType
-        type.isOptional = false
+        type.isOptional = true
         
         let owner = NSRelationshipDescription()
         owner.name = "owner"
         owner.destinationEntity = ownerEntity
         owner.deleteRule = .nullifyDeleteRule
         owner.maxCount = 1
-        owner.isOptional = false
+        owner.isOptional = true
         
         let ownerInverse = NSRelationshipDescription()
         ownerInverse.name = entityName.lowercased() + "s"
@@ -308,7 +315,7 @@ public class Datastore {
             let value = NSAttributeDescription()
             value.name = "value"
             value.attributeType = attributeType
-            value.isOptional = false
+            value.isOptional = true
             entity.properties.append(value)
         }
 
@@ -323,11 +330,15 @@ public class Datastore {
         target.destinationEntity = ownerEntity
         target.deleteRule = .nullifyDeleteRule
         target.maxCount = 1
+        
         let targetInverse = NSRelationshipDescription()
         targetInverse.name = "targets"
-        targetInverse.destinationEntity = ownerEntity
+        targetInverse.destinationEntity = relationship
+        
         target.inverseRelationship = targetInverse
         targetInverse.inverseRelationship = target
+
+        relationship.properties.append(target)
         ownerEntity.properties.append(targetInverse)
 
         return relationship
