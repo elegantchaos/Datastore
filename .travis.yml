@@ -4,6 +4,7 @@ language: swift
 install:
 - sudo gem install xcpretty-travis-formatter
 script:
+- git config --global url."https://github".insteadOf git://github
 - swift test
 #- xcodebuild -workspace Datastore.xcworkspace -scheme Datastore test | xcpretty -f `xcpretty-travis-formatter`
 notifications:
