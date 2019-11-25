@@ -92,6 +92,7 @@ extension DatastoreTests {
     func testLoadFromFile() {
         
         // set the REBUILD_TEST_FILE environment variable to recreate the test sqlite database from Test.json
+        // (eg: `export REBUILD_TEST_FILE=1; swift test`)
         if testFlag("REBUILD_TEST_FILE") {
             createTestFile()
             XCTFail("rebuilt test file; run again without REBUILD_TEST_FILE to run the actual test")

@@ -160,7 +160,7 @@ public class EntityRecord: NSManagedObject {
     func string(withKey key: String) -> String? {
         if let strings = strings as? Set<StringProperty> {
             let names = strings.filter({ $0.name == key })
-            let sorted = names.sorted(by: {$0.datestamp! > $1.datestamp! })
+            let sorted = names.sorted(by: {$0.datestamp > $1.datestamp })
             return sorted.first?.value
         }
         return nil
@@ -185,7 +185,6 @@ public class EntityRecord: NSManagedObject {
         property.name = key
         property.owner = self
         property.type = type
-        assert(property.type != nil)
         return property
     }
     
@@ -193,9 +192,7 @@ public class EntityRecord: NSManagedObject {
     func encode<T>(from properties: NSSet?, as: T.Type, into values: inout [String:Any], encoder: InterchangeEncoder) where T: NamedProperty {
         if let set = properties as? Set<T> {
             for property in set {
-                if let name = property.name {
-                    values[name] = property.encode(with: encoder)
-                }
+                values[property.name] = property.encode(with: encoder)
             }
         }
     }
@@ -204,10 +201,11 @@ public class EntityRecord: NSManagedObject {
         if let set = properties as? Set<T> {
             // there may be multiple entries for each property, so we sort them in date
             // order, and only return the newest one
-            let sorted = set.sorted(by: { (p1, p2) in p1.datestamp! > p2.datestamp! })
+            let sorted = set.sorted(by: { (p1, p2) in p1.datestamp > p2.datestamp })
             var remaining = names
             for property in sorted {
-                if let name = property.name, remaining.contains(name) {
+                let name = property.name
+                if remaining.contains(name) {
                     let value = property.semanticValue
                     assert(value.type != nil)
                     values[valueWithKey: name] = value
@@ -221,10 +219,11 @@ public class EntityRecord: NSManagedObject {
         if let set = properties as? Set<T> {
             // there may be multiple entries for each property, so we sort them in date
             // order, and only return the newest one
-            let sorted = set.sorted(by: { (p1, p2) in p1.datestamp! > p2.datestamp! })
+            let sorted = set.sorted(by: { (p1, p2) in p1.datestamp > p2.datestamp })
             var done: Set<String> = []
             for property in sorted {
-                if let name = property.name, !done.contains(name) {
+                let name = property.name
+                if !done.contains(name) {
                     let value = property.semanticValue
                     assert(value.type != nil)
                     values[valueWithKey: name] = value
@@ -237,7 +236,8 @@ public class EntityRecord: NSManagedObject {
     func remove<T>(names: Set<String>, from properties: NSSet?, as: T.Type, store: Datastore) where T: NamedProperty {
         if let set = properties as? Set<T> {
             for property in set {
-                if let name = property.name, names.contains(name) {
+                let name = property.name
+                if names.contains(name) {
                     property.managedObjectContext?.delete(property)
                 }
             }

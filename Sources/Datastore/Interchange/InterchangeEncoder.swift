@@ -47,9 +47,7 @@ public extension InterchangeEncoder {
     }
 
     func encode(_ string: StringProperty, into record: inout [String:Any]) {
-        if let string = string.value {
-            record[Datastore.standardNames.string] = string
-        }
+        record[Datastore.standardNames.string] = string.value
         encode(type: string.type, datestamp: string.datestamp, into: &record)
     }
     
@@ -64,7 +62,7 @@ public extension InterchangeEncoder {
     }
 
     func encode(_ relationship: RelationshipProperty, into record: inout [String:Any]) {
-        if let value = relationship.target?.uuid {
+        if let value = relationship.target.uuid {
             record[Datastore.standardNames.entity] = encodePrimitive(value)
         }
         encode(type: relationship.type, datestamp: relationship.datestamp, into: &record)

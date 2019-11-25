@@ -7,7 +7,7 @@ import Foundation
 
 
 public class DateProperty: NamedProperty {
-    @NSManaged public var value: Date?
+    @NSManaged public var value: Date
     
     override var semanticValue: SemanticValue {
         return SemanticValue(value, type: type, datestamp: datestamp)

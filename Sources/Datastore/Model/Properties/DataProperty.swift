@@ -6,7 +6,7 @@
 import Foundation
 
 public class DataProperty: NamedProperty {
-    @NSManaged public var value: Data?
+    @NSManaged public var value: Data
     
     override var semanticValue: SemanticValue {
         return SemanticValue(value, type: type, datestamp: datestamp)

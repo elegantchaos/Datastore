@@ -6,10 +6,10 @@
 import CoreData
 
 public class NamedProperty: NSManagedObject {
-    @NSManaged public var datestamp: Date?
-    @NSManaged public var name: String?
-    @NSManaged public var type: String?
-    @NSManaged public var owner: EntityRecord?
+    @NSManaged public var datestamp: Date
+    @NSManaged public var name: String
+    @NSManaged public var type: String
+    @NSManaged public var owner: EntityRecord
     
     var semanticValue: SemanticValue {
         return SemanticValue(nil)
