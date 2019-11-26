@@ -4,7 +4,7 @@ language: swift
 install:
 - sudo gem install xcpretty-travis-formatter
 script:
-- swift test
+- swift test --filter "DatastoreTests.DatastoreTests/.*" # don't run the combine tests for now, as Travis is running 10.14.
 notifications:
   email: false
   slack:
