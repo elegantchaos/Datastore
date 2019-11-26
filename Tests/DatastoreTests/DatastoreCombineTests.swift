@@ -3,6 +3,8 @@
 //  All code (c) 2019 - present day, Elegant Chaos Limited.
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
+#if canImport(Combine)
+
 import XCTest
 import Combine
 
@@ -31,3 +33,5 @@ class DatastoreCombineTests: DatastoreTestCase {
         check(action: "load", future: future)
     }
 }
+
+#endif
