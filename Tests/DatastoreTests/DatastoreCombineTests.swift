@@ -10,7 +10,7 @@ import Combine
 
 @testable import Datastore
 
-class DatastoreCombineTests: DatastoreTestCase {
+@available(macOS 10.15, *) class DatastoreCombineTests: DatastoreTestCase {
     
     func check<Output, Failure>(action: String, future: Future<Output, Failure>) {
         let done = expectation(description: action)

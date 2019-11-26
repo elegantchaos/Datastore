@@ -10,7 +10,7 @@ import Foundation
 
 extension Datastore {
     
-    public class func loadCombine(name: String, url: URL? = nil) -> Future<Datastore, Error> {
+    @available(macOS 10.15, *) public class func loadCombine(name: String, url: URL? = nil) -> Future<Datastore, Error> {
         let future = Future<Datastore, Error>() { promise in
             load(name: name, url: url) { result in
                 promise(result)
