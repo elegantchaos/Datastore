@@ -6,10 +6,8 @@
 import Foundation
 import CoreData
 import Logger
-import Combine
 
 let datastoreChannel = Channel("com.elegantchaos.datastore")
-
 
 public class Datastore {
     static var cachedModel: NSManagedObjectModel!
@@ -34,16 +32,6 @@ public class Datastore {
     public typealias ApplyResult = Result<Void, Error>
     
     static let specialProperties = [Datastore.standardNames.uuid, Datastore.standardNames.datestamp, Datastore.standardNames.type]
-    
-    public class func loadCombine(name: String, url: URL? = nil) -> Future<Datastore, Error> {
-        let future = Future<Datastore, Error>() { promise in
-            load(name: name, url: url) { result in
-                promise(result)
-            }
-        }        
-        
-        return future
-    }
     
     public class func load(name: String, url: URL? = nil, container: NSPersistentContainer.Type = NSPersistentContainer.self, completion: @escaping LoadCompletion) {
         let container = container.init(name: name, managedObjectModel: Datastore.model)
