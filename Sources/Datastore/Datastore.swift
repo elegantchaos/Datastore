@@ -31,7 +31,7 @@ public class Datastore {
     
     public typealias ApplyResult = Result<Void, Error>
     
-    static let specialProperties = [Datastore.standardNames.uuid, Datastore.standardNames.datestamp, Datastore.standardNames.type]
+    static let specialProperties = [Datastore.standardNames.identifier, Datastore.standardNames.datestamp, Datastore.standardNames.type]
     
     public class func load(name: String, url: URL? = nil, container: NSPersistentContainer.Type = NSPersistentContainer.self, completion: @escaping LoadCompletion) {
         let container = container.init(name: name, managedObjectModel: Datastore.model)
@@ -116,6 +116,19 @@ public class Datastore {
                 }
             }
             completion(result.map({ Entity($0) }))
+        }
+    }
+    
+    public func get(entitiesOfType type: String, withIDs entityIDs: [EntityID], completion: @escaping EntitiesCompletion) {
+        let context = self.context
+        context.perform {
+            var result: [Entity] = []
+            for entityID in entityIDs {
+                if let entity = entityID.resolve(in: context) {
+                    result.append(Entity(entity))
+                }
+            }
+            completion(result)
         }
     }
     

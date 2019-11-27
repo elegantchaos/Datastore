@@ -2,7 +2,7 @@
     "entities" : [
         {
             "type" : "test",
-            "uuid" : "FE396F3F-A325-4F50-899C-F22308C97D12",
+            "identifier" : "FE396F3F-A325-4F50-899C-F22308C97D12",
             "datestamp" : { "date" : "1969-11-12T01:23:45Z" },
             
             "name" : {
@@ -34,7 +34,7 @@
         
         {
             "type" : "test",
-            "uuid" : "652A3D31-C409-4CBE-8469-6232D1EEBC96",
+            "identifier" : "652A3D31-C409-4CBE-8469-6232D1EEBC96",
             "datestamp" : { "date" : "1969-11-12T01:23:45Z" },
             
             "address" : {

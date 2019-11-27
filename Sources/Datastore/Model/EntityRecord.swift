@@ -11,7 +11,7 @@ import CoreData
 public class EntityRecord: NSManagedObject {
     @NSManaged public var datestamp: Date?
     @NSManaged public var type: String?
-    @NSManaged public var uuid: UUID?
+    @NSManaged public var identifier: String?
     
     @NSManaged public var datas: NSSet?
     @NSManaged public var dates: NSSet?
@@ -22,8 +22,8 @@ public class EntityRecord: NSManagedObject {
     @NSManaged public var targets: NSSet?
 
     public override func awakeFromInsert() {
-        if uuid == nil {
-            uuid = UUID()
+        if identifier == nil {
+            identifier = UUID().uuidString
         }
         if datestamp == nil {
             datestamp = Date()
@@ -131,8 +131,8 @@ public class EntityRecord: NSManagedObject {
         if names.contains(Datastore.standardNames.datestamp) {
             values[valueWithKey: Datastore.standardNames.datestamp] = SemanticValue(datestamp, type: Datastore.standardNames.date)
         }
-        if names.contains(Datastore.standardNames.uuid) {
-            values[valueWithKey: Datastore.standardNames.uuid] = SemanticValue(uuid, type: Datastore.standardNames.identifier)
+        if names.contains(Datastore.standardNames.identifier) {
+            values[valueWithKey: Datastore.standardNames.identifier] = SemanticValue(identifier, type: Datastore.standardNames.identifier)
         }
         if names.contains(Datastore.standardNames.type) {
             values[valueWithKey: Datastore.standardNames.type] = SemanticValue(type, type: Datastore.standardNames.entity)

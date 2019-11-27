@@ -18,7 +18,7 @@
     },
     {
       "name" : "Author",
-      "uuid" : "ADDD557A-668E-4C6B-A9A0-3BCF099646E8",
+      "identifier" : "ADDD557A-668E-4C6B-A9A0-3BCF099646E8",
       "datestamp" : { "date" : "1969-11-12T01:23:45Z" },
       "modified" : { "date" : "1963-09-21T01:23:45Z" },
       "type" : "test",

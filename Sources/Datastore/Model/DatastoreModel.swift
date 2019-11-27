@@ -24,21 +24,21 @@ fileprivate extension DatastoreModel {
         entityRecord.managedObjectClassName = "Datastore.EntityRecord"
         
         let datestamp = NSAttributeDescription()
-        datestamp.name = "datestamp"
+        datestamp.name = Datastore.standardNames.datestamp
         datestamp.attributeType = .dateAttributeType
         datestamp.isOptional = false
         
         let type = NSAttributeDescription()
-        type.name = "type"
+        type.name = Datastore.standardNames.type
         type.attributeType = .stringAttributeType
         type.isOptional = false
         
-        let uuid = NSAttributeDescription()
-        uuid.name = "uuid"
-        uuid.attributeType = .UUIDAttributeType
-        uuid.isOptional = false
+        let identifier = NSAttributeDescription()
+        identifier.name = Datastore.standardNames.identifier
+        identifier.attributeType = .stringAttributeType
+        identifier.isOptional = false
         
-        entityRecord.properties = [datestamp, type, uuid]
+        entityRecord.properties = [datestamp, type, identifier]
         self.entities = [
             entityRecord,
             makeEntity("Data", type: .binaryDataAttributeType, ownerEntity: entityRecord),

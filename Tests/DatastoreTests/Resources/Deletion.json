@@ -2,14 +2,14 @@
   "entities" : [
     {
       "name" : "Test1",
-      "uuid" : "C41DB873-323D-4026-95D1-603120B9ADF6",
+      "identifier" : "C41DB873-323D-4026-95D1-603120B9ADF6",
       "type" : "test",
       "foo" : "Hello",
       "bar" : "Hello"
     },
     {
       "name" : "Test2",
-      "uuid" : "ADDD557A-668E-4C6B-A9A0-3BCF099646E8",
+      "identifier" : "ADDD557A-668E-4C6B-A9A0-3BCF099646E8",
       "type" : "test",
       "foo" : "Hello",
       "bar" : "Hello"

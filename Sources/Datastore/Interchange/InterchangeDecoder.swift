@@ -50,7 +50,7 @@ public extension InterchangeDecoder {
         } else if let date = decode(date: value, type: nil, store: store) {
             decoded = date
         } else if let uuid = decodePrimitive(uuid: value) {
-            decoded = decode(entity: uuid, type: nil, store: store) // we assume that raw uuids refer to entities
+            decoded = decode(entity: uuid.uuidString, type: nil, store: store) // we assume that raw uuids refer to entities
         } else if let data = decodePrimitive(data: value) {
             decoded = decode(data: data, type: nil, store: store)
         } else if value != nil {
@@ -97,8 +97,8 @@ public extension InterchangeDecoder {
     }
 
     func decode(entity: Any?, type: String?, store: Datastore) -> SemanticValue? {
-        if let uuid = decodePrimitive(uuid: entity) {
-            return SemanticValue(EntityID(uuid: uuid), type: type ?? Datastore.standardNames.entity)
+        if let identifier = entity as? String {
+            return SemanticValue(EntityID(identifier: identifier), type: type ?? Datastore.standardNames.entity)
         }
         return nil
     }

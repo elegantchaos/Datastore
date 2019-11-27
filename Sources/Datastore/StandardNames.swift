@@ -18,5 +18,4 @@ struct StandardNames {
     let string = "string"
     let type = "type"
     let value = "value"
-    let uuid = "uuid"
 }

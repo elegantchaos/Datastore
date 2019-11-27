@@ -104,16 +104,15 @@ internal struct OpaqueNamedID: ResolvableID {
 }
 
 internal struct OpaqueIdentifiedID: ResolvableID {
-    let uuid: UUID
-    let name: String?
+    let identifier: String
+    let createIfMissing: Bool
     
     internal func resolve(in context: NSManagedObjectContext, as type: NSManagedObject.Type) -> ResolvableID? {
-        if let object = type.withIdentifier(uuid, in: context) {
+        if let object = type.withIdentifier(identifier, in: context) {
             return OpaqueCachedID(object)
-        } else if let name = name {
+        } else if createIfMissing {
             let object = type.init(context: context)
-            object.setValue(name.lowercased(), forKey: Datastore.standardNames.name)
-            object.setValue(uuid, forKey: Datastore.standardNames.uuid)
+            object.setValue(identifier, forKey: Datastore.standardNames.identifier)
             return OpaqueCachedID(object)
         } else {
             return NullCachedID()
@@ -121,17 +120,17 @@ internal struct OpaqueIdentifiedID: ResolvableID {
     }
     
     internal var object: NSManagedObject? {
-        identifierChannel.debug("identifier \(uuid) unresolved")
+        identifierChannel.debug("identifier \(identifier) unresolved")
         return nil
     }
 
     func hash(into hasher: inout Hasher) {
-        uuid.hash(into: &hasher)
+        identifier.hash(into: &hasher)
     }
 
     func equal(to other: ResolvableID) -> Bool {
         if let other = other as? Self {
-            return (other.uuid == uuid)
+            return (other.identifier == identifier)
         } else {
             return false
         }
@@ -148,12 +147,12 @@ public class WrappedID<T: NSManagedObject>: Equatable, Hashable {
         self.id = id
     }
     
-    init(named name: String, createIfMissing: Bool) {
+    public init(named name: String, createIfMissing: Bool) {
         self.id = OpaqueNamedID(name: name.lowercased(), createIfMissing: createIfMissing)
     }
     
-    init(uuid: UUID, name: String? = nil) {
-        self.id = OpaqueIdentifiedID(uuid: uuid, name: name)
+    public init(identifier: String, createIfMissing: Bool = false) {
+        self.id = OpaqueIdentifiedID(identifier: identifier, createIfMissing: createIfMissing)
     }
     
     func resolve(in context: NSManagedObjectContext) -> T? {

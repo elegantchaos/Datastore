@@ -35,11 +35,11 @@ extension Datastore {
     fileprivate func decodeEntities(from interchange: [String : Any], with decoder: InterchangeDecoder) {
         if let entities = interchange[Datastore.standardNames.entities] as? [[String:Any]] {
             for entityRecord in entities {
-                if let uuid = decoder.decodePrimitive(uuid: entityRecord[Datastore.standardNames.uuid]), let type = entityRecord[Datastore.standardNames.type] as? String {
-                    var entity = EntityRecord.withIdentifier(uuid, in: context)
+                if let identifier = entityRecord[Datastore.standardNames.identifier] as? String, let type = entityRecord[Datastore.standardNames.type] as? String {
+                    var entity = EntityRecord.withIdentifier(identifier, in: context)
                     if entity == nil {
                         let newEntity = EntityRecord(in: context)
-                        newEntity.uuid = uuid
+                        newEntity.identifier = identifier
                         newEntity.type = type
                         entity = newEntity
                         try? context.save()
@@ -77,7 +77,7 @@ extension Datastore {
                     var record: [String:Any] = [:]
                     record[Datastore.standardNames.type] = entity.type
                     record[Datastore.standardNames.datestamp] = encoder.encodePrimitive(entity.datestamp)
-                    record[Datastore.standardNames.uuid] = encoder.encodePrimitive(entity.uuid)
+                    record[Datastore.standardNames.identifier] = entity.identifier
                     entity.encode(from: entity.strings, as: StringProperty.self, into: &record, encoder: encoder)
                     entity.encode(from: entity.integers, as: IntegerProperty.self, into: &record, encoder: encoder)
                     entity.encode(from: entity.dates, as: DateProperty.self, into: &record, encoder: encoder)

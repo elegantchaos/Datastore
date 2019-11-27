@@ -54,6 +54,33 @@ class DatastoreTests: DatastoreTestCase {
         wait(for: [created], timeout: 1.0)
     }
     
+    func testGetEntityByUUID() {
+        let done = expectation(description: "loaded")
+        loadJSON(name: "Simple", expectation: done) { datastore in
+            let entityID = EntityID(identifier: "C41DB873-323D-4026-95D1-603120B9ADF6")
+            datastore.get(entitiesOfType: "Person", withIDs: [entityID]) { results in
+                XCTAssertEqual(results.count, 1)
+                let person = results[0]
+                XCTAssertEqual(person.object.string(withKey: Datastore.standardNames.name), "Test")
+                done.fulfill()
+            }
+        }
+        wait(for: [done], timeout: 1.0)
+    }
+
+    func testGetEntityByUUIDCreateWhenMissing() {
+        let done = expectation(description: "loaded")
+        loadJSON(name: "Simple", expectation: done) { datastore in
+            let missingID = EntityID(identifier: "no-such-id", createIfMissing: true)
+            datastore.get(entitiesOfType: "Person", withIDs: [missingID]) { results in
+                XCTAssertEqual(results.count, 1)
+                let person = results[0]
+                XCTAssertEqual(person.object.identifier, "no-such-id")
+                done.fulfill()
+            }
+        }
+        wait(for: [done], timeout: 1.0)
+    }
     func testGetProperties() {
         let done = expectation(description: "done")
         loadJSON(name: "Simple", expectation: done) { datastore in

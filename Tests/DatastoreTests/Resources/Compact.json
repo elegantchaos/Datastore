@@ -2,7 +2,7 @@
   "entities" : [
     {
       "name" : "Person 1",
-      "uuid" : "C41DB873-323D-4026-95D1-603120B9ADF6",
+      "identifier" : "C41DB873-323D-4026-95D1-603120B9ADF6",
       "datestamp" : { "date" : "1969-11-12T01:23:45Z" },
       "modified" : { "date" : "1963-09-21T01:23:45Z" },
       "type" : "test",
@@ -15,7 +15,7 @@
     },
     {
       "name" : "Person 2",
-      "uuid" : "ADDD557A-668E-4C6B-A9A0-3BCF099646E8",
+      "identifier" : "ADDD557A-668E-4C6B-A9A0-3BCF099646E8",
       "datestamp" : { "date" : "1969-11-12T01:23:45Z" },
       "modified" : { "date" : "1963-09-21T01:23:45Z" },
       "type" : "test",
