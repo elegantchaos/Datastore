@@ -138,31 +138,11 @@ internal struct OpaqueIdentifiedID: ResolvableID {
 
 public class WrappedID<T: NSManagedObject>: Equatable, Hashable {
     var id: ResolvableID
-    
-    init(_ object: T) {
-        self.id = OpaqueCachedID(object)
-    }
-    
+
     init(_ id: ResolvableID) {
         self.id = id
     }
     
-    public init(named name: String, createIfMissing: Bool) {
-        self.id = OpaqueNamedID(name: name.lowercased(), createIfMissing: createIfMissing)
-    }
-    
-    public init(identifier: String, createIfMissing: Bool = false) {
-        self.id = OpaqueIdentifiedID(identifier: identifier, createIfMissing: createIfMissing)
-    }
-    
-    func resolve(in context: NSManagedObjectContext) -> T? {
-        if let resolved = id.resolve(in: context, as: T.self) {
-            id = resolved
-        }
-        
-        return id.object as? T
-    }
-
     public static func == (lhs: WrappedID<T>, rhs: WrappedID<T>) -> Bool {
         return lhs.id.equal(to: rhs.id)
     }
@@ -170,14 +150,55 @@ public class WrappedID<T: NSManagedObject>: Equatable, Hashable {
     public func hash(into hasher: inout Hasher) {
         id.hash(into: &hasher)
     }
+
+    func resolve(in context: NSManagedObjectContext) -> T? {
+        if let resolved = id.resolve(in: context, as: T.self) {
+            id = resolved
+        }
+        
+        return id.object as? T
+    }
 }
 
+/// A wrapped ID created by specifying a name or an identifier.
+/// If the underlying object doesn't exist, it can be created during the resolution process.
+public class ResolvableWrappedID<T: NSManagedObject>: WrappedID<T> {
+    
+    public init(named name: String, createIfMissing: Bool) {
+        super.init(OpaqueNamedID(name: name.lowercased(), createIfMissing: createIfMissing))
+    }
+    
+    public init(identifier: String, createIfMissing: Bool = false) {
+        super.init(OpaqueIdentifiedID(identifier: identifier, createIfMissing: createIfMissing))
+    }
+    
+}
+
+/// A wrapped ID created from an existing object.
 public class GuaranteedWrappedID<T: NSManagedObject>: WrappedID<T> {
+    public init(_ object: T) {
+        super.init(OpaqueCachedID(object))
+    }
+    
     internal var object: T {
         return id.object as! T
     }
 }
 
 public typealias EntityID = WrappedID<EntityRecord>
-public typealias Entity = GuaranteedWrappedID<EntityRecord>
+
+public typealias ResolvableEntity = ResolvableWrappedID<EntityRecord>
+
+/// An Entity is an `EntityID` that is guaranteed to back an existing entity.
+/// Internally it already has a resolved object pointer.
+/// It also keeps a copy of the object's `identifier` which is publically
+/// accessible and can be safely read from any thread/context.
+public class Entity: GuaranteedWrappedID<EntityRecord> {
+    public let identifier: String
+    
+    override init(_ object: EntityRecord) {
+        self.identifier = object.identifier!
+        super.init(object)
+    }
+}
 

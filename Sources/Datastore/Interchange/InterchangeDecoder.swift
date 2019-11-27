@@ -98,7 +98,7 @@ public extension InterchangeDecoder {
 
     func decode(entity: Any?, type: String?, store: Datastore) -> SemanticValue? {
         if let identifier = entity as? String {
-            return SemanticValue(EntityID(identifier: identifier), type: type ?? Datastore.standardNames.entity)
+            return SemanticValue(ResolvableEntity(identifier: identifier), type: type ?? Datastore.standardNames.entity)
         }
         return nil
     }

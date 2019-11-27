@@ -57,7 +57,7 @@ class DatastoreTests: DatastoreTestCase {
     func testGetEntityByUUID() {
         let done = expectation(description: "loaded")
         loadJSON(name: "Simple", expectation: done) { datastore in
-            let entityID = EntityID(identifier: "C41DB873-323D-4026-95D1-603120B9ADF6")
+            let entityID = ResolvableEntity(identifier: "C41DB873-323D-4026-95D1-603120B9ADF6")
             datastore.get(entitiesOfType: "Person", withIDs: [entityID]) { results in
                 XCTAssertEqual(results.count, 1)
                 let person = results[0]
@@ -71,11 +71,11 @@ class DatastoreTests: DatastoreTestCase {
     func testGetEntityByUUIDCreateWhenMissing() {
         let done = expectation(description: "loaded")
         loadJSON(name: "Simple", expectation: done) { datastore in
-            let missingID = EntityID(identifier: "no-such-id", createIfMissing: true)
+            let missingID = ResolvableEntity(identifier: "no-such-id", createIfMissing: true)
             datastore.get(entitiesOfType: "Person", withIDs: [missingID]) { results in
                 XCTAssertEqual(results.count, 1)
                 let person = results[0]
-                XCTAssertEqual(person.object.identifier, "no-such-id")
+                XCTAssertEqual(person.identifier, "no-such-id")
                 done.fulfill()
             }
         }
@@ -111,7 +111,7 @@ class DatastoreTests: DatastoreTestCase {
         wait(for: [done], timeout: 1.0)
     }
     
-    func exampleProperties(date: Date = Date(), owner: EntityID, in store: Datastore) -> SemanticDictionary {
+    func exampleProperties(date: Date = Date(), owner: Entity, in store: Datastore) -> SemanticDictionary {
         var properties = SemanticDictionary()
         properties["address"] = SemanticValue("123 New St", type: "address")
         properties["date"] = date
