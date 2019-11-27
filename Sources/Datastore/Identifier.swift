@@ -9,14 +9,14 @@ import Logger
 let identifierChannel = Channel("com.elegantchaos.datastore.identifier")
 
 internal protocol ResolvableID {
-    func resolve(in context: NSManagedObjectContext, as type: NSManagedObject.Type) -> ResolvableID?
+    func resolve(in context: NSManagedObjectContext, as type: NSManagedObject.Type, creationType: String?) -> ResolvableID?
     func hash(into hasher: inout Hasher)
     func equal(to: ResolvableID) -> Bool
     var object: NSManagedObject? { get }
 }
 
 internal struct NullCachedID: ResolvableID {
-    internal func resolve(in context: NSManagedObjectContext, as type: NSManagedObject.Type) -> ResolvableID? {
+    internal func resolve(in context: NSManagedObjectContext, as type: NSManagedObject.Type, creationType: String?) -> ResolvableID? {
         return nil
     }
     
@@ -42,7 +42,7 @@ internal struct OpaqueCachedID: ResolvableID {
         self.id = object.objectID
     }
     
-    internal func resolve(in context: NSManagedObjectContext, as objectType: NSManagedObject.Type) -> ResolvableID? {
+    internal func resolve(in context: NSManagedObjectContext, as objectType: NSManagedObject.Type, creationType: String?) -> ResolvableID? {
         if context == cached.managedObjectContext {
             if type(of: cached) == objectType {
                 return nil
@@ -76,8 +76,13 @@ internal struct OpaqueNamedID: ResolvableID {
     let name: String
     let createIfMissing: Bool
     
-    internal func resolve(in context: NSManagedObjectContext, as type: NSManagedObject.Type) -> ResolvableID? {
-        if let object = type.named(name, in: context, createIfMissing: createIfMissing) {
+    internal func resolve(in context: NSManagedObjectContext, as type: NSManagedObject.Type, creationType: String?) -> ResolvableID? {
+        if let object = type.named(name, in: context, createIfMissing: false) {
+            return OpaqueCachedID(object)
+        } else if createIfMissing {
+            let object = type.init(context: context)
+            object.setValue(creationType, forKey: Datastore.standardNames.type)
+            object.setValue(name, forKey: Datastore.standardNames.name)
             return OpaqueCachedID(object)
         } else {
             return NullCachedID()
@@ -107,11 +112,12 @@ internal struct OpaqueIdentifiedID: ResolvableID {
     let identifier: String
     let createIfMissing: Bool
     
-    internal func resolve(in context: NSManagedObjectContext, as type: NSManagedObject.Type) -> ResolvableID? {
+    internal func resolve(in context: NSManagedObjectContext, as type: NSManagedObject.Type, creationType: String?) -> ResolvableID? {
         if let object = type.withIdentifier(identifier, in: context) {
             return OpaqueCachedID(object)
-        } else if createIfMissing {
+        } else if createIfMissing, let creationType = creationType {
             let object = type.init(context: context)
+            object.setValue(creationType, forKey: Datastore.standardNames.type)
             object.setValue(identifier, forKey: Datastore.standardNames.identifier)
             return OpaqueCachedID(object)
         } else {
@@ -151,8 +157,8 @@ public class WrappedID<T: NSManagedObject>: Equatable, Hashable {
         id.hash(into: &hasher)
     }
 
-    func resolve(in context: NSManagedObjectContext) -> T? {
-        if let resolved = id.resolve(in: context, as: T.self) {
+    func resolve(in context: NSManagedObjectContext, as type: String?) -> T? {
+        if let resolved = id.resolve(in: context, as: T.self, creationType: type) {
             id = resolved
         }
         

@@ -12,7 +12,10 @@ import Foundation
 public struct SemanticDictionary {
     var values: [String:SemanticValue] = [:]
     
-    subscript(_ key: String) -> Any? {
+    public init() {
+    }
+    
+    public subscript(_ key: String) -> Any? {
         get { return values[key]?.value }
         set {
             if let value = newValue as? SemanticValue {
@@ -27,20 +30,20 @@ public struct SemanticDictionary {
         }
     }
     
-    subscript(_ key: String, as type: String) -> Any? {
+    public subscript(_ key: String, as type: String) -> Any? {
         get { return values[key]?.value }
         set { values[key] = SemanticValue(newValue, type: type, datestamp: nil) }
     }
     
-    subscript(typeWithKey key: String) -> String? {
+    public subscript(typeWithKey key: String) -> String? {
         get { return values[key]?.type }
     }
 
-    subscript(datestampWithKey key: String) -> Date? {
+    public subscript(datestampWithKey key: String) -> Date? {
         get { return values[key]?.datestamp }
     }
     
-    subscript(valueWithKey key: String) -> SemanticValue? {
+    public subscript(valueWithKey key: String) -> SemanticValue? {
         get { return values[key] }
         set { values[key] = newValue }
     }

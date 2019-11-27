@@ -124,7 +124,7 @@ public class Datastore {
         context.perform {
             var result: [Entity] = []
             for entityID in entityIDs {
-                if let entity = entityID.resolve(in: context) {
+                if let entity = entityID.resolve(in: context, as: type) {
                     result.append(Entity(entity))
                 }
             }
@@ -158,7 +158,7 @@ public class Datastore {
             var result: [SemanticDictionary] = []
             for entityID in entities {
                 let values: SemanticDictionary
-                if let entity = entityID.resolve(in: context) {
+                if let entity = entityID.resolve(in: context, as: nil) {
                     values = entity.read(properties: names, store: self)
                 } else {
                     values = SemanticDictionary()
@@ -175,7 +175,7 @@ public class Datastore {
             var result: [SemanticDictionary] = []
             for entityID in entities {
                 let values: SemanticDictionary
-                if let entity = entityID.resolve(in: context) {
+                if let entity = entityID.resolve(in: context, as: nil) {
                     values = entity.readAllProperties(store: self)
                 } else {
                     values = SemanticDictionary()
@@ -190,7 +190,7 @@ public class Datastore {
         let context = self.context
         context.perform {
             for (entityID, values) in properties {
-                if let entity = entityID.resolve(in: context) {
+                if let entity = entityID.resolve(in: context, as: nil) {
                     values.add(to: entity, store: self)
                 }
             }
@@ -205,7 +205,7 @@ public class Datastore {
         let context = self.context
         context.perform {
             for entityID in entities {
-                if let entity = entityID.resolve(in: context) {
+                if let entity = entityID.resolve(in: context, as: nil) {
                     entity.remove(properties: names, store: self)
                 }
             }

@@ -73,12 +73,12 @@ public class EntityRecord: NSManagedObject {
                 add(entity, key: property, type: value.type, store: store)
                 
             case let entity as EntityID:
-                if let resolved = entity.resolve(in: context) {
+                if let resolved = entity.resolve(in: context, as: nil) {
                     add(resolved, key: property, type: value.type, store: store)
                 }
 
             case let entity as Entity:
-                if let resolved = entity.resolve(in: context) {
+                if let resolved = entity.resolve(in: context, as: nil) {
                     add(resolved, key: property, type: value.type, store: store)
                 }
 
