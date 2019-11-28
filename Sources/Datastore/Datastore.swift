@@ -131,22 +131,6 @@ public class Datastore {
         }
     }
 
-    public func get(entitiesOfType type: EntityType, withIntialProperties idsAndProperties: [(EntityReference, PropertyDictionary)], completion: @escaping EntitiesCompletion) {
-        let context = self.context
-        context.perform {
-            var result: [GuaranteedEntity] = []
-            for (entityID, entityProperties) in idsAndProperties {
-                if let entity = entityID.resolve(in: self) {
-                    result.append(GuaranteedEntity(entity))
-                } else if let entity = entityID.resolve(in: self, as: type) {
-                    entityProperties.add(to: entity, store: self)
-                    result.append(GuaranteedEntity(entity))
-                }
-            }
-            completion(result)
-        }
-    }
-
     public func get(entityOfType type: EntityType, where key: PropertyKey, equals: String, createIfMissing: Bool = true, completion: @escaping EntityCompletion) {
         get(entitiesOfType: type, where: key, contains: [equals], createIfMissing: createIfMissing) { entities in
             completion(entities.first)

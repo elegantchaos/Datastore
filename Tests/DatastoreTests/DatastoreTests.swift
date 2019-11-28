@@ -105,9 +105,8 @@ class DatastoreTests: DatastoreTestCase {
     func testGetEntityInitialPropertiesIgnoredIfAlreadyExists() {
         let done = expectation(description: "loaded")
         loadJSON(name: "Simple", expectation: done) { datastore in
-            let entityID = Entity.withIdentifier("C41DB873-323D-4026-95D1-603120B9ADF6")
-            let properties = PropertyDictionary([.name: "Test"])
-            datastore.get(entitiesOfType: .test, withIntialProperties: [(entityID, properties)]) { results in
+            let id = Entity.withIdentifier("C41DB873-323D-4026-95D1-603120B9ADF6", initialProperties: PropertyDictionary([.name: "Different Name"]))
+            datastore.get(entitiesOfType: .person, withIDs: [id]) { results in
                 XCTAssertEqual(results.count, 1)
                 let person = results[0]
                 XCTAssertEqual(person.object.string(withKey: .name), "Test") // new name should not have been applied since the entity already exists
