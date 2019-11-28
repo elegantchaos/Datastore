@@ -151,6 +151,10 @@ public class Datastore {
         }
     }
     
+    public func get(properties names: Set<PropertyKey>, of entities: [EntityID], completion: @escaping ([PropertyDictionary]) -> Void) {
+        get(properties: Set(names.map({ $0.name })), of: entities, completion: completion)
+    }
+    
     public func get(properties names: Set<String>, of entities: [EntityID], completion: @escaping ([PropertyDictionary]) -> Void) {
         let context = self.context
         context.perform {
