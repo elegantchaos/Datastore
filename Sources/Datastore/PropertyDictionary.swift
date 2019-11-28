@@ -63,3 +63,19 @@ public struct PropertyDictionary {
         }
     }
 }
+
+
+extension PropertyDictionary: CustomStringConvertible {
+    public var description: String {
+        let sortedKeys = values.keys.sorted(by: { return $0.name < $1.name })
+        var string = ""
+        for key in sortedKeys {
+            string += "\n\(key.name):"
+            if let value = self[key] {
+                string += " \(value)"
+            }
+        }
+        return string
+    }
+    
+}

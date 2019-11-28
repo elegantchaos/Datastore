@@ -210,27 +210,27 @@ public class GuaranteedEntity: EntityReference {
 }
 
 public struct Entity {
-    static func identifiedBy(_ identifier: String, initialProperties: PropertyDictionary? = nil) -> ResolvableEntity {
+    public static func identifiedBy(_ identifier: String, initialProperties: PropertyDictionary? = nil) -> ResolvableEntity {
         return ResolvableEntity(identifier: identifier, initialProperties: initialProperties)
     }
     
-    static func identifiedBy(_ identifier: String, createIfMissing: Bool) -> ResolvableEntity {
+    public static func identifiedBy(_ identifier: String, createIfMissing: Bool) -> ResolvableEntity {
         return ResolvableEntity(identifier: identifier, initialProperties: createIfMissing ? PropertyDictionary() : nil)
     }
     
-    static func named(_ name: String, initialProperties: PropertyDictionary? = nil) -> ResolvableEntity {
+    public static func named(_ name: String, initialProperties: PropertyDictionary? = nil) -> ResolvableEntity {
         return ResolvableEntity(key: .name, value: name, initialProperties: initialProperties)
     }
 
-    static func named(_ name: String, createIfMissing: Bool) -> ResolvableEntity {
+    public static func named(_ name: String, createIfMissing: Bool) -> ResolvableEntity {
         return ResolvableEntity(key: .name, value: name, initialProperties: createIfMissing ? PropertyDictionary() : nil)
     }
 
-    static func whereKey(_ key: PropertyKey, equals value: String, initialProperties: PropertyDictionary? = nil) -> ResolvableEntity {
+    public static func whereKey(_ key: PropertyKey, equals value: String, initialProperties: PropertyDictionary? = nil) -> ResolvableEntity {
         return ResolvableEntity(key: key, value: value, initialProperties: initialProperties)
     }
 
-    static func whereKey(_ key: PropertyKey, equals value: String, createIfMissing: Bool) -> ResolvableEntity {
+    public static func whereKey(_ key: PropertyKey, equals value: String, createIfMissing: Bool) -> ResolvableEntity {
         return ResolvableEntity(key: key, value: value, initialProperties: createIfMissing ? PropertyDictionary() : nil)
     }
 

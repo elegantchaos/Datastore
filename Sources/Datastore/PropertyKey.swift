@@ -8,12 +8,12 @@ import Foundation
 public struct PropertyKey: Equatable, Hashable, ExpressibleByStringLiteral {
     public let name: String
     public init(_ name: String) { self.name = name }
+    public init(array name: String) { self.name = name + "-" + UUID().uuidString }
+    public init(stringLiteral: String) { self.name = stringLiteral }
     public init?(_ name: String?) {
         guard let name = name else { return nil }
         self.name = name
     }
-    public init(stringLiteral: String) { self.name = stringLiteral }
-//    public var rawValue: String { return name }
 }
 
 // MARK: - Standard Keys
