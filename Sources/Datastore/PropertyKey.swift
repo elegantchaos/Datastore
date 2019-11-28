@@ -5,7 +5,7 @@
 
 import Foundation
 
-public struct SemanticKey: Equatable, Hashable, ExpressibleByStringLiteral {
+public struct PropertyKey: Equatable, Hashable, ExpressibleByStringLiteral {
     public let name: String
     public init(_ name: String) { self.name = name }
     public init?(_ name: String?) {
@@ -17,7 +17,7 @@ public struct SemanticKey: Equatable, Hashable, ExpressibleByStringLiteral {
 }
 
 // MARK: - Standard Names
-public extension SemanticKey {
+public extension PropertyKey {
     static let data: Self = "data"
     static let datestamp: Self = "datestamp"
     static let date: Self = "date"

@@ -111,9 +111,9 @@ class DatastoreTests: DatastoreTestCase {
         wait(for: [done], timeout: 1.0)
     }
     
-    func exampleProperties(date: Date = Date(), owner: Entity, in store: Datastore) -> SemanticDictionary {
-        var properties = SemanticDictionary()
-        properties["address"] = SemanticValue("123 New St", type: "address")
+    func exampleProperties(date: Date = Date(), owner: Entity, in store: Datastore) -> PropertyDictionary {
+        var properties = PropertyDictionary()
+        properties["address"] = PropertyValue("123 New St", type: "address")
         properties["date"] = date
         properties["integer"] = 123
         properties["double"] = 456.789
@@ -248,7 +248,7 @@ class DatastoreTests: DatastoreTestCase {
                     return
                 }
                 
-                var properties = SemanticDictionary()
+                var properties = PropertyDictionary()
                 properties["name"] = "New Name"
                 datastore.add(properties: [person : properties]) {
                     XCTAssertEqual(person.object.string(withKey: .name), "New Name")
@@ -265,7 +265,7 @@ class DatastoreTests: DatastoreTestCase {
             datastore.get(entitiesOfType: "test", where: "name", contains: ["test"]) { (entities) in
                 XCTAssertEqual(entities.count, 1)
                 let entity = entities[0]
-                var properties = SemanticDictionary()
+                var properties = PropertyDictionary()
                 properties["thing"] = "foo"
                 datastore.add(properties: [entity: properties]) { () in
                     properties["thing"] = "bar"

@@ -8,38 +8,38 @@ import Foundation
 
 
 public protocol InterchangeDecoder {
-    func decode(_ value: Any?, store: Datastore) -> SemanticValue
+    func decode(_ value: Any?, store: Datastore) -> PropertyValue
     
     func decodePrimitive(date: Any?) -> Date?
     func decodePrimitive(uuid: Any?) -> UUID?
     func decodePrimitive(data: Any?) -> Data?
     
     // TODO: split decode functions into small helper objects so that we can iterate them
-    func decode(string: Any?, type: SemanticKey?, store: Datastore) -> SemanticValue?
-    func decode(integer: Any?, type: SemanticKey?, store: Datastore) -> SemanticValue?
-    func decode(double: Any?, type: SemanticKey?, store: Datastore) -> SemanticValue?
-    func decode(date: Any?, type: SemanticKey?, store: Datastore) -> SemanticValue?
-    func decode(data: Any?, type: SemanticKey?, store: Datastore) -> SemanticValue?
-    func decode(entity: Any?, type: SemanticKey?, store: Datastore) -> SemanticValue?
+    func decode(string: Any?, type: PropertyKey?, store: Datastore) -> PropertyValue?
+    func decode(integer: Any?, type: PropertyKey?, store: Datastore) -> PropertyValue?
+    func decode(double: Any?, type: PropertyKey?, store: Datastore) -> PropertyValue?
+    func decode(date: Any?, type: PropertyKey?, store: Datastore) -> PropertyValue?
+    func decode(data: Any?, type: PropertyKey?, store: Datastore) -> PropertyValue?
+    func decode(entity: Any?, type: PropertyKey?, store: Datastore) -> PropertyValue?
 }
 
 public extension InterchangeDecoder {
-    func decode(_ value: Any?, store: Datastore) -> SemanticValue {
-        var decoded: SemanticValue? = nil
+    func decode(_ value: Any?, store: Datastore) -> PropertyValue {
+        var decoded: PropertyValue? = nil
         if let record = value as? [String:Any] {
-            let typeName = record[SemanticKey.type.name] as? String
-            let type = SemanticKey(typeName)
-            if let string = record[SemanticKey.string.name] {
+            let typeName = record[PropertyKey.type.name] as? String
+            let type = PropertyKey(typeName)
+            if let string = record[PropertyKey.string.name] {
                 decoded = decode(string: string, type: type, store: store)
-            } else if let integer = record[SemanticKey.integer.name] {
+            } else if let integer = record[PropertyKey.integer.name] {
                 decoded = decode(integer: integer, type: type, store: store)
-            } else if let double = record[SemanticKey.double.name] {
+            } else if let double = record[PropertyKey.double.name] {
                 decoded = decode(double: double, type: type, store: store)
-            } else if let date = record[SemanticKey.date.name] {
+            } else if let date = record[PropertyKey.date.name] {
                 decoded = decode(date: date, type: type, store: store)
-            } else if let entity = record[SemanticKey.entity.name] {
+            } else if let entity = record[PropertyKey.entity.name] {
                 decoded = decode(entity: entity, type: type, store: store)
-            } else if let data = record[SemanticKey.data.name] {
+            } else if let data = record[PropertyKey.data.name] {
                 decoded = decode(data: data, type: type, store: store)
             }
         } else if let string = decode(string: value, type: nil, store: store) {
@@ -58,48 +58,48 @@ public extension InterchangeDecoder {
             print("couldn't decode \(String(describing: value))")
         }
         
-        return decoded ?? SemanticValue(value)
+        return decoded ?? PropertyValue(value)
     }
     
     
-    func decode(string: Any?, type: SemanticKey?, store: Datastore) -> SemanticValue? {
+    func decode(string: Any?, type: PropertyKey?, store: Datastore) -> PropertyValue? {
         if let string = string as? String {
-            return SemanticValue(string, type: type ?? .string)
+            return PropertyValue(string, type: type ?? .string)
         }
         return nil
     }
     
-    func decode(integer: Any?, type: SemanticKey?, store: Datastore) -> SemanticValue? {
+    func decode(integer: Any?, type: PropertyKey?, store: Datastore) -> PropertyValue? {
         if let integer = integer as? Int {
-            return SemanticValue(integer, type: type ?? .integer)
+            return PropertyValue(integer, type: type ?? .integer)
         }
         return nil
     }
     
-    func decode(double: Any?, type: SemanticKey?, store: Datastore) -> SemanticValue? {
+    func decode(double: Any?, type: PropertyKey?, store: Datastore) -> PropertyValue? {
         if let double = double as? Double {
-            return SemanticValue(double, type: type ?? .double)
+            return PropertyValue(double, type: type ?? .double)
         }
         return nil
     }
     
-    func decode(date: Any?, type: SemanticKey?, store: Datastore) -> SemanticValue? {
+    func decode(date: Any?, type: PropertyKey?, store: Datastore) -> PropertyValue? {
         if let date = decodePrimitive(date: date) {
-            return SemanticValue(date, type: type ?? .date)
+            return PropertyValue(date, type: type ?? .date)
         }
         return nil
     }
 
-    func decode(data: Any?, type: SemanticKey?, store: Datastore) -> SemanticValue? {
+    func decode(data: Any?, type: PropertyKey?, store: Datastore) -> PropertyValue? {
         if let data = decodePrimitive(data: data) {
-            return SemanticValue(data, type: type ?? .data)
+            return PropertyValue(data, type: type ?? .data)
         }
         return nil
     }
 
-    func decode(entity: Any?, type: SemanticKey?, store: Datastore) -> SemanticValue? {
+    func decode(entity: Any?, type: PropertyKey?, store: Datastore) -> PropertyValue? {
         if let identifier = entity as? String {
-            return SemanticValue(ResolvableEntity(identifier: identifier), type: type ?? .entity)
+            return PropertyValue(ResolvableEntity(identifier: identifier), type: type ?? .entity)
         }
         return nil
     }

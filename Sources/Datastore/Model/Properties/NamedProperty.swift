@@ -11,10 +11,10 @@ public class NamedProperty: NSManagedObject {
     @NSManaged public var type: String
     @NSManaged public var owner: EntityRecord
     
-    var typeKey: SemanticKey { return SemanticKey(type) }
+    var typeKey: PropertyKey { return PropertyKey(type) }
     
-    var semanticValue: SemanticValue {
-        return SemanticValue(nil)
+    var propertyValue: PropertyValue {
+        return PropertyValue(nil)
     }
     
     func encode(with encoder: InterchangeEncoder, into record: inout [String:Any]) {

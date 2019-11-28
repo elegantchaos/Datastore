@@ -32,37 +32,37 @@ public extension InterchangeEncoder {
     }
 
     func encode(type: String?, datestamp: Date?, into record: inout [String:Any]) {
-        record[SemanticKey.type.name] = type
-        record[SemanticKey.datestamp.name] = encodePrimitive(datestamp)
+        record[PropertyKey.type.name] = type
+        record[PropertyKey.datestamp.name] = encodePrimitive(datestamp)
     }
     
     func encode(_ date: DateProperty, into record: inout [String:Any]) {
-        record[SemanticKey.date.name] = encodePrimitive(date.value)
+        record[PropertyKey.date.name] = encodePrimitive(date.value)
         encode(type: date.type, datestamp: date.datestamp, into: &record)
     }
 
     func encode(_ data: DataProperty, into record: inout [String:Any]) {
-        record[SemanticKey.data.name] = encodePrimitive(data.value)
+        record[PropertyKey.data.name] = encodePrimitive(data.value)
         encode(type: data.type, datestamp: data.datestamp, into: &record)
     }
 
     func encode(_ string: StringProperty, into record: inout [String:Any]) {
-        record[SemanticKey.string.name] = string.value
+        record[PropertyKey.string.name] = string.value
         encode(type: string.type, datestamp: string.datestamp, into: &record)
     }
     
     func encode(_ integer: IntegerProperty, into record: inout [String:Any]) {
-        record[SemanticKey.integer.name] = integer.value
+        record[PropertyKey.integer.name] = integer.value
         encode(type: integer.type, datestamp: integer.datestamp, into: &record)
     }
 
     func encode(_ double: DoubleProperty, into record: inout [String:Any]) {
-        record[SemanticKey.double.name] = double.value
+        record[PropertyKey.double.name] = double.value
         encode(type: double.type, datestamp: double.datestamp, into: &record)
     }
 
     func encode(_ relationship: RelationshipProperty, into record: inout [String:Any]) {
-        record[SemanticKey.entity.name] = relationship.target.identifier
+        record[PropertyKey.entity.name] = relationship.target.identifier
         encode(type: relationship.type, datestamp: relationship.datestamp, into: &record)
     }
 }

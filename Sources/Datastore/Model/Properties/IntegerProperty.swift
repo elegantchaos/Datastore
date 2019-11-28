@@ -8,8 +8,8 @@ import Foundation
 public class IntegerProperty: NamedProperty {
     @NSManaged public var value: Int64
     
-    override var semanticValue: SemanticValue {
-        return SemanticValue(Int(value), type: typeKey, datestamp: datestamp)
+    override var propertyValue: PropertyValue {
+        return PropertyValue(Int(value), type: typeKey, datestamp: datestamp)
     }
 
     override func encode(with encoder: InterchangeEncoder, into record: inout [String:Any]) {

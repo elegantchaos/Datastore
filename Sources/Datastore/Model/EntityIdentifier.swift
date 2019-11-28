@@ -81,8 +81,8 @@ internal struct OpaqueNamedID: ResolvableID {
             return OpaqueCachedID(object)
         } else if createIfMissing {
             let object = type.init(context: context)
-            object.setValue(creationType, forKey: SemanticKey.type.name)
-            object.setValue(name, forKey: SemanticKey.name.name)
+            object.setValue(creationType, forKey: PropertyKey.type.name)
+            object.setValue(name, forKey: PropertyKey.name.name)
             return OpaqueCachedID(object)
         } else {
             return NullCachedID()
@@ -117,8 +117,8 @@ internal struct OpaqueIdentifiedID: ResolvableID {
             return OpaqueCachedID(object)
         } else if createIfMissing, let creationType = creationType {
             let object = type.init(context: context)
-            object.setValue(creationType, forKey: SemanticKey.type.name)
-            object.setValue(identifier, forKey: SemanticKey.identifier.name)
+            object.setValue(creationType, forKey: PropertyKey.type.name)
+            object.setValue(identifier, forKey: PropertyKey.identifier.name)
             return OpaqueCachedID(object)
         } else {
             return NullCachedID()

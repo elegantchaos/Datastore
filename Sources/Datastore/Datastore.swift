@@ -30,7 +30,7 @@ public class Datastore {
     
     public typealias ApplyResult = Result<Void, Error>
     
-    static let specialProperties: [SemanticKey] = [.identifier, .datestamp, .type]
+    static let specialProperties: [PropertyKey] = [.identifier, .datestamp, .type]
     
     public class func load(name: String, url: URL? = nil, container: NSPersistentContainer.Type = NSPersistentContainer.self, completion: @escaping LoadCompletion) {
         let container = container.init(name: name, managedObjectModel: Datastore.model)
@@ -86,7 +86,7 @@ public class Datastore {
         }
     }
     
-    public func get(entitiesOfType type: String, where key: SemanticKey, contains: Set<String>, createIfMissing: Bool = true, completion: @escaping EntitiesCompletion) {
+    public func get(entitiesOfType type: String, where key: PropertyKey, contains: Set<String>, createIfMissing: Bool = true, completion: @escaping EntitiesCompletion) {
         let context = self.context
         
         context.perform {
@@ -131,7 +131,7 @@ public class Datastore {
         }
     }
     
-    public func get(entityOfType type: String, where key: SemanticKey, equals: String, createIfMissing: Bool = true, completion: @escaping EntityCompletion) {
+    public func get(entityOfType type: String, where key: PropertyKey, equals: String, createIfMissing: Bool = true, completion: @escaping EntityCompletion) {
         get(entitiesOfType: type, where: key, contains: [equals], createIfMissing: createIfMissing) { entities in
             completion(entities.first)
         }
@@ -151,16 +151,16 @@ public class Datastore {
         }
     }
     
-    public func get(properties names: Set<String>, of entities: [EntityID], completion: @escaping ([SemanticDictionary]) -> Void) {
+    public func get(properties names: Set<String>, of entities: [EntityID], completion: @escaping ([PropertyDictionary]) -> Void) {
         let context = self.context
         context.perform {
-            var result: [SemanticDictionary] = []
+            var result: [PropertyDictionary] = []
             for entityID in entities {
-                let values: SemanticDictionary
+                let values: PropertyDictionary
                 if let entity = entityID.resolve(in: context, as: nil) {
                     values = entity.read(properties: names, store: self)
                 } else {
-                    values = SemanticDictionary()
+                    values = PropertyDictionary()
                 }
                 result.append(values)
             }
@@ -168,16 +168,16 @@ public class Datastore {
         }
     }
     
-    public func get(allPropertiesOf entities: [EntityID], completion: @escaping ([SemanticDictionary]) -> Void) {
+    public func get(allPropertiesOf entities: [EntityID], completion: @escaping ([PropertyDictionary]) -> Void) {
         let context = self.context
         context.perform {
-            var result: [SemanticDictionary] = []
+            var result: [PropertyDictionary] = []
             for entityID in entities {
-                let values: SemanticDictionary
+                let values: PropertyDictionary
                 if let entity = entityID.resolve(in: context, as: nil) {
                     values = entity.readAllProperties(store: self)
                 } else {
-                    values = SemanticDictionary()
+                    values = PropertyDictionary()
                 }
                 result.append(values)
             }
@@ -185,7 +185,7 @@ public class Datastore {
         }
     }
     
-    public func add(properties: [EntityID: SemanticDictionary], completion: @escaping () -> Void) {
+    public func add(properties: [EntityID: PropertyDictionary], completion: @escaping () -> Void) {
         let context = self.context
         context.perform {
             for (entityID, values) in properties {
@@ -197,7 +197,7 @@ public class Datastore {
         }
     }
     
-    public func update(properties: [EntityID: SemanticDictionary], completion: @escaping () -> Void) {
+    public func update(properties: [EntityID: PropertyDictionary], completion: @escaping () -> Void) {
     }
     
     public func remove(properties names: Set<String>, of entities: [EntityID], completion: @escaping () -> Void) {

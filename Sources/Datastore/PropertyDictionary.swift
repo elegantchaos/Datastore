@@ -5,13 +5,13 @@
 
 import Foundation
 
-/// A dictionary containing `SemanticValue` objects.
-/// The normal subscript operator accesses the `SemanticValue` object's actual value, and is read-only.
+/// A dictionary containing `PropertyValue` objects.
+/// The normal subscript operator accesses the `PropertyValue` object's actual value, and is read-only.
 /// Other subscript operators are provided to access the type, or to get/set the raw semantic value.
 
-public struct SemanticDictionary {
-    public typealias Key = SemanticKey
-    public typealias Value = SemanticValue
+public struct PropertyDictionary {
+    public typealias Key = PropertyKey
+    public typealias Value = PropertyValue
     
     var values: [Key:Value] = [:]
 

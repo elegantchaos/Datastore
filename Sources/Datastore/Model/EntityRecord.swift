@@ -6,7 +6,7 @@
 import CoreData
 
 public class EntityRecord: NSManagedObject {
-    typealias Key = SemanticKey
+    typealias Key = PropertyKey
     
     @NSManaged public var datestamp: Date?
     @NSManaged public var type: String?
@@ -29,7 +29,7 @@ public class EntityRecord: NSManagedObject {
         }
     }
     
-    func add(property: Key, value: SemanticValue, store: Datastore) {
+    func add(property: Key, value: PropertyValue, store: Datastore) {
         if let context = managedObjectContext {
             switch value.value {
             case let string as String:
@@ -125,16 +125,16 @@ public class EntityRecord: NSManagedObject {
         }
     }
         
-    func read(properties names: Set<String>, store: Datastore) -> SemanticDictionary {
-        var values = SemanticDictionary()
-        if names.contains(SemanticKey.datestamp.name) {
-            values[valueWithKey: .datestamp] = SemanticValue(datestamp, type: .date)
+    func read(properties names: Set<String>, store: Datastore) -> PropertyDictionary {
+        var values = PropertyDictionary()
+        if names.contains(PropertyKey.datestamp.name) {
+            values[valueWithKey: .datestamp] = PropertyValue(datestamp, type: .date)
         }
-        if names.contains(SemanticKey.identifier.name) {
-            values[valueWithKey: .identifier] = SemanticValue(identifier, type: .identifier)
+        if names.contains(PropertyKey.identifier.name) {
+            values[valueWithKey: .identifier] = PropertyValue(identifier, type: .identifier)
         }
-        if names.contains(SemanticKey.type.name) {
-            values[valueWithKey: .type] = SemanticValue(type, type: .entity)
+        if names.contains(PropertyKey.type.name) {
+            values[valueWithKey: .type] = PropertyValue(type, type: .entity)
         }
 
         read(names: names, from: strings, as: StringProperty.self, into: &values, store: store)
@@ -146,8 +146,8 @@ public class EntityRecord: NSManagedObject {
         return values
     }
     
-    func readAllProperties(store: Datastore) -> SemanticDictionary {
-        var values = SemanticDictionary()
+    func readAllProperties(store: Datastore) -> PropertyDictionary {
+        var values = PropertyDictionary()
         readAll(from: strings, as: StringProperty.self, into: &values, store: store)
         readAll(from: integers, as: IntegerProperty.self, into: &values, store: store)
         readAll(from: doubles, as: DoubleProperty.self, into: &values, store: store)
@@ -196,7 +196,7 @@ public class EntityRecord: NSManagedObject {
         }
     }
     
-    func read<T>(names: Set<String>, from properties: NSSet?, as: T.Type, into values: inout SemanticDictionary, store: Datastore) where T: NamedProperty {
+    func read<T>(names: Set<String>, from properties: NSSet?, as: T.Type, into values: inout PropertyDictionary, store: Datastore) where T: NamedProperty {
         if let set = properties as? Set<T> {
             // there may be multiple entries for each property, so we sort them in date
             // order, and only return the newest one
@@ -205,7 +205,7 @@ public class EntityRecord: NSManagedObject {
             for property in sorted {
                 let name = property.name
                 if remaining.contains(name) {
-                    let value = property.semanticValue
+                    let value = property.propertyValue
                     assert(value.type != nil)
                     values[valueWithKey: Key(name)] = value
                     remaining.remove(name)
@@ -214,7 +214,7 @@ public class EntityRecord: NSManagedObject {
         }
     }
 
-    func readAll<T>(from properties: NSSet?, as: T.Type, into values: inout SemanticDictionary, store: Datastore) where T: NamedProperty {
+    func readAll<T>(from properties: NSSet?, as: T.Type, into values: inout PropertyDictionary, store: Datastore) where T: NamedProperty {
         if let set = properties as? Set<T> {
             // there may be multiple entries for each property, so we sort them in date
             // order, and only return the newest one
@@ -223,7 +223,7 @@ public class EntityRecord: NSManagedObject {
             for property in sorted {
                 let name = property.name
                 if !done.contains(name) {
-                    let value = property.semanticValue
+                    let value = property.propertyValue
                     assert(value.type != nil)
                     values[valueWithKey: Key(name)] = value
                     done.insert(name)
