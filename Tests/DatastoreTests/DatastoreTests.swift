@@ -62,7 +62,7 @@ class DatastoreTests: DatastoreTestCase {
     func testGetEntityByUUID() {
         let done = expectation(description: "loaded")
         loadJSON(name: "Simple", expectation: done) { datastore in
-            let entityID = ResolvableEntity(identifier: "C41DB873-323D-4026-95D1-603120B9ADF6")
+            let entityID = Entity.withIdentifier("C41DB873-323D-4026-95D1-603120B9ADF6")
             datastore.get(entitiesOfType: .person, withIDs: [entityID]) { results in
                 XCTAssertEqual(results.count, 1)
                 let person = results[0]
@@ -76,7 +76,7 @@ class DatastoreTests: DatastoreTestCase {
     func testGetEntityByUUIDCreateWhenMissing() {
         let done = expectation(description: "loaded")
         loadJSON(name: "Simple", expectation: done) { datastore in
-            let missingID = ResolvableEntity(identifier: "no-such-id", createIfMissing: true)
+            let missingID = Entity.withIdentifier("no-such-id", createIfMissing: true)
             datastore.get(entitiesOfType: .person, withIDs: [missingID]) { results in
                 XCTAssertEqual(results.count, 1)
                 let person = results[0]
@@ -90,7 +90,7 @@ class DatastoreTests: DatastoreTestCase {
     func testGetEntityCreateWithInitialProperties() {
         let done = expectation(description: "loaded")
         loadAndCheck { datastore in
-            let missingID = ResolvableEntity(identifier: "no-such-id", initialProperties: PropertyDictionary([.name: "Test"]))
+            let missingID = Entity.withIdentifier("no-such-id", initialProperties: PropertyDictionary([.name: "Test"]))
             datastore.get(entitiesOfType: .person, withIDs: [missingID]) { results in
                 XCTAssertEqual(results.count, 1)
                 let person = results[0]
@@ -105,7 +105,7 @@ class DatastoreTests: DatastoreTestCase {
     func testGetEntityInitialPropertiesIgnoredIfAlreadyExists() {
         let done = expectation(description: "loaded")
         loadJSON(name: "Simple", expectation: done) { datastore in
-            let entityID = ResolvableEntity(identifier: "C41DB873-323D-4026-95D1-603120B9ADF6")
+            let entityID = Entity.withIdentifier("C41DB873-323D-4026-95D1-603120B9ADF6")
             let properties = PropertyDictionary([.name: "Test"])
             datastore.get(entitiesOfType: .test, withIntialProperties: [(entityID, properties)]) { results in
                 XCTAssertEqual(results.count, 1)
@@ -147,7 +147,7 @@ class DatastoreTests: DatastoreTestCase {
         wait(for: [done], timeout: 1.0)
     }
     
-    func exampleProperties(date: Date = Date(), owner: Entity, in store: Datastore) -> PropertyDictionary {
+    func exampleProperties(date: Date = Date(), owner: GuaranteedEntity, in store: Datastore) -> PropertyDictionary {
         var properties = PropertyDictionary()
         properties["address"] = PropertyValue("123 New St", type: "address")
         properties["date"] = date
@@ -177,7 +177,7 @@ class DatastoreTests: DatastoreTestCase {
                         XCTAssertEqual(properties["date"] as? Date, now)
                         XCTAssertEqual(properties["integer"] as? Int, 123)
                         XCTAssertEqual(properties["double"] as? Double, 456.789)
-                        XCTAssertEqual(properties["owner"] as? Entity, person)
+                        XCTAssertEqual(properties["owner"] as? GuaranteedEntity, person)
                         done.fulfill()
                     }
                 }
@@ -221,7 +221,7 @@ class DatastoreTests: DatastoreTestCase {
                         let modified = result["modified"] as! Date
                         XCTAssertEqual(modified.description, "1963-09-21 01:23:45 +0000")
                         XCTAssertEqual(result[typeWithKey: "modified"], "date")
-                        let owner = result["owner"] as! Entity
+                        let owner = result["owner"] as! GuaranteedEntity
                         XCTAssertEqual(owner, people[n])
                         XCTAssertEqual(result[typeWithKey: "owner"], "owner")
                         n += 1

@@ -140,14 +140,18 @@ internal struct OpaqueIdentifiedID: ResolvableID {
         }
     }}
 
-public class WrappedID: Equatable, Hashable {
+/// A reference to an entity in a store.
+/// The reference can be passed around safely in any context/thread
+/// It contains enough information to be resolved into a real `EntityRecord` by a store.
+/// In some cases, resolving the reference may actually create a new entity.
+public class EntityReference: Equatable, Hashable {
     var id: ResolvableID
 
     init(_ id: ResolvableID) {
         self.id = id
     }
     
-    public static func == (lhs: WrappedID, rhs: WrappedID) -> Bool {
+    public static func == (lhs: EntityReference, rhs: EntityReference) -> Bool {
         return lhs.id.equal(to: rhs.id)
     }
     
@@ -166,27 +170,23 @@ public class WrappedID: Equatable, Hashable {
 
 /// A wrapped ID created by specifying a name or an identifier.
 /// If the underlying object doesn't exist, it can be created during the resolution process.
-public class ResolvableEntity: WrappedID {
+public class ResolvableEntity: EntityReference {
     
-    public init(named name: String, createIfMissing: Bool) {
+    init(named name: String, createIfMissing: Bool) {
         super.init(OpaqueNamedID(name: name.lowercased(), createIfMissing: createIfMissing))
     }
     
-    public init(identifier: String, initialProperties: PropertyDictionary? = nil) {
+    init(identifier: String, initialProperties: PropertyDictionary? = nil) {
         super.init(OpaqueIdentifiedID(identifier: identifier, initialProperties: initialProperties))
-    }
-
-    public init(identifier: String, createIfMissing: Bool) {
-        super.init(OpaqueIdentifiedID(identifier: identifier, initialProperties: createIfMissing ? PropertyDictionary() : nil))
     }
 
 }
 
-/// An Entity is an `WrappedID` that is guaranteed to back an existing entity.
+/// An Entity is an `EntityReference` that is guaranteed to back an existing entity.
 /// Internally it already has a resolved object pointer.
 /// It also keeps a copy of the object's `identifier` which is publically
 /// accessible and can be safely read from any thread/context.
-public class Entity: WrappedID {
+public class GuaranteedEntity: EntityReference {
     public let identifier: String
     init(_ object: EntityRecord) {
         self.identifier = object.identifier!
@@ -198,5 +198,12 @@ public class Entity: WrappedID {
     }
 }
 
-public typealias EntityID = WrappedID
-
+public struct Entity {
+    static func withIdentifier(_ identifier: String, initialProperties: PropertyDictionary? = nil) -> ResolvableEntity {
+        return ResolvableEntity(identifier: identifier, initialProperties: initialProperties)
+    }
+    
+    static func withIdentifier(_ identifier: String, createIfMissing: Bool) -> ResolvableEntity {
+        return ResolvableEntity(identifier: identifier, initialProperties: createIfMissing ? PropertyDictionary() : nil)
+    }
+}
