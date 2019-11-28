@@ -86,6 +86,26 @@ public class Datastore {
         }
     }
     
+    public func get(entitiesOfType type: EntityType, withIDs entityIDs: [EntityReference], completion: @escaping EntitiesCompletion) {
+        let context = self.context
+        context.perform {
+            var result: [GuaranteedEntity] = []
+            for entityID in entityIDs {
+                if let entity = entityID.resolve(in: self, as: type) {
+                    result.append(GuaranteedEntity(entity))
+                }
+            }
+            completion(result)
+        }
+    }
+
+    public func get(entityOfType type: EntityType, where key: PropertyKey, equals: String, createIfMissing: Bool = true, completion: @escaping EntityCompletion) {
+        get(entitiesOfType: type, where: key, contains: [equals], createIfMissing: createIfMissing) { entities in
+            completion(entities.first)
+        }
+    }
+    
+
     public func get(entitiesOfType type: EntityType, where key: PropertyKey, contains: Set<String>, createIfMissing: Bool = true, completion: @escaping EntitiesCompletion) {
         let context = self.context
         
@@ -94,6 +114,7 @@ public class Datastore {
             var create: Set<String> = contains
             
             let request: NSFetchRequest<EntityRecord> = EntityRecord.fetcher(in: context)
+            request.predicate = NSPredicate(format: "type == %@", type.name)
             if let entities = try? context.fetch(request) {
                 for entity in entities {
                     if let value = entity.string(withKey: key), contains.contains(value) {
@@ -117,26 +138,6 @@ public class Datastore {
             completion(result.map({ GuaranteedEntity($0) }))
         }
     }
-    
-    public func get(entitiesOfType type: EntityType, withIDs entityIDs: [EntityReference], completion: @escaping EntitiesCompletion) {
-        let context = self.context
-        context.perform {
-            var result: [GuaranteedEntity] = []
-            for entityID in entityIDs {
-                if let entity = entityID.resolve(in: self, as: type) {
-                    result.append(GuaranteedEntity(entity))
-                }
-            }
-            completion(result)
-        }
-    }
-
-    public func get(entityOfType type: EntityType, where key: PropertyKey, equals: String, createIfMissing: Bool = true, completion: @escaping EntityCompletion) {
-        get(entitiesOfType: type, where: key, contains: [equals], createIfMissing: createIfMissing) { entities in
-            completion(entities.first)
-        }
-    }
-    
     public func get(allEntitiesOfType type: EntityType, completion: @escaping EntitiesCompletion) {
         let context = self.context
         context.perform {

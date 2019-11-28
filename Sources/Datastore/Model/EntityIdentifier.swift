@@ -74,9 +74,18 @@ internal struct OpaqueNamedID: ResolvableID {
     let createIfMissing: Bool
     
     internal func resolve(in store: Datastore, creationType: String?) -> ResolvableID? {
-        if let object = EntityRecord.named(name, in: store.context, createIfMissing: false) {
-            return OpaqueCachedID(object)
-        } else if createIfMissing {
+        
+        // TODO: optimise this search to just fetch the newest string record with the relevant key
+        let request: NSFetchRequest<EntityRecord> = EntityRecord.fetcher(in: store.context)
+        if let entities = try? store.context.fetch(request) {
+            for entity in entities {
+                if let value = entity.string(withKey: .name), value == name {
+                    return OpaqueCachedID(entity)
+                }
+            }
+        }
+
+        if createIfMissing {
             let entity = EntityRecord(in: store.context)
             entity.type = creationType
             entity.add(name, key: .name, type: .string, store: store)
@@ -173,7 +182,7 @@ public class EntityReference: Equatable, Hashable {
 public class ResolvableEntity: EntityReference {
     
     init(named name: String, createIfMissing: Bool) {
-        super.init(OpaqueNamedID(name: name.lowercased(), createIfMissing: createIfMissing))
+        super.init(OpaqueNamedID(name: name, createIfMissing: createIfMissing))
     }
     
     init(identifier: String, initialProperties: PropertyDictionary? = nil) {
@@ -205,5 +214,9 @@ public struct Entity {
     
     static func withIdentifier(_ identifier: String, createIfMissing: Bool) -> ResolvableEntity {
         return ResolvableEntity(identifier: identifier, initialProperties: createIfMissing ? PropertyDictionary() : nil)
+    }
+    
+    static func named(_ name: String) -> ResolvableEntity {
+        return ResolvableEntity(named: name, createIfMissing: false)
     }
 }

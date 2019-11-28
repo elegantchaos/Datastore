@@ -59,7 +59,7 @@ class DatastoreTests: DatastoreTestCase {
         wait(for: [created], timeout: 1.0)
     }
     
-    func testGetEntityByUUID() {
+    func testGetEntityByIdentifier() {
         let done = expectation(description: "loaded")
         loadJSON(name: "Simple", expectation: done) { datastore in
             let entityID = Entity.withIdentifier("C41DB873-323D-4026-95D1-603120B9ADF6")
@@ -73,7 +73,21 @@ class DatastoreTests: DatastoreTestCase {
         wait(for: [done], timeout: 1.0)
     }
 
-    func testGetEntityByUUIDCreateWhenMissing() {
+    func testGetEntityByName() {
+        let done = expectation(description: "loaded")
+        loadJSON(name: "Simple", expectation: done) { datastore in
+            let entityRef = Entity.named("Test")
+            datastore.get(entitiesOfType: .person, withIDs: [entityRef]) { results in
+                XCTAssertEqual(results.count, 1)
+                let person = results[0]
+                XCTAssertEqual(person.identifier, "C41DB873-323D-4026-95D1-603120B9ADF6")
+                done.fulfill()
+            }
+        }
+        wait(for: [done], timeout: 1.0)
+    }
+
+    func testGetEntityByIdentifierCreateWhenMissing() {
         let done = expectation(description: "loaded")
         loadJSON(name: "Simple", expectation: done) { datastore in
             let missingID = Entity.withIdentifier("no-such-id", createIfMissing: true)
