@@ -13,10 +13,10 @@ import Foundation
 
 public struct PropertyValue {
     let value: Any?
-    let type: PropertyKey?
+    let type: PropertyType?
     let datestamp: Date?
     
-    init(_ value: Any?, type: PropertyKey? = .value, datestamp: Date? = Date()) {
+    init(_ value: Any?, type: PropertyType? = .value, datestamp: Date? = Date()) {
         self.value = value
         self.type = type
         self.datestamp = datestamp

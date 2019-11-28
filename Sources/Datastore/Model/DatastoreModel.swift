@@ -65,7 +65,7 @@ fileprivate extension DatastoreModel {
         name.isOptional = false
         
         let type = NSAttributeDescription()
-        type.name = "type"
+        type.name = "typeName"
         type.attributeType = .stringAttributeType
         type.isOptional = false
         

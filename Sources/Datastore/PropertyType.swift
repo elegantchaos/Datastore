@@ -1,11 +1,11 @@
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-//  Created by Sam Deane on 24/09/2019.
+//  Created by Sam Deane on 28/11/2019.
 //  All code (c) 2019 - present day, Elegant Chaos Limited.
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 import Foundation
 
-public struct PropertyKey: Equatable, Hashable, ExpressibleByStringLiteral {
+public struct PropertyType: Equatable, Hashable, ExpressibleByStringLiteral {
     public let name: String
     public init(_ name: String) { self.name = name }
     public init?(_ name: String?) {
@@ -16,12 +16,15 @@ public struct PropertyKey: Equatable, Hashable, ExpressibleByStringLiteral {
 //    public var rawValue: String { return name }
 }
 
-// MARK: - Standard Keys
+// MARK: - Standard Types
 
-public extension PropertyKey {
-    static let datestamp: Self = "datestamp"
-    static let entities: Self = "entities"
+public extension PropertyType {
+    static let data: Self = "data"
+    static let date: Self = "date"
+    static let double: Self = "double"
+    static let entity: Self = "entity"
     static let identifier: Self = "identifier"
-    static let name: Self = "name"
-    static let type: Self = "type"
+    static let integer: Self = "integer"
+    static let string: Self = "string"
+    static let value: Self = "value"
 }

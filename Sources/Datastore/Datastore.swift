@@ -86,7 +86,7 @@ public class Datastore {
         }
     }
     
-    public func get(entitiesOfType type: String, where key: PropertyKey, contains: Set<String>, createIfMissing: Bool = true, completion: @escaping EntitiesCompletion) {
+    public func get(entitiesOfType type: EntityType, where key: PropertyKey, contains: Set<String>, createIfMissing: Bool = true, completion: @escaping EntitiesCompletion) {
         let context = self.context
         
         context.perform {
@@ -106,7 +106,7 @@ public class Datastore {
             if createIfMissing {
                 for name in create {
                     let entity = EntityRecord(in: context)
-                    entity.type = type
+                    entity.type = type.name
                     let property = StringProperty(in: context)
                     property.owner = entity
                     property.name = key.name
@@ -118,7 +118,7 @@ public class Datastore {
         }
     }
     
-    public func get(entitiesOfType type: String, withIDs entityIDs: [EntityID], completion: @escaping EntitiesCompletion) {
+    public func get(entitiesOfType type: EntityType, withIDs entityIDs: [EntityID], completion: @escaping EntitiesCompletion) {
         let context = self.context
         context.perform {
             var result: [Entity] = []
@@ -131,18 +131,18 @@ public class Datastore {
         }
     }
     
-    public func get(entityOfType type: String, where key: PropertyKey, equals: String, createIfMissing: Bool = true, completion: @escaping EntityCompletion) {
+    public func get(entityOfType type: EntityType, where key: PropertyKey, equals: String, createIfMissing: Bool = true, completion: @escaping EntityCompletion) {
         get(entitiesOfType: type, where: key, contains: [equals], createIfMissing: createIfMissing) { entities in
             completion(entities.first)
         }
     }
     
-    public func get(allEntitiesOfType type: String, completion: @escaping EntitiesCompletion) {
+    public func get(allEntitiesOfType type: EntityType, completion: @escaping EntitiesCompletion) {
         let context = self.context
         context.perform {
             
             let request: NSFetchRequest<EntityRecord> = EntityRecord.fetcher(in: context)
-            request.predicate = NSPredicate(format: "type = %@", type)
+            request.predicate = NSPredicate(format: "type = %@", type.name)
             if let entities = try? context.fetch(request) {
                 completion(Array(entities.map({ Entity($0) })))
             } else {
@@ -157,7 +157,7 @@ public class Datastore {
             var result: [PropertyDictionary] = []
             for entityID in entities {
                 let values: PropertyDictionary
-                if let entity = entityID.resolve(in: context, as: nil) {
+                if let entity = entityID.resolve(in: context) {
                     values = entity.read(properties: names, store: self)
                 } else {
                     values = PropertyDictionary()
@@ -174,7 +174,7 @@ public class Datastore {
             var result: [PropertyDictionary] = []
             for entityID in entities {
                 let values: PropertyDictionary
-                if let entity = entityID.resolve(in: context, as: nil) {
+                if let entity = entityID.resolve(in: context) {
                     values = entity.readAllProperties(store: self)
                 } else {
                     values = PropertyDictionary()
@@ -189,7 +189,7 @@ public class Datastore {
         let context = self.context
         context.perform {
             for (entityID, values) in properties {
-                if let entity = entityID.resolve(in: context, as: nil) {
+                if let entity = entityID.resolve(in: context) {
                     values.add(to: entity, store: self)
                 }
             }
@@ -204,7 +204,7 @@ public class Datastore {
         let context = self.context
         context.perform {
             for entityID in entities {
-                if let entity = entityID.resolve(in: context, as: nil) {
+                if let entity = entityID.resolve(in: context) {
                     entity.remove(properties: names, store: self)
                 }
             }

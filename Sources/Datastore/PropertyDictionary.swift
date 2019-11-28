@@ -23,22 +23,22 @@ public struct PropertyDictionary {
         set {
             if let value = newValue as? Value {
                 values[key] = value
-            } else if let (value, type) = newValue as? (Any?, Key) {
+            } else if let (value, type) = newValue as? (Any?, PropertyType) {
                 values[key] = Value(value, type: type, datestamp: nil)
             } else if let (value, type) = newValue as? (Any?, String) {
-                values[key] = Value(value, type: Key(type), datestamp: nil)
+                values[key] = Value(value, type: PropertyType(type), datestamp: nil)
             } else {
                 values[key] = Value(newValue, type: nil, datestamp: nil)
             }
         }
     }
     
-    public subscript(_ key: Key, as type: Key) -> Any? {
+    public subscript(_ key: Key, as type: PropertyType) -> Any? {
         get { return values[key]?.value }
         set { values[key] = Value(newValue, type: type, datestamp: nil) }
     }
     
-    public subscript(typeWithKey key: Key) -> Key? {
+    public subscript(typeWithKey key: Key) -> PropertyType? {
         get { return values[key]?.type }
     }
 

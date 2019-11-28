@@ -9,7 +9,7 @@ public class RelationshipProperty: NamedProperty {
     @NSManaged public var target: EntityRecord
     
     override var propertyValue: PropertyValue {
-        return PropertyValue(Entity(target), type: typeKey, datestamp: datestamp)
+        return PropertyValue(Entity(target), type: type, datestamp: datestamp)
     }
     
     override func encode(with encoder: InterchangeEncoder, into record: inout [String:Any]) {

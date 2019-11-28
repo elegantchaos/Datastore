@@ -89,37 +89,37 @@ public class EntityRecord: NSManagedObject {
         }
     }
     
-    func add(_ value: String, key: Key, type: Key?, store: Datastore) {
+    func add(_ value: String, key: Key, type: PropertyType?, store: Datastore) {
         if let property: StringProperty = add(key: key, type: type ?? .string) {
             property.value = value
         }
     }
     
-    func add(_ value: Int64, key: Key, type: Key?, store: Datastore) {
+    func add(_ value: Int64, key: Key, type: PropertyType?, store: Datastore) {
         if let property: IntegerProperty = add(key: key, type: type ?? .integer) {
             property.value = value
         }
     }
     
-    func add(_ value: Double, key: Key, type: Key?, store: Datastore) {
+    func add(_ value: Double, key: Key, type: PropertyType?, store: Datastore) {
         if let property: DoubleProperty = add(key: key, type: type ?? .double) {
             property.value = value
         }
     }
     
-    func add(_ value: Date, key: Key, type: Key?, store: Datastore) {
+    func add(_ value: Date, key: Key, type: PropertyType?, store: Datastore) {
         if let property: DateProperty = add(key: key, type: type ?? .date) {
             property.value = value
         }
     }
 
-    func add(_ value: Data, key: Key, type: Key?, store: Datastore) {
+    func add(_ value: Data, key: Key, type: PropertyType?, store: Datastore) {
         if let property: DataProperty = add(key: key, type: type ?? .data) {
             property.value = value
         }
     }
 
-    func add(_ value: EntityRecord, key: Key, type: Key?, store: Datastore) {
+    func add(_ value: EntityRecord, key: Key, type: PropertyType?, store: Datastore) {
         if let property: RelationshipProperty = add(key: key, type: type ?? .entity) {
             property.target = value
         }
@@ -175,7 +175,7 @@ public class EntityRecord: NSManagedObject {
     
     // MARK: - Generic Helpers
     
-    func add<R>(key: Key, type: Key) -> R? where R: NamedProperty {
+    func add<R>(key: Key, type: PropertyType) -> R? where R: NamedProperty {
         guard let context = managedObjectContext else {
             return nil
         }
@@ -183,7 +183,7 @@ public class EntityRecord: NSManagedObject {
         let property = R(context: context)
         property.name = key.name
         property.owner = self
-        property.type = type.name
+        property.typeName = type.name
         return property
     }
     

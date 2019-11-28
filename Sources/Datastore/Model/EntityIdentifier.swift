@@ -157,8 +157,8 @@ public class WrappedID<T: NSManagedObject>: Equatable, Hashable {
         id.hash(into: &hasher)
     }
 
-    func resolve(in context: NSManagedObjectContext, as type: String?) -> T? {
-        if let resolved = id.resolve(in: context, as: T.self, creationType: type) {
+    func resolve(in context: NSManagedObjectContext, as type: EntityType? = nil) -> T? {
+        if let resolved = id.resolve(in: context, as: T.self, creationType: type?.name) {
             id = resolved
         }
         
