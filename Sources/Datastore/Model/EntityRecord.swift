@@ -30,62 +30,62 @@ public class EntityRecord: NSManagedObject {
     }
     
     func add(property: Key, value: PropertyValue, store: Datastore) {
-        if let context = managedObjectContext {
-            switch value.value {
-            case let string as String:
-                add(string, key: property, type: value.type, store: store)
-                
-            case let integer as Int16:
-                add(Int64(integer), key: property, type: value.type, store: store)
-                
-            case let integer as Int32:
-                add(Int64(integer), key: property, type: value.type, store: store)
-                
-            case let integer as Int64:
-                add(integer, key: property, type: value.type, store: store)
-                
-            case let integer as Int:
-                add(Int64(integer), key: property, type: value.type, store: store)
-                
-            case let integer as UInt16:
-                add(Int64(integer), key: property, type: value.type, store: store)
-                
-            case let integer as UInt32:
-                add(Int64(integer), key: property, type: value.type, store: store)
-                
-            case let integer as UInt64:
-                add(Int64(integer), key: property, type: value.type, store: store)
-                
-            case let integer as UInt:
-                add(Int64(integer), key: property, type: value.type, store: store)
-                
-            case let double as Double:
-                add(double, key: property, type: value.type, store: store)
-                
-            case let date as Date:
-                add(date, key: property, type: value.type, store: store)
-                
-            case let data as Data:
-                add(data, key: property, type: value.type, store: store)
-                
-            case let entity as EntityRecord:
-                add(entity, key: property, type: value.type, store: store)
-                
-            case let entity as EntityReference:
-                if let resolved = entity.resolve(in: store) {
-                    add(resolved, key: property, type: value.type, store: store)
-                }
-
-            case let entity as GuaranteedEntity:
-                if let resolved = entity.resolve(in: store) {
-                    add(resolved, key: property, type: value.type, store: store)
-                }
-
-            default:
-                let unknown = Swift.type(of: value.value)
-                print("unknown value type \(unknown) \(String(describing: value.value))")
-                break
+        assert(managedObjectContext == store.context)
+        
+        switch value.value {
+        case let string as String:
+            add(string, key: property, type: value.type, store: store)
+            
+        case let integer as Int16:
+            add(Int64(integer), key: property, type: value.type, store: store)
+            
+        case let integer as Int32:
+            add(Int64(integer), key: property, type: value.type, store: store)
+            
+        case let integer as Int64:
+            add(integer, key: property, type: value.type, store: store)
+            
+        case let integer as Int:
+            add(Int64(integer), key: property, type: value.type, store: store)
+            
+        case let integer as UInt16:
+            add(Int64(integer), key: property, type: value.type, store: store)
+            
+        case let integer as UInt32:
+            add(Int64(integer), key: property, type: value.type, store: store)
+            
+        case let integer as UInt64:
+            add(Int64(integer), key: property, type: value.type, store: store)
+            
+        case let integer as UInt:
+            add(Int64(integer), key: property, type: value.type, store: store)
+            
+        case let double as Double:
+            add(double, key: property, type: value.type, store: store)
+            
+        case let date as Date:
+            add(date, key: property, type: value.type, store: store)
+            
+        case let data as Data:
+            add(data, key: property, type: value.type, store: store)
+            
+        case let entity as EntityRecord:
+            add(entity, key: property, type: value.type, store: store)
+            
+        case let entity as EntityReference:
+            if let resolved = entity.resolve(in: store) {
+                add(resolved, key: property, type: value.type, store: store)
             }
+
+        case let entity as GuaranteedEntity:
+            if let resolved = entity.resolve(in: store) {
+                add(resolved, key: property, type: value.type, store: store)
+            }
+
+        default:
+            let unknown = Swift.type(of: value.value)
+            print("unknown value type \(unknown) \(String(describing: value.value))")
+            break
         }
     }
     
@@ -126,6 +126,8 @@ public class EntityRecord: NSManagedObject {
     }
         
     func read(properties names: Set<String>, store: Datastore) -> PropertyDictionary {
+        assert(managedObjectContext == store.context)
+
         var values = PropertyDictionary()
         if names.contains(PropertyKey.datestamp.name) {
             values[valueWithKey: .datestamp] = PropertyValue(datestamp, type: .date)
@@ -147,6 +149,8 @@ public class EntityRecord: NSManagedObject {
     }
     
     func readAllProperties(store: Datastore) -> PropertyDictionary {
+        assert(managedObjectContext == store.context)
+
         var values = PropertyDictionary()
         readAll(from: strings, as: StringProperty.self, into: &values, store: store)
         readAll(from: integers, as: IntegerProperty.self, into: &values, store: store)
@@ -166,6 +170,8 @@ public class EntityRecord: NSManagedObject {
     }
     
     func remove(properties names: Set<String>, store: Datastore) {
+        assert(managedObjectContext == store.context)
+
         remove(names: names, from: strings, as: StringProperty.self, store: store)
         remove(names: names, from: integers, as: IntegerProperty.self, store: store)
         remove(names: names, from: doubles, as: DoubleProperty.self, store: store)
