@@ -10,10 +10,10 @@ import Foundation
 
 public struct SemanticValue {
     let value: Any?
-    let type: String?
+    let type: SemanticKey?
     let datestamp: Date?
     
-    init(_ value: Any?, type: String? = Datastore.standardNames.value, datestamp: Date? = Date()) {
+    init(_ value: Any?, type: SemanticKey? = .value, datestamp: Date? = Date()) {
         self.value = value
         self.type = type
         self.datestamp = datestamp

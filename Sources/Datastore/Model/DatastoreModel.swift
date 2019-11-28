@@ -24,17 +24,17 @@ fileprivate extension DatastoreModel {
         entityRecord.managedObjectClassName = "Datastore.EntityRecord"
         
         let datestamp = NSAttributeDescription()
-        datestamp.name = Datastore.standardNames.datestamp
+        datestamp.name = SemanticKey.datestamp.name
         datestamp.attributeType = .dateAttributeType
         datestamp.isOptional = false
         
         let type = NSAttributeDescription()
-        type.name = Datastore.standardNames.type
+        type.name = SemanticKey.type.name
         type.attributeType = .stringAttributeType
         type.isOptional = false
         
         let identifier = NSAttributeDescription()
-        identifier.name = Datastore.standardNames.identifier
+        identifier.name = SemanticKey.identifier.name
         identifier.attributeType = .stringAttributeType
         identifier.isOptional = false
         

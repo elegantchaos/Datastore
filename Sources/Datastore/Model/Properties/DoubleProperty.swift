@@ -9,7 +9,7 @@ public class DoubleProperty: NamedProperty {
     @NSManaged public var value: Double
     
     override var semanticValue: SemanticValue {
-        return SemanticValue(value, type: type, datestamp: datestamp)
+        return SemanticValue(value, type: SemanticKey(type), datestamp: datestamp)
     }
 
     override func encode(with encoder: InterchangeEncoder, into record: inout [String:Any]) {

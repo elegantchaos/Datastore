@@ -11,7 +11,6 @@ let datastoreChannel = Channel("com.elegantchaos.datastore")
 
 public class Datastore {
     static var cachedModel: NSManagedObjectModel!
-    static let standardNames = StandardNames()
     static let model = DatastoreModel()
 
     internal let container: NSPersistentContainer
@@ -31,7 +30,7 @@ public class Datastore {
     
     public typealias ApplyResult = Result<Void, Error>
     
-    static let specialProperties = [Datastore.standardNames.identifier, Datastore.standardNames.datestamp, Datastore.standardNames.type]
+    static let specialProperties: [SemanticKey] = [.identifier, .datestamp, .type]
     
     public class func load(name: String, url: URL? = nil, container: NSPersistentContainer.Type = NSPersistentContainer.self, completion: @escaping LoadCompletion) {
         let container = container.init(name: name, managedObjectModel: Datastore.model)
@@ -87,7 +86,7 @@ public class Datastore {
         }
     }
     
-    public func get(entitiesOfType type: String, where key: String, contains: Set<String>, createIfMissing: Bool = true, completion: @escaping EntitiesCompletion) {
+    public func get(entitiesOfType type: String, where key: SemanticKey, contains: Set<String>, createIfMissing: Bool = true, completion: @escaping EntitiesCompletion) {
         let context = self.context
         
         context.perform {
@@ -110,7 +109,7 @@ public class Datastore {
                     entity.type = type
                     let property = StringProperty(in: context)
                     property.owner = entity
-                    property.name = key
+                    property.name = key.name
                     property.value = name
                     result.append(entity)
                 }
@@ -132,7 +131,7 @@ public class Datastore {
         }
     }
     
-    public func get(entityOfType type: String, where key: String, equals: String, createIfMissing: Bool = true, completion: @escaping EntityCompletion) {
+    public func get(entityOfType type: String, where key: SemanticKey, equals: String, createIfMissing: Bool = true, completion: @escaping EntityCompletion) {
         get(entitiesOfType: type, where: key, contains: [equals], createIfMissing: createIfMissing) { entities in
             completion(entities.first)
         }

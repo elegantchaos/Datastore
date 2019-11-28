@@ -11,6 +11,8 @@ public class NamedProperty: NSManagedObject {
     @NSManaged public var type: String
     @NSManaged public var owner: EntityRecord
     
+    var typeKey: SemanticKey { return SemanticKey(type) }
+    
     var semanticValue: SemanticValue {
         return SemanticValue(nil)
     }

@@ -32,37 +32,37 @@ public extension InterchangeEncoder {
     }
 
     func encode(type: String?, datestamp: Date?, into record: inout [String:Any]) {
-        record[Datastore.standardNames.type] = type
-        record[Datastore.standardNames.datestamp] = encodePrimitive(datestamp)
+        record[SemanticKey.type.name] = type
+        record[SemanticKey.datestamp.name] = encodePrimitive(datestamp)
     }
     
     func encode(_ date: DateProperty, into record: inout [String:Any]) {
-        record[Datastore.standardNames.date] = encodePrimitive(date.value)
+        record[SemanticKey.date.name] = encodePrimitive(date.value)
         encode(type: date.type, datestamp: date.datestamp, into: &record)
     }
 
     func encode(_ data: DataProperty, into record: inout [String:Any]) {
-        record[Datastore.standardNames.data] = encodePrimitive(data.value)
+        record[SemanticKey.data.name] = encodePrimitive(data.value)
         encode(type: data.type, datestamp: data.datestamp, into: &record)
     }
 
     func encode(_ string: StringProperty, into record: inout [String:Any]) {
-        record[Datastore.standardNames.string] = string.value
+        record[SemanticKey.string.name] = string.value
         encode(type: string.type, datestamp: string.datestamp, into: &record)
     }
     
     func encode(_ integer: IntegerProperty, into record: inout [String:Any]) {
-        record[Datastore.standardNames.integer] = integer.value
+        record[SemanticKey.integer.name] = integer.value
         encode(type: integer.type, datestamp: integer.datestamp, into: &record)
     }
 
     func encode(_ double: DoubleProperty, into record: inout [String:Any]) {
-        record[Datastore.standardNames.double] = double.value
+        record[SemanticKey.double.name] = double.value
         encode(type: double.type, datestamp: double.datestamp, into: &record)
     }
 
     func encode(_ relationship: RelationshipProperty, into record: inout [String:Any]) {
-        record[Datastore.standardNames.entity] = relationship.target.identifier
+        record[SemanticKey.entity.name] = relationship.target.identifier
         encode(type: relationship.type, datestamp: relationship.datestamp, into: &record)
     }
 }

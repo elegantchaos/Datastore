@@ -47,7 +47,7 @@ class DatastoreTests: DatastoreTestCase {
         let created = expectation(description: "loaded")
         loadAndCheck { (datastore) in
             datastore.get(entityOfType: "Person", where: "name", equals: "Person 1") { person in
-                XCTAssertEqual(person?.object.string(withKey: Datastore.standardNames.name), "Person 1")
+                XCTAssertEqual(person?.object.string(withKey: .name), "Person 1")
                 created.fulfill()
             }
         }
@@ -61,7 +61,7 @@ class DatastoreTests: DatastoreTestCase {
             datastore.get(entitiesOfType: "Person", withIDs: [entityID]) { results in
                 XCTAssertEqual(results.count, 1)
                 let person = results[0]
-                XCTAssertEqual(person.object.string(withKey: Datastore.standardNames.name), "Test")
+                XCTAssertEqual(person.object.string(withKey: .name), "Test")
                 done.fulfill()
             }
         }
@@ -251,7 +251,7 @@ class DatastoreTests: DatastoreTestCase {
                 var properties = SemanticDictionary()
                 properties["name"] = "New Name"
                 datastore.add(properties: [person : properties]) {
-                    XCTAssertEqual(person.object.string(withKey: Datastore.standardNames.name), "New Name")
+                    XCTAssertEqual(person.object.string(withKey: .name), "New Name")
                     created.fulfill()
                 }
             }

@@ -10,40 +10,43 @@ import Foundation
 /// Other subscript operators are provided to access the type, or to get/set the raw semantic value.
 
 public struct SemanticDictionary {
-    var values: [String:SemanticValue] = [:]
+    public typealias Key = SemanticKey
+    public typealias Value = SemanticValue
     
+    var values: [Key:Value] = [:]
+
     public init() {
     }
     
-    public subscript(_ key: String) -> Any? {
+    public subscript(_ key: Key) -> Any? {
         get { return values[key]?.value }
         set {
-            if let value = newValue as? SemanticValue {
+            if let value = newValue as? Value {
                 values[key] = value
+            } else if let (value, type) = newValue as? (Any?, Key) {
+                values[key] = Value(value, type: type, datestamp: nil)
             } else if let (value, type) = newValue as? (Any?, String) {
-                values[key] = SemanticValue(value, type: type, datestamp: nil)
-            } else if let (value, type) = newValue as? (Any?, String) {
-                values[key] = SemanticValue(value, type: type, datestamp: nil)
+                values[key] = Value(value, type: Key(type), datestamp: nil)
             } else {
-                values[key] = SemanticValue(newValue, type: nil, datestamp: nil)
+                values[key] = Value(newValue, type: nil, datestamp: nil)
             }
         }
     }
     
-    public subscript(_ key: String, as type: String) -> Any? {
+    public subscript(_ key: Key, as type: Key) -> Any? {
         get { return values[key]?.value }
-        set { values[key] = SemanticValue(newValue, type: type, datestamp: nil) }
+        set { values[key] = Value(newValue, type: type, datestamp: nil) }
     }
     
-    public subscript(typeWithKey key: String) -> String? {
+    public subscript(typeWithKey key: Key) -> Key? {
         get { return values[key]?.type }
     }
 
-    public subscript(datestampWithKey key: String) -> Date? {
+    public subscript(datestampWithKey key: Key) -> Date? {
         get { return values[key]?.datestamp }
     }
     
-    public subscript(valueWithKey key: String) -> SemanticValue? {
+    public subscript(valueWithKey key: Key) -> Value? {
         get { return values[key] }
         set { values[key] = newValue }
     }

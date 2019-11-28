@@ -10,7 +10,7 @@ public class DateProperty: NamedProperty {
     @NSManaged public var value: Date
     
     override var semanticValue: SemanticValue {
-        return SemanticValue(value, type: type, datestamp: datestamp)
+        return SemanticValue(value, type: typeKey, datestamp: datestamp)
     }
 
     override func encode(with encoder: InterchangeEncoder, into record: inout [String:Any]) {
