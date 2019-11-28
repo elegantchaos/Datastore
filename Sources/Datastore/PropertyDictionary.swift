@@ -18,19 +18,13 @@ public struct PropertyDictionary {
     public init() {
     }
     
+    public init(_ values: [Key:Any]) {
+        self.values = values.mapValues({ asValue($0) })
+    }
+    
     public subscript(_ key: Key) -> Any? {
         get { return values[key]?.value }
-        set {
-            if let value = newValue as? Value {
-                values[key] = value
-            } else if let (value, type) = newValue as? (Any?, PropertyType) {
-                values[key] = Value(value, type: type, datestamp: nil)
-            } else if let (value, type) = newValue as? (Any?, String) {
-                values[key] = Value(value, type: PropertyType(type), datestamp: nil)
-            } else {
-                values[key] = Value(newValue, type: nil, datestamp: nil)
-            }
-        }
+        set { values[key] = asValue(newValue) }
     }
     
     public subscript(_ key: Key, as type: PropertyType) -> Any? {
@@ -49,6 +43,18 @@ public struct PropertyDictionary {
     public subscript(valueWithKey key: Key) -> Value? {
         get { return values[key] }
         set { values[key] = newValue }
+    }
+    
+    internal func asValue(_ value: Any?) -> Value {
+        if let value = value as? Value {
+            return value
+        } else if let (value, type) = value as? (Any?, PropertyType) {
+            return Value(value, type: type, datestamp: nil)
+        } else if let (value, type) = value as? (Any?, String) {
+            return Value(value, type: PropertyType(type), datestamp: nil)
+        } else {
+            return Value(value, type: nil, datestamp: nil)
+        }
     }
     
     func add(to entity: EntityRecord, store: Datastore) {

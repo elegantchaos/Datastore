@@ -9,18 +9,18 @@ import Logger
 let identifierChannel = Channel("com.elegantchaos.datastore.identifier")
 
 internal protocol ResolvableID {
-    func resolve(in context: NSManagedObjectContext, as type: NSManagedObject.Type, creationType: String?) -> ResolvableID?
+    func resolve(in store: Datastore, creationType: String?) -> ResolvableID?
     func hash(into hasher: inout Hasher)
     func equal(to: ResolvableID) -> Bool
-    var object: NSManagedObject? { get }
+    var object: EntityRecord? { get }
 }
 
 internal struct NullCachedID: ResolvableID {
-    internal func resolve(in context: NSManagedObjectContext, as type: NSManagedObject.Type, creationType: String?) -> ResolvableID? {
+    internal func resolve(in store: Datastore, creationType: String?) -> ResolvableID? {
         return nil
     }
     
-    internal var object: NSManagedObject? {
+    internal var object: EntityRecord? {
         return nil
     }
 
@@ -34,28 +34,25 @@ internal struct NullCachedID: ResolvableID {
 }
 
 internal struct OpaqueCachedID: ResolvableID {
-    let cached: NSManagedObject
+    let cached: EntityRecord
     let id: NSManagedObjectID
     
-    internal init(_ object: NSManagedObject) {
+    internal init(_ object: EntityRecord) {
         self.cached = object
         self.id = object.objectID
     }
     
-    internal func resolve(in context: NSManagedObjectContext, as objectType: NSManagedObject.Type, creationType: String?) -> ResolvableID? {
-        if context == cached.managedObjectContext {
-            if type(of: cached) == objectType {
-                return nil
-            } else {
-                return NullCachedID()
-            }
-        } else {
-            let object = context.object(with: id)
+    internal func resolve(in store: Datastore, creationType: String?) -> ResolvableID? {
+        if store.context == cached.managedObjectContext {
+            return nil
+        } else if let object = store.context.object(with: id) as? EntityRecord {
             return OpaqueCachedID(object)
+        } else {
+            return NullCachedID()
         }
     }
     
-    internal var object: NSManagedObject? {
+    internal var object: EntityRecord? {
         return cached
     }
 
@@ -76,20 +73,20 @@ internal struct OpaqueNamedID: ResolvableID {
     let name: String
     let createIfMissing: Bool
     
-    internal func resolve(in context: NSManagedObjectContext, as type: NSManagedObject.Type, creationType: String?) -> ResolvableID? {
-        if let object = type.named(name, in: context, createIfMissing: false) {
+    internal func resolve(in store: Datastore, creationType: String?) -> ResolvableID? {
+        if let object = EntityRecord.named(name, in: store.context, createIfMissing: false) {
             return OpaqueCachedID(object)
         } else if createIfMissing {
-            let object = type.init(context: context)
-            object.setValue(creationType, forKey: PropertyKey.type.name)
-            object.setValue(name, forKey: PropertyKey.name.name)
-            return OpaqueCachedID(object)
+            let entity = EntityRecord(in: store.context)
+            entity.type = creationType
+            entity.add(name, key: .name, type: .string, store: store)
+            return OpaqueCachedID(entity)
         } else {
             return NullCachedID()
         }
     }
     
-    internal var object: NSManagedObject? {
+    internal var object: EntityRecord? {
         identifierChannel.debug("identifier \(name) unresolved")
         return nil
     }
@@ -110,22 +107,23 @@ internal struct OpaqueNamedID: ResolvableID {
 
 internal struct OpaqueIdentifiedID: ResolvableID {
     let identifier: String
-    let createIfMissing: Bool
+    let initialProperties: PropertyDictionary?
     
-    internal func resolve(in context: NSManagedObjectContext, as type: NSManagedObject.Type, creationType: String?) -> ResolvableID? {
-        if let object = type.withIdentifier(identifier, in: context) {
+    internal func resolve(in store: Datastore, creationType: String?) -> ResolvableID? {
+        if let object = EntityRecord.withIdentifier(identifier, in: store.context) {
             return OpaqueCachedID(object)
-        } else if createIfMissing, let creationType = creationType {
-            let object = type.init(context: context)
-            object.setValue(creationType, forKey: PropertyKey.type.name)
-            object.setValue(identifier, forKey: PropertyKey.identifier.name)
-            return OpaqueCachedID(object)
+        } else if let initialProperties = initialProperties, let creationType = creationType {
+            let entity = EntityRecord(in: store.context)
+            entity.type = creationType
+            entity.identifier = identifier
+            initialProperties.add(to: entity, store: store)
+            return OpaqueCachedID(entity)
         } else {
             return NullCachedID()
         }
     }
     
-    internal var object: NSManagedObject? {
+    internal var object: EntityRecord? {
         identifierChannel.debug("identifier \(identifier) unresolved")
         return nil
     }
@@ -142,14 +140,14 @@ internal struct OpaqueIdentifiedID: ResolvableID {
         }
     }}
 
-public class WrappedID<T: NSManagedObject>: Equatable, Hashable {
+public class WrappedID: Equatable, Hashable {
     var id: ResolvableID
 
     init(_ id: ResolvableID) {
         self.id = id
     }
     
-    public static func == (lhs: WrappedID<T>, rhs: WrappedID<T>) -> Bool {
+    public static func == (lhs: WrappedID, rhs: WrappedID) -> Bool {
         return lhs.id.equal(to: rhs.id)
     }
     
@@ -157,54 +155,48 @@ public class WrappedID<T: NSManagedObject>: Equatable, Hashable {
         id.hash(into: &hasher)
     }
 
-    func resolve(in context: NSManagedObjectContext, as type: EntityType? = nil) -> T? {
-        if let resolved = id.resolve(in: context, as: T.self, creationType: type?.name) {
+    func resolve(in store: Datastore, as type: EntityType? = nil) -> EntityRecord? {
+        if let resolved = id.resolve(in: store, creationType: type?.name) {
             id = resolved
         }
         
-        return id.object as? T
+        return id.object
     }
 }
 
 /// A wrapped ID created by specifying a name or an identifier.
 /// If the underlying object doesn't exist, it can be created during the resolution process.
-public class ResolvableWrappedID<T: NSManagedObject>: WrappedID<T> {
+public class ResolvableEntity: WrappedID {
     
     public init(named name: String, createIfMissing: Bool) {
         super.init(OpaqueNamedID(name: name.lowercased(), createIfMissing: createIfMissing))
     }
     
-    public init(identifier: String, createIfMissing: Bool = false) {
-        super.init(OpaqueIdentifiedID(identifier: identifier, createIfMissing: createIfMissing))
+    public init(identifier: String, initialProperties: PropertyDictionary? = nil) {
+        super.init(OpaqueIdentifiedID(identifier: identifier, initialProperties: initialProperties))
     }
-    
+
+    public init(identifier: String, createIfMissing: Bool) {
+        super.init(OpaqueIdentifiedID(identifier: identifier, initialProperties: createIfMissing ? PropertyDictionary() : nil))
+    }
+
 }
 
-/// A wrapped ID created from an existing object.
-public class GuaranteedWrappedID<T: NSManagedObject>: WrappedID<T> {
-    public init(_ object: T) {
-        super.init(OpaqueCachedID(object))
-    }
-    
-    internal var object: T {
-        return id.object as! T
-    }
-}
-
-public typealias EntityID = WrappedID<EntityRecord>
-
-public typealias ResolvableEntity = ResolvableWrappedID<EntityRecord>
-
-/// An Entity is an `EntityID` that is guaranteed to back an existing entity.
+/// An Entity is an `WrappedID` that is guaranteed to back an existing entity.
 /// Internally it already has a resolved object pointer.
 /// It also keeps a copy of the object's `identifier` which is publically
 /// accessible and can be safely read from any thread/context.
-public class Entity: GuaranteedWrappedID<EntityRecord> {
+public class Entity: WrappedID {
     public let identifier: String
-    
-    override init(_ object: EntityRecord) {
+    init(_ object: EntityRecord) {
         self.identifier = object.identifier!
-        super.init(object)
+        super.init(OpaqueCachedID(object))
+    }
+
+    internal var object: EntityRecord {
+        return id.object!
     }
 }
+
+public typealias EntityID = WrappedID
 

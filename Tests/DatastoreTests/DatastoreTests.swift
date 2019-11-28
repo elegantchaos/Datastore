@@ -86,6 +86,37 @@ class DatastoreTests: DatastoreTestCase {
         }
         wait(for: [done], timeout: 1.0)
     }
+    
+    func testGetEntityCreateWithInitialProperties() {
+        let done = expectation(description: "loaded")
+        loadAndCheck { datastore in
+            let missingID = ResolvableEntity(identifier: "no-such-id", initialProperties: PropertyDictionary([.name: "Test"]))
+            datastore.get(entitiesOfType: .person, withIDs: [missingID]) { results in
+                XCTAssertEqual(results.count, 1)
+                let person = results[0]
+                XCTAssertEqual(person.identifier, "no-such-id")
+                XCTAssertEqual(person.object.string(withKey: .name), "Test") // new name should not have been applied since the entity already exists
+                done.fulfill()
+            }
+        }
+        wait(for: [done], timeout: 1.0)
+    }
+
+    func testGetEntityInitialPropertiesIgnoredIfAlreadyExists() {
+        let done = expectation(description: "loaded")
+        loadJSON(name: "Simple", expectation: done) { datastore in
+            let entityID = ResolvableEntity(identifier: "C41DB873-323D-4026-95D1-603120B9ADF6")
+            let properties = PropertyDictionary([.name: "Test"])
+            datastore.get(entitiesOfType: .test, withIntialProperties: [(entityID, properties)]) { results in
+                XCTAssertEqual(results.count, 1)
+                let person = results[0]
+                XCTAssertEqual(person.object.string(withKey: .name), "Test") // new name should not have been applied since the entity already exists
+                done.fulfill()
+            }
+        }
+        wait(for: [done], timeout: 1.0)
+    }
+    
     func testGetProperties() {
         let done = expectation(description: "done")
         loadJSON(name: "Simple", expectation: done) { datastore in
