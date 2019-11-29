@@ -79,3 +79,19 @@ extension PropertyDictionary: CustomStringConvertible {
     }
     
 }
+
+public struct EntityInitialiser {
+    let type: EntityType
+    let properties: PropertyDictionary
+    
+    public init(as type: EntityType, properties: PropertyDictionary = PropertyDictionary()) {
+        self.type = type
+        self.properties = properties
+    }
+
+    public init(as type: EntityType, properties: [PropertyKey:Any]) {
+        self.type = type
+        self.properties = PropertyDictionary(properties)
+    }
+
+}

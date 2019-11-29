@@ -9,14 +9,14 @@ import Logger
 let identifierChannel = Channel("com.elegantchaos.datastore.identifier")
 
 internal protocol ResolvableID {
-    func resolve(in store: Datastore, as type: EntityType?) -> ResolvableID?
+    func resolve(in store: Datastore) -> ResolvableID?
     func hash(into hasher: inout Hasher)
     func equal(to: ResolvableID) -> Bool
     var object: EntityRecord? { get }
 }
 
 internal struct NullCachedID: ResolvableID {
-    internal func resolve(in store: Datastore, as type: EntityType?) -> ResolvableID? {
+    internal func resolve(in store: Datastore) -> ResolvableID? {
         return nil
     }
     
@@ -42,7 +42,7 @@ internal struct OpaqueCachedID: ResolvableID {
         self.id = object.objectID
     }
     
-    internal func resolve(in store: Datastore, as type: EntityType?) -> ResolvableID? {
+    internal func resolve(in store: Datastore) -> ResolvableID? {
         if store.context == cached.managedObjectContext {
             return nil
         } else if let object = store.context.object(with: id) as? EntityRecord {
@@ -72,9 +72,9 @@ internal struct OpaqueCachedID: ResolvableID {
 internal struct OpaqueNamedID: ResolvableID {
     let name: String
     let key: PropertyKey
-    let initialProperties: PropertyDictionary?
+    let initialiser: EntityInitialiser?
 
-    internal func resolve(in store: Datastore, as type: EntityType?) -> ResolvableID? {
+    internal func resolve(in store: Datastore) -> ResolvableID? {
         
         // TODO: optimise this search to just fetch the newest string record with the relevant key
         let request: NSFetchRequest<EntityRecord> = EntityRecord.fetcher(in: store.context)
@@ -86,10 +86,10 @@ internal struct OpaqueNamedID: ResolvableID {
             }
         }
 
-        if let initialProperties = initialProperties, let typeName = type?.name {
+        if let initialiser = initialiser {
             let entity = EntityRecord(in: store.context)
-            entity.type = typeName
-            initialProperties.add(to: entity, store: store)
+            entity.type = initialiser.type.name
+            initialiser.properties.add(to: entity, store: store)
             entity.add(name, key: key, type: .string, store: store)
             return OpaqueCachedID(entity)
         } else {
@@ -118,16 +118,16 @@ internal struct OpaqueNamedID: ResolvableID {
 
 internal struct OpaqueIdentifiedID: ResolvableID {
     let identifier: String
-    let initialProperties: PropertyDictionary?
+    let initialiser: EntityInitialiser?
     
-    internal func resolve(in store: Datastore, as type: EntityType?) -> ResolvableID? {
+    internal func resolve(in store: Datastore) -> ResolvableID? {
         if let object = EntityRecord.withIdentifier(identifier, in: store.context) {
             return OpaqueCachedID(object)
-        } else if let initialProperties = initialProperties, let typeName = type?.name {
+        } else if let initialiser = initialiser {
             let entity = EntityRecord(in: store.context)
-            entity.type = typeName
+            entity.type = initialiser.type.name
             entity.identifier = identifier
-            initialProperties.add(to: entity, store: store)
+            initialiser.properties.add(to: entity, store: store)
             return OpaqueCachedID(entity)
         } else {
             return NullCachedID()
@@ -170,8 +170,8 @@ public class EntityReference: Equatable, Hashable {
         id.hash(into: &hasher)
     }
 
-    func resolve(in store: Datastore, as type: EntityType? = nil) -> EntityRecord? {
-        if let resolved = id.resolve(in: store, as: type) {
+    func resolve(in store: Datastore) -> EntityRecord? {
+        if let resolved = id.resolve(in: store) {
             id = resolved
         }
         
@@ -183,12 +183,12 @@ public class EntityReference: Equatable, Hashable {
 /// If the underlying object doesn't exist, it can be created during the resolution process.
 public class ResolvableEntity: EntityReference {
     
-    init(key: PropertyKey, value: String, initialProperties: PropertyDictionary? = nil) {
-        super.init(OpaqueNamedID(name: value, key: key, initialProperties: initialProperties))
+    init(key: PropertyKey, value: String, initialiser: EntityInitialiser? = nil) {
+        super.init(OpaqueNamedID(name: value, key: key, initialiser: initialiser))
     }
     
-    init(identifier: String, initialProperties: PropertyDictionary? = nil) {
-        super.init(OpaqueIdentifiedID(identifier: identifier, initialProperties: initialProperties))
+    init(identifier: String, initialiser: EntityInitialiser? = nil) {
+        super.init(OpaqueIdentifiedID(identifier: identifier, initialiser: initialiser))
     }
 
 }
@@ -210,28 +210,28 @@ public class GuaranteedEntity: EntityReference {
 }
 
 public struct Entity {
-    public static func identifiedBy(_ identifier: String, initialProperties: PropertyDictionary? = nil) -> ResolvableEntity {
-        return ResolvableEntity(identifier: identifier, initialProperties: initialProperties)
+    public static func identifiedBy(_ identifier: String, initialiser: EntityInitialiser? = nil) -> ResolvableEntity {
+        return ResolvableEntity(identifier: identifier, initialiser: initialiser)
     }
     
-    public static func identifiedBy(_ identifier: String, createIfMissing: Bool) -> ResolvableEntity {
-        return ResolvableEntity(identifier: identifier, initialProperties: createIfMissing ? PropertyDictionary() : nil)
+    public static func identifiedBy(_ identifier: String, createAs type: EntityType) -> ResolvableEntity {
+        return ResolvableEntity(identifier: identifier, initialiser: EntityInitialiser(as: type))
     }
     
-    public static func named(_ name: String, initialProperties: PropertyDictionary? = nil) -> ResolvableEntity {
-        return ResolvableEntity(key: .name, value: name, initialProperties: initialProperties)
+    public static func named(_ name: String, initialiser: EntityInitialiser? = nil) -> ResolvableEntity {
+        return ResolvableEntity(key: .name, value: name, initialiser: initialiser)
     }
 
-    public static func named(_ name: String, createIfMissing: Bool) -> ResolvableEntity {
-        return ResolvableEntity(key: .name, value: name, initialProperties: createIfMissing ? PropertyDictionary() : nil)
+    public static func named(_ name: String, createAs type: EntityType) -> ResolvableEntity {
+        return ResolvableEntity(key: .name, value: name, initialiser: EntityInitialiser(as: type))
     }
 
-    public static func whereKey(_ key: PropertyKey, equals value: String, initialProperties: PropertyDictionary? = nil) -> ResolvableEntity {
-        return ResolvableEntity(key: key, value: value, initialProperties: initialProperties)
+    public static func whereKey(_ key: PropertyKey, equals value: String, initialiser: EntityInitialiser? = nil) -> ResolvableEntity {
+        return ResolvableEntity(key: key, value: value, initialiser: initialiser)
     }
 
-    public static func whereKey(_ key: PropertyKey, equals value: String, createIfMissing: Bool) -> ResolvableEntity {
-        return ResolvableEntity(key: key, value: value, initialProperties: createIfMissing ? PropertyDictionary() : nil)
+    public static func whereKey(_ key: PropertyKey, equals value: String, createAs type: EntityType) -> ResolvableEntity {
+        return ResolvableEntity(key: key, value: value, initialiser: EntityInitialiser(as: type))
     }
 
 }

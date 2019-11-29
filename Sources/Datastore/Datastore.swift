@@ -91,7 +91,7 @@ public class Datastore {
         context.perform {
             var result: [GuaranteedEntity] = []
             for entityID in entityIDs {
-                if let entity = entityID.resolve(in: self, as: type) {
+                if let entity = entityID.resolve(in: self) {
                     result.append(GuaranteedEntity(entity))
                 }
             }

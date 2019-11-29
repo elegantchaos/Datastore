@@ -88,7 +88,7 @@ class DatastoreTests: DatastoreTestCase {
     func testGetEntityByIdentifierCreateWhenMissing() {
         let done = expectation(description: "loaded")
         loadJSON(name: "Simple", expectation: done) { datastore in
-            let missingID = Entity.identifiedBy("no-such-id", createIfMissing: true)
+            let missingID = Entity.identifiedBy("no-such-id", createAs: .person)
             datastore.get(entitiesOfType: .person, withIDs: [missingID]) { results in
                 XCTAssertEqual(results.count, 1)
                 let person = results[0]
@@ -154,7 +154,7 @@ class DatastoreTests: DatastoreTestCase {
     func testGetEntityCreateWithInitialProperties() {
         let done = expectation(description: "loaded")
         loadAndCheck { datastore in
-            let missingID = Entity.identifiedBy("no-such-id", initialProperties: PropertyDictionary([.name: "Test"]))
+            let missingID = Entity.identifiedBy("no-such-id", initialiser: EntityInitialiser(as: .person, properties: [.name: "Test"]))
             datastore.get(entitiesOfType: .person, withIDs: [missingID]) { results in
                 XCTAssertEqual(results.count, 1)
                 let person = results[0]
@@ -169,7 +169,7 @@ class DatastoreTests: DatastoreTestCase {
     func testGetEntityInitialPropertiesIgnoredIfAlreadyExists() {
         let done = expectation(description: "loaded")
         loadJSON(name: "Simple", expectation: done) { datastore in
-            let id = Entity.identifiedBy("C41DB873-323D-4026-95D1-603120B9ADF6", initialProperties: PropertyDictionary([.name: "Different Name"]))
+            let id = Entity.identifiedBy("C41DB873-323D-4026-95D1-603120B9ADF6", initialiser: EntityInitialiser(as: .person, properties: [.name: "Different Name"]))
             datastore.get(entitiesOfType: .person, withIDs: [id]) { results in
                 XCTAssertEqual(results.count, 1)
                 let person = results[0]
