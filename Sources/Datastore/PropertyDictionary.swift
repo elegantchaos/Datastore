@@ -15,6 +15,8 @@ public struct PropertyDictionary {
     
     var values: [Key:Value] = [:]
 
+    public var count: Int { return values.count }
+    
     public init() {
     }
     
@@ -62,6 +64,8 @@ public struct PropertyDictionary {
             entity.add(property: key, value: value, store: store)
         }
     }
+    
+    
 }
 
 

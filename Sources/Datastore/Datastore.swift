@@ -92,7 +92,9 @@ public class Datastore {
             var result: [GuaranteedEntity] = []
             for entityID in entityIDs {
                 if let entity = entityID.resolve(in: self) {
-                    result.append(GuaranteedEntity(entity))
+                    if entity.type == type.name {
+                        result.append(GuaranteedEntity(entity))
+                    }
                 }
             }
             completion(result)
