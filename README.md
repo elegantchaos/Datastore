@@ -1,28 +1,60 @@
 #  An asynchronous schema-less object store
 
-The goal is for a flexible object store which can be implemented efficiently using threading. 
+A flexible object store which supports asynchronous usage patterns.
 
-It forces asynchronous usage patterns by not supplying synchronous ones! 
+In fact, it forces asynchronous usage patterns by not supplying synchronous ones! 
+
+The goal is that it has a lightweight API which is reasonably easy to use, but can be implemented efficiently. 
+
+It also supports versioning at the property level, by retaining every value that a property has ever had. 
+
+This is partly useful in its own right, but is primarily intended to make the database resilient when synchronise between devices, since individual property values are only ever added to, and never modified.
+
 
 
 ## Structure
 
 The datastore contains *entities*, which have *properties* and *relationships*.
 
-For housekeeping purposes, all entities have three fixed properties:  `type`, `datestamp` and `uuid`.
+### Entities
 
-Entities also have any number of custom properties stored as `key, value, date, type` tuples. 
+For housekeeping purposes, all entities have three fixed properties:  `type`, `datestamp` and `identifier`.
 
-Entities are tagged as being of a particular *type*, but it's just a tag, it's up to you whether it implies structure.
+The entity `type` is just a label that indicates what kind of thing the entity is. It's up to you whether it also implies what properties the entity will have - the datastore doesn't enforce any structure on a particular entity type.
 
-Properties values are stored as primitive types (string, number, etc), but are tagged as being of a particular semantic *type*. 
+The entity `identifier` is unique across all entities, regardless of type.
+
+The entity `datestamp` indicates the time that it was first added to the store.
+
+### Properties
+
+In addition to these fixed properties, entities also have any number of custom properties.
+
+Each of these is stored in the database as a separate  `(key, value, datestamp, type)` tuple. 
+
+The `key` of a property is just a label ("name", "address", etc).
+
+The `value` of a property is a primitive type (string, number, etc), or a reference to another entity. 
+
+The `datestamp` indicates the time that the property value was set.
+
+The `type` of a property is a label that indicates the *semantic* type of the property. You can think of this as a way of indicating how the raw `value` of the property should be interpreted or displayed.
+
+### Relationships
+
+Properties can form relationships between entities. 
 
 Relationships are just properties that tie together two entities in some way; the `value` is the related entity, and the `type` indicates the kind of relationship.
 
-Property values have a datestamp. An entity can have more than one entry for the same property. 
+### Versioning
 
-What multiple entries for the same property means is up to interpretation - it can either indicate a change history (with the newest entry being the current value),
-or it can indicate that the entity does indeed have multiple values for that property. 
+Property values have a `datestamp`. 
+
+An entity can have more than one entry for the same property. 
+
+When a property is changed, a new entry is added, with the updated value, and a newer datestamp.
+
+Thus the multiple entries for a property are a record of its history, with the newest entry being the current value.
 
 
 ## Access
@@ -31,11 +63,25 @@ All access operations are asynchronous, and backing-store neutral.
 
 Entities are passed in and returned as opaque references. 
 
-Properties are passed in and returned as dictionaries. 
+Properties are passed in and returned as immutable dictionaries. 
 
-Results are returned using callback blocks.
+Results are delivered using callback blocks, which pass back entity references and property dictionaries. 
 
-The API is designed for bulk operations; it takes a list of entities/properties to operate on, and returns lists or dictionaries of the combined results. 
+The API is designed for bulk operations; it takes a list of entities/properties to operate on, and returns lists or dictionaries of the combined results.
+
+### References & On-Demand Creation
+
+Entity references can be specified by `identifier` or by matching a particular property (eg `name`).
+
+These are lightweight structures which can be passed around safely in the client, and are not tied to a particular thread or database context.
+
+Internally, an entity reference is resolved to an actual `EntityRecord`.
+
+Sometimes your client code knows (or expects) that an entity exists, and if resolution fails it's either a programming error or you simply want to do nothing. 
+
+Other times you want to specify an entity by name or identifier, and create if it wasn't already there.  
+
+Entity references support this pattern by allowing you to provide a type and set of initial properties along with the search keys. When the entity is resolved, if the reference doesn't match an existing object, a new object is created using supplied type and properties.
 
 
 ## Backing Store

@@ -11,7 +11,6 @@ let datastoreChannel = Channel("com.elegantchaos.datastore")
 
 public class Datastore {
     static var cachedModel: NSManagedObjectModel!
-    static let standardNames = StandardNames()
     static let model = DatastoreModel()
 
     internal let container: NSPersistentContainer
@@ -22,8 +21,8 @@ public class Datastore {
     
     public typealias LoadCompletion = (LoadResult) -> Void
     public typealias SaveCompletion = (SaveResult) -> Void
-    public typealias EntitiesCompletion = ([Entity]) -> Void
-    public typealias EntityCompletion = (Entity?) -> Void
+    public typealias EntitiesCompletion = ([GuaranteedEntity]) -> Void
+    public typealias EntityCompletion = (GuaranteedEntity?) -> Void
     public typealias InterchangeCompletion = ([String:Any]) -> Void
     
     struct LoadingModelError: Error { }
@@ -31,7 +30,7 @@ public class Datastore {
     
     public typealias ApplyResult = Result<Void, Error>
     
-    static let specialProperties = [Datastore.standardNames.identifier, Datastore.standardNames.datestamp, Datastore.standardNames.type]
+    static let specialProperties: [PropertyKey] = [.identifier, .datestamp, .type]
     
     public class func load(name: String, url: URL? = nil, container: NSPersistentContainer.Type = NSPersistentContainer.self, completion: @escaping LoadCompletion) {
         let container = container.init(name: name, managedObjectModel: Datastore.model)
@@ -87,7 +86,29 @@ public class Datastore {
         }
     }
     
-    public func get(entitiesOfType type: String, where key: String, contains: Set<String>, createIfMissing: Bool = true, completion: @escaping EntitiesCompletion) {
+    public func get(entitiesOfType type: EntityType, withIDs entityIDs: [EntityReference], completion: @escaping EntitiesCompletion) {
+        let context = self.context
+        context.perform {
+            var result: [GuaranteedEntity] = []
+            for entityID in entityIDs {
+                if let entity = entityID.resolve(in: self) {
+                    if entity.type == type.name {
+                        result.append(GuaranteedEntity(entity))
+                    }
+                }
+            }
+            completion(result)
+        }
+    }
+
+    public func get(entityOfType type: EntityType, where key: PropertyKey, equals: String, createIfMissing: Bool = true, completion: @escaping EntityCompletion) {
+        get(entitiesOfType: type, where: key, contains: [equals], createIfMissing: createIfMissing) { entities in
+            completion(entities.first)
+        }
+    }
+    
+
+    public func get(entitiesOfType type: EntityType, where key: PropertyKey, contains: Set<String>, createIfMissing: Bool = true, completion: @escaping EntitiesCompletion) {
         let context = self.context
         
         context.perform {
@@ -95,6 +116,7 @@ public class Datastore {
             var create: Set<String> = contains
             
             let request: NSFetchRequest<EntityRecord> = EntityRecord.fetcher(in: context)
+            request.predicate = NSPredicate(format: "type == %@", type.name)
             if let entities = try? context.fetch(request) {
                 for entity in entities {
                     if let value = entity.string(withKey: key), contains.contains(value) {
@@ -107,61 +129,45 @@ public class Datastore {
             if createIfMissing {
                 for name in create {
                     let entity = EntityRecord(in: context)
-                    entity.type = type
+                    entity.type = type.name
                     let property = StringProperty(in: context)
                     property.owner = entity
-                    property.name = key
+                    property.name = key.name
                     property.value = name
                     result.append(entity)
                 }
             }
-            completion(result.map({ Entity($0) }))
+            completion(result.map({ GuaranteedEntity($0) }))
         }
     }
-    
-    public func get(entitiesOfType type: String, withIDs entityIDs: [EntityID], completion: @escaping EntitiesCompletion) {
-        let context = self.context
-        context.perform {
-            var result: [Entity] = []
-            for entityID in entityIDs {
-                if let entity = entityID.resolve(in: context) {
-                    result.append(Entity(entity))
-                }
-            }
-            completion(result)
-        }
-    }
-    
-    public func get(entityOfType type: String, where key: String, equals: String, createIfMissing: Bool = true, completion: @escaping EntityCompletion) {
-        get(entitiesOfType: type, where: key, contains: [equals], createIfMissing: createIfMissing) { entities in
-            completion(entities.first)
-        }
-    }
-    
-    public func get(allEntitiesOfType type: String, completion: @escaping EntitiesCompletion) {
+    public func get(allEntitiesOfType type: EntityType, completion: @escaping EntitiesCompletion) {
         let context = self.context
         context.perform {
             
             let request: NSFetchRequest<EntityRecord> = EntityRecord.fetcher(in: context)
-            request.predicate = NSPredicate(format: "type = %@", type)
+            request.predicate = NSPredicate(format: "type = %@", type.name)
             if let entities = try? context.fetch(request) {
-                completion(Array(entities.map({ Entity($0) })))
+                completion(Array(entities.map({ GuaranteedEntity($0) })))
             } else {
                 completion([])
             }
         }
     }
     
-    public func get(properties names: Set<String>, of entities: [EntityID], completion: @escaping ([SemanticDictionary]) -> Void) {
+    public func get(properties names: Set<PropertyKey>, of entities: [EntityReference], completion: @escaping ([PropertyDictionary]) -> Void) {
+        get(properties: Set(names.map({ $0.name })), of: entities, completion: completion)
+    }
+    
+    public func get(properties names: Set<String>, of entities: [EntityReference], completion: @escaping ([PropertyDictionary]) -> Void) {
         let context = self.context
         context.perform {
-            var result: [SemanticDictionary] = []
+            var result: [PropertyDictionary] = []
             for entityID in entities {
-                let values: SemanticDictionary
-                if let entity = entityID.resolve(in: context) {
+                let values: PropertyDictionary
+                if let entity = entityID.resolve(in: self) {
                     values = entity.read(properties: names, store: self)
                 } else {
-                    values = SemanticDictionary()
+                    values = PropertyDictionary()
                 }
                 result.append(values)
             }
@@ -169,16 +175,16 @@ public class Datastore {
         }
     }
     
-    public func get(allPropertiesOf entities: [EntityID], completion: @escaping ([SemanticDictionary]) -> Void) {
+    public func get(allPropertiesOf entities: [EntityReference], completion: @escaping ([PropertyDictionary]) -> Void) {
         let context = self.context
         context.perform {
-            var result: [SemanticDictionary] = []
+            var result: [PropertyDictionary] = []
             for entityID in entities {
-                let values: SemanticDictionary
-                if let entity = entityID.resolve(in: context) {
+                let values: PropertyDictionary
+                if let entity = entityID.resolve(in: self) {
                     values = entity.readAllProperties(store: self)
                 } else {
-                    values = SemanticDictionary()
+                    values = PropertyDictionary()
                 }
                 result.append(values)
             }
@@ -186,11 +192,11 @@ public class Datastore {
         }
     }
     
-    public func add(properties: [EntityID: SemanticDictionary], completion: @escaping () -> Void) {
+    public func add(properties: [EntityReference: PropertyDictionary], completion: @escaping () -> Void) {
         let context = self.context
         context.perform {
             for (entityID, values) in properties {
-                if let entity = entityID.resolve(in: context) {
+                if let entity = entityID.resolve(in: self) {
                     values.add(to: entity, store: self)
                 }
             }
@@ -198,14 +204,14 @@ public class Datastore {
         }
     }
     
-    public func update(properties: [EntityID: SemanticDictionary], completion: @escaping () -> Void) {
+    public func update(properties: [EntityReference: PropertyDictionary], completion: @escaping () -> Void) {
     }
     
-    public func remove(properties names: Set<String>, of entities: [EntityID], completion: @escaping () -> Void) {
+    public func remove(properties names: Set<String>, of entities: [EntityReference], completion: @escaping () -> Void) {
         let context = self.context
         context.perform {
             for entityID in entities {
-                if let entity = entityID.resolve(in: context) {
+                if let entity = entityID.resolve(in: self) {
                     entity.remove(properties: names, store: self)
                 }
             }

@@ -5,10 +5,9 @@
 
 import CoreData
 
-
-
-
 public class EntityRecord: NSManagedObject {
+    typealias Key = PropertyKey
+    
     @NSManaged public var datestamp: Date?
     @NSManaged public var type: String?
     @NSManaged public var identifier: String?
@@ -30,112 +29,114 @@ public class EntityRecord: NSManagedObject {
         }
     }
     
-    func add(property: String, value: SemanticValue, store: Datastore) {
-        if let context = managedObjectContext {
-            switch value.value {
-            case let string as String:
-                add(string, key: property, type: value.type, store: store)
-                
-            case let integer as Int16:
-                add(Int64(integer), key: property, type: value.type, store: store)
-                
-            case let integer as Int32:
-                add(Int64(integer), key: property, type: value.type, store: store)
-                
-            case let integer as Int64:
-                add(integer, key: property, type: value.type, store: store)
-                
-            case let integer as Int:
-                add(Int64(integer), key: property, type: value.type, store: store)
-                
-            case let integer as UInt16:
-                add(Int64(integer), key: property, type: value.type, store: store)
-                
-            case let integer as UInt32:
-                add(Int64(integer), key: property, type: value.type, store: store)
-                
-            case let integer as UInt64:
-                add(Int64(integer), key: property, type: value.type, store: store)
-                
-            case let integer as UInt:
-                add(Int64(integer), key: property, type: value.type, store: store)
-                
-            case let double as Double:
-                add(double, key: property, type: value.type, store: store)
-                
-            case let date as Date:
-                add(date, key: property, type: value.type, store: store)
-                
-            case let data as Data:
-                add(data, key: property, type: value.type, store: store)
-                
-            case let entity as EntityRecord:
-                add(entity, key: property, type: value.type, store: store)
-                
-            case let entity as EntityID:
-                if let resolved = entity.resolve(in: context) {
-                    add(resolved, key: property, type: value.type, store: store)
-                }
-
-            case let entity as Entity:
-                if let resolved = entity.resolve(in: context) {
-                    add(resolved, key: property, type: value.type, store: store)
-                }
-
-            default:
-                let unknown = Swift.type(of: value.value)
-                print("unknown value type \(unknown) \(String(describing: value.value))")
-                break
+    func add(property: Key, value: PropertyValue, store: Datastore) {
+        assert(managedObjectContext == store.context)
+        
+        switch value.value {
+        case let string as String:
+            add(string, key: property, type: value.type, store: store)
+            
+        case let integer as Int16:
+            add(Int64(integer), key: property, type: value.type, store: store)
+            
+        case let integer as Int32:
+            add(Int64(integer), key: property, type: value.type, store: store)
+            
+        case let integer as Int64:
+            add(integer, key: property, type: value.type, store: store)
+            
+        case let integer as Int:
+            add(Int64(integer), key: property, type: value.type, store: store)
+            
+        case let integer as UInt16:
+            add(Int64(integer), key: property, type: value.type, store: store)
+            
+        case let integer as UInt32:
+            add(Int64(integer), key: property, type: value.type, store: store)
+            
+        case let integer as UInt64:
+            add(Int64(integer), key: property, type: value.type, store: store)
+            
+        case let integer as UInt:
+            add(Int64(integer), key: property, type: value.type, store: store)
+            
+        case let double as Double:
+            add(double, key: property, type: value.type, store: store)
+            
+        case let date as Date:
+            add(date, key: property, type: value.type, store: store)
+            
+        case let data as Data:
+            add(data, key: property, type: value.type, store: store)
+            
+        case let entity as EntityRecord:
+            add(entity, key: property, type: value.type, store: store)
+            
+        case let entity as EntityReference:
+            if let resolved = entity.resolve(in: store) {
+                add(resolved, key: property, type: value.type, store: store)
             }
+
+        case let entity as GuaranteedEntity:
+            if let resolved = entity.resolve(in: store) {
+                add(resolved, key: property, type: value.type, store: store)
+            }
+
+        default:
+            let unknown = Swift.type(of: value.value)
+            print("unknown value type \(unknown) \(String(describing: value.value))")
+            break
         }
     }
     
-    func add(_ value: String, key: String, type: String?, store: Datastore) {
-        if let property: StringProperty = add(key: key, type: type ?? Datastore.standardNames.string) {
+    func add(_ value: String, key: Key, type: PropertyType?, store: Datastore) {
+        if let property: StringProperty = add(key: key, type: type ?? .string) {
             property.value = value
         }
     }
     
-    func add(_ value: Int64, key: String, type: String?, store: Datastore) {
-        if let property: IntegerProperty = add(key: key, type: type ?? Datastore.standardNames.integer) {
+    func add(_ value: Int64, key: Key, type: PropertyType?, store: Datastore) {
+        if let property: IntegerProperty = add(key: key, type: type ?? .integer) {
             property.value = value
         }
     }
     
-    func add(_ value: Double, key: String, type: String?, store: Datastore) {
-        if let property: DoubleProperty = add(key: key, type: type ?? Datastore.standardNames.double) {
+    func add(_ value: Double, key: Key, type: PropertyType?, store: Datastore) {
+        if let property: DoubleProperty = add(key: key, type: type ?? .double) {
             property.value = value
         }
     }
     
-    func add(_ value: Date, key: String, type: String?, store: Datastore) {
-        if let property: DateProperty = add(key: key, type: type ?? Datastore.standardNames.date) {
+    func add(_ value: Date, key: Key, type: PropertyType?, store: Datastore) {
+        if let property: DateProperty = add(key: key, type: type ?? .date) {
             property.value = value
         }
     }
 
-    func add(_ value: Data, key: String, type: String?, store: Datastore) {
-        if let property: DataProperty = add(key: key, type: type ?? Datastore.standardNames.data) {
+    func add(_ value: Data, key: Key, type: PropertyType?, store: Datastore) {
+        if let property: DataProperty = add(key: key, type: type ?? .data) {
             property.value = value
         }
     }
 
-    func add(_ value: EntityRecord, key: String, type: String?, store: Datastore) {
-        if let property: RelationshipProperty = add(key: key, type: type ?? Datastore.standardNames.entity) {
+    func add(_ value: EntityRecord, key: Key, type: PropertyType?, store: Datastore) {
+        if let property: RelationshipProperty = add(key: key, type: type ?? .entity) {
             property.target = value
         }
     }
         
-    func read(properties names: Set<String>, store: Datastore) -> SemanticDictionary {
-        var values = SemanticDictionary()
-        if names.contains(Datastore.standardNames.datestamp) {
-            values[valueWithKey: Datastore.standardNames.datestamp] = SemanticValue(datestamp, type: Datastore.standardNames.date)
+    func read(properties names: Set<String>, store: Datastore) -> PropertyDictionary {
+        assert(managedObjectContext == store.context)
+
+        var values = PropertyDictionary()
+        if names.contains(PropertyKey.datestamp.name) {
+            values[valueWithKey: .datestamp] = PropertyValue(datestamp, type: .date)
         }
-        if names.contains(Datastore.standardNames.identifier) {
-            values[valueWithKey: Datastore.standardNames.identifier] = SemanticValue(identifier, type: Datastore.standardNames.identifier)
+        if names.contains(PropertyKey.identifier.name) {
+            values[valueWithKey: .identifier] = PropertyValue(identifier, type: .identifier)
         }
-        if names.contains(Datastore.standardNames.type) {
-            values[valueWithKey: Datastore.standardNames.type] = SemanticValue(type, type: Datastore.standardNames.entity)
+        if names.contains(PropertyKey.type.name) {
+            values[valueWithKey: .type] = PropertyValue(type, type: .entity)
         }
 
         read(names: names, from: strings, as: StringProperty.self, into: &values, store: store)
@@ -147,8 +148,10 @@ public class EntityRecord: NSManagedObject {
         return values
     }
     
-    func readAllProperties(store: Datastore) -> SemanticDictionary {
-        var values = SemanticDictionary()
+    func readAllProperties(store: Datastore) -> PropertyDictionary {
+        assert(managedObjectContext == store.context)
+
+        var values = PropertyDictionary()
         readAll(from: strings, as: StringProperty.self, into: &values, store: store)
         readAll(from: integers, as: IntegerProperty.self, into: &values, store: store)
         readAll(from: doubles, as: DoubleProperty.self, into: &values, store: store)
@@ -157,9 +160,9 @@ public class EntityRecord: NSManagedObject {
         return values
     }
     
-    func string(withKey key: String) -> String? {
+    func string(withKey key: Key) -> String? {
         if let strings = strings as? Set<StringProperty> {
-            let names = strings.filter({ $0.name == key })
+            let names = strings.filter({ $0.name == key.name })
             let sorted = names.sorted(by: {$0.datestamp > $1.datestamp })
             return sorted.first?.value
         }
@@ -167,6 +170,8 @@ public class EntityRecord: NSManagedObject {
     }
     
     func remove(properties names: Set<String>, store: Datastore) {
+        assert(managedObjectContext == store.context)
+
         remove(names: names, from: strings, as: StringProperty.self, store: store)
         remove(names: names, from: integers, as: IntegerProperty.self, store: store)
         remove(names: names, from: doubles, as: DoubleProperty.self, store: store)
@@ -176,15 +181,15 @@ public class EntityRecord: NSManagedObject {
     
     // MARK: - Generic Helpers
     
-    func add<R>(key: String, type: String) -> R? where R: NamedProperty {
+    func add<R>(key: Key, type: PropertyType) -> R? where R: NamedProperty {
         guard let context = managedObjectContext else {
             return nil
         }
         
         let property = R(context: context)
-        property.name = key
+        property.name = key.name
         property.owner = self
-        property.type = type
+        property.typeName = type.name
         return property
     }
     
@@ -197,7 +202,7 @@ public class EntityRecord: NSManagedObject {
         }
     }
     
-    func read<T>(names: Set<String>, from properties: NSSet?, as: T.Type, into values: inout SemanticDictionary, store: Datastore) where T: NamedProperty {
+    func read<T>(names: Set<String>, from properties: NSSet?, as: T.Type, into values: inout PropertyDictionary, store: Datastore) where T: NamedProperty {
         if let set = properties as? Set<T> {
             // there may be multiple entries for each property, so we sort them in date
             // order, and only return the newest one
@@ -206,16 +211,16 @@ public class EntityRecord: NSManagedObject {
             for property in sorted {
                 let name = property.name
                 if remaining.contains(name) {
-                    let value = property.semanticValue
+                    let value = property.propertyValue
                     assert(value.type != nil)
-                    values[valueWithKey: name] = value
+                    values[valueWithKey: Key(name)] = value
                     remaining.remove(name)
                 }
             }
         }
     }
 
-    func readAll<T>(from properties: NSSet?, as: T.Type, into values: inout SemanticDictionary, store: Datastore) where T: NamedProperty {
+    func readAll<T>(from properties: NSSet?, as: T.Type, into values: inout PropertyDictionary, store: Datastore) where T: NamedProperty {
         if let set = properties as? Set<T> {
             // there may be multiple entries for each property, so we sort them in date
             // order, and only return the newest one
@@ -224,9 +229,9 @@ public class EntityRecord: NSManagedObject {
             for property in sorted {
                 let name = property.name
                 if !done.contains(name) {
-                    let value = property.semanticValue
+                    let value = property.propertyValue
                     assert(value.type != nil)
-                    values[valueWithKey: name] = value
+                    values[valueWithKey: Key(name)] = value
                     done.insert(name)
                 }
             }

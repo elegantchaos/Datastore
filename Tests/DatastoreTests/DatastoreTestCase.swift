@@ -54,5 +54,16 @@ class DatastoreTestCase: XCTestCase {
         }
         wait(for: [created], timeout: 1.0)
     }
-    
+
+    func exampleProperties(date: Date = Date(), owner: EntityReference, in store: Datastore) -> PropertyDictionary {
+        var properties = PropertyDictionary()
+        properties["address"] = PropertyValue("123 New St", type: "address")
+        properties["date"] = date
+        properties["integer"] = 123
+        properties["double"] = 456.789
+        properties["owner"] = (owner, "owner")
+        properties["data"] = "encoded string".data(using: .utf8)
+        return properties
+    }
+
 }

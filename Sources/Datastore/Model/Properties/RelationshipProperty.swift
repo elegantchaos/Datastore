@@ -8,8 +8,8 @@ import Foundation
 public class RelationshipProperty: NamedProperty {
     @NSManaged public var target: EntityRecord
     
-    override var semanticValue: SemanticValue {
-        return SemanticValue(Entity(target), type: type, datestamp: datestamp)
+    override var propertyValue: PropertyValue {
+        return PropertyValue(GuaranteedEntity(target), type: type, datestamp: datestamp)
     }
     
     override func encode(with encoder: InterchangeEncoder, into record: inout [String:Any]) {
