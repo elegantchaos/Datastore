@@ -8,6 +8,97 @@ import Logger
 
 let identifierChannel = Channel("com.elegantchaos.datastore.identifier")
 
+
+/// Helper object which can match against entities in the database.
+internal class EntityMatcher: Hashable, Equatable {
+    
+    func find(in: NSManagedObjectContext) -> EntityRecord? { return nil }
+    func hash(into hasher: inout Hasher) {
+    }
+    func equal(to other: EntityMatcher) -> Bool {
+        return false
+    }
+    static func == (lhs: EntityMatcher, rhs: EntityMatcher) -> Bool {
+        return lhs.equal(to: rhs)
+    }
+    func addInitialProperties(entity: EntityRecord, store: Datastore) {
+    }
+}
+
+
+/// Matcher which finds an entity with a given identifier.
+internal class MatchByIdentifier: EntityMatcher {
+    let identifier: String
+    init(identifier: String) {
+        self.identifier = identifier
+    }
+
+    override func hash(into hasher: inout Hasher) {
+        identifier.hash(into: &hasher)
+    }
+
+    override func find(in context: NSManagedObjectContext) -> EntityRecord? {
+        if let object = EntityRecord.withIdentifier(identifier, in: context) {
+            return object
+        }
+        
+        return nil
+    }
+
+    override func equal(to other: EntityMatcher) -> Bool {
+        if let other = other as? MatchByIdentifier {
+            return (other.identifier == identifier)
+        } else {
+            return false
+        }
+    }
+
+    override func addInitialProperties(entity: EntityRecord, store: Datastore) {
+        entity.identifier = identifier
+    }
+}
+
+/// Matcher which finds an entity where a given key equals a given value
+internal class MatchByValue: EntityMatcher {
+    let key: PropertyKey
+    let value: String
+    init(key: PropertyKey, value: String) {
+        self.key = key
+        self.value = value
+    }
+
+    override func hash(into hasher: inout Hasher) {
+        value.hash(into: &hasher)
+        key.hash(into: &hasher)
+    }
+
+    override func find(in context: NSManagedObjectContext) -> EntityRecord? {
+        // TODO: optimise this search to just fetch the newest string record with the relevant key
+        let request: NSFetchRequest<EntityRecord> = EntityRecord.fetcher(in: context)
+        if let entities = try? context.fetch(request) {
+            for entity in entities {
+                if let found = entity.string(withKey: key), found == value {
+                    return entity
+                }
+            }
+        }
+        return nil
+    }
+
+    override func equal(to other: EntityMatcher) -> Bool {
+        if let other = other as? MatchByValue {
+            return (other.value == value) && (other.key == key)
+        } else {
+            return false
+        }
+    }
+
+    override func addInitialProperties(entity: EntityRecord, store: Datastore) {
+        entity.add(value, key: key, type: .string, store: store)
+    }
+}
+
+
 internal protocol ResolvableID {
     func resolve(in store: Datastore) -> ResolvableID?
     func hash(into hasher: inout Hasher)
@@ -69,102 +160,17 @@ internal struct OpaqueCachedID: ResolvableID {
     }
 }
 
-internal struct OpaqueNamedID: ResolvableID {
-    
-    class Searcher: Hashable, Equatable {
-        
-        func find(in: NSManagedObjectContext) -> EntityRecord? { return nil }
-        func hash(into hasher: inout Hasher) {
-        }
-        func equal(to other: Searcher) -> Bool {
-            return false
-        }
-        static func == (lhs: OpaqueNamedID.Searcher, rhs: OpaqueNamedID.Searcher) -> Bool {
-            return lhs.equal(to: rhs)
-        }
-        func addInitialProperties(entity: EntityRecord, store: Datastore) {
-        }
-    }
 
-    class KeyValueSearcher: Searcher {
-        let key: PropertyKey
-        let value: String
-        init(key: PropertyKey, value: String) {
-            self.key = key
-            self.value = value
-        }
-
-        override func hash(into hasher: inout Hasher) {
-            value.hash(into: &hasher)
-            key.hash(into: &hasher)
-        }
-
-        override func find(in context: NSManagedObjectContext) -> EntityRecord? {
-            // TODO: optimise this search to just fetch the newest string record with the relevant key
-            let request: NSFetchRequest<EntityRecord> = EntityRecord.fetcher(in: context)
-            if let entities = try? context.fetch(request) {
-                for entity in entities {
-                    if let found = entity.string(withKey: key), found == value {
-                        return entity
-                    }
-                }
-            }
-            return nil
-        }
-
-        override func equal(to other: Searcher) -> Bool {
-            if let other = other as? KeyValueSearcher {
-                return (other.value == value) && (other.key == key)
-            } else {
-                return false
-            }
-        }
-
-        override func addInitialProperties(entity: EntityRecord, store: Datastore) {
-            entity.add(value, key: key, type: .string, store: store)
-        }
-    }
-
-    class IdentifierSearcher: Searcher {
-        let identifier: String
-        init(identifier: String) {
-            self.identifier = identifier
-        }
-
-        override func hash(into hasher: inout Hasher) {
-            identifier.hash(into: &hasher)
-        }
-
-        override func find(in context: NSManagedObjectContext) -> EntityRecord? {
-            if let object = EntityRecord.withIdentifier(identifier, in: context) {
-                return object
-            }
-            
-            return nil
-        }
-
-        override func equal(to other: Searcher) -> Bool {
-            if let other = other as? IdentifierSearcher {
-                return (other.identifier == identifier)
-            } else {
-                return false
-            }
-        }
-
-        override func addInitialProperties(entity: EntityRecord, store: Datastore) {
-            entity.identifier = identifier
-        }
-    }
-
-    let searchers: [Searcher]
+internal struct MatchedID: ResolvableID {
+    let matchers: [EntityMatcher]
     let initialiser: EntityInitialiser?
 
     func hash(into hasher: inout Hasher) {
-        searchers.hash(into: &hasher)
+        matchers.hash(into: &hasher)
     }
     
     internal func resolve(in store: Datastore) -> ResolvableID? {
-        for searcher in searchers {
+        for searcher in matchers {
             if let entity = searcher.find(in: store.context) {
                 return OpaqueCachedID(entity)
             }
@@ -176,7 +182,7 @@ internal struct OpaqueNamedID: ResolvableID {
             if let identifier = initialiser.identifier {
                 entity.identifier = identifier
             }
-            for searcher in searchers {
+            for searcher in matchers {
                 searcher.addInitialProperties(entity: entity, store: store)
             }
             initialiser.properties.add(to: entity, store: store)
@@ -187,53 +193,18 @@ internal struct OpaqueNamedID: ResolvableID {
     }
     
     internal var object: EntityRecord? {
-        identifierChannel.debug("identifier \(searchers) unresolved")
+        identifierChannel.debug("identifier \(matchers) unresolved")
         return nil
     }
 
     func equal(to other: ResolvableID) -> Bool {
-        if let other = other as? OpaqueNamedID {
-            return (other.searchers == searchers)
+        if let other = other as? MatchedID {
+            return (other.matchers == matchers)
         } else {
             return false
         }
     }
 }
-//
-//internal struct OpaqueIdentifiedID: ResolvableID {
-//    let identifier: String
-//    let initialiser: EntityInitialiser?
-//    
-//    internal func resolve(in store: Datastore) -> ResolvableID? {
-//        if let object = EntityRecord.withIdentifier(identifier, in: store.context) {
-//            return OpaqueCachedID(object)
-//        } else if let initialiser = initialiser {
-//            let entity = EntityRecord(in: store.context)
-//            entity.type = initialiser.type.name
-//            entity.identifier = identifier
-//            initialiser.properties.add(to: entity, store: store)
-//            return OpaqueCachedID(entity)
-//        } else {
-//            return NullCachedID()
-//        }
-//    }
-//    
-//    internal var object: EntityRecord? {
-//        identifierChannel.debug("identifier \(identifier) unresolved")
-//        return nil
-//    }
-//
-//    func hash(into hasher: inout Hasher) {
-//        identifier.hash(into: &hasher)
-//    }
-//
-//    func equal(to other: ResolvableID) -> Bool {
-//        if let other = other as? Self {
-//            return (other.identifier == identifier)
-//        } else {
-//            return false
-//        }
-//    }}
 
 /// A reference to an entity in a store.
 /// The reference can be passed around safely in any context/thread
@@ -263,28 +234,11 @@ public class EntityReference: Equatable, Hashable {
     }
 }
 
-/// A wrapped ID created by specifying a name or an identifier.
-/// If the underlying object doesn't exist, it can be created during the resolution process.
-public class ResolvableEntity: EntityReference {
-    
-    init(key: PropertyKey, value: String, initialiser: EntityInitialiser? = nil) {
-        let searchers = [ OpaqueNamedID.KeyValueSearcher(key: key, value: value)]
-        super.init(OpaqueNamedID(searchers: searchers, initialiser: initialiser))
-    }
-    
-    init(identifier: String, initialiser: EntityInitialiser? = nil) {
-        let searchers = [ OpaqueNamedID.IdentifierSearcher(identifier: identifier)]
-        super.init(OpaqueNamedID(searchers: searchers, initialiser: initialiser))
-//        super.init(OpaqueIdentifiedID(identifier: identifier, initialiser: initialiser))
-    }
-
-}
-
 /// An Entity is an `EntityReference` that is guaranteed to back an existing entity.
 /// Internally it already has a resolved object pointer.
 /// It also keeps a copy of the object's `identifier` and `type` which are publically
 /// accessible and can be safely read from any thread/context.
-public class GuaranteedEntity: EntityReference {
+public class GuaranteedReference: EntityReference {
     public let identifier: String
     public let type: EntityType
     init(_ object: EntityRecord) {
@@ -298,29 +252,48 @@ public class GuaranteedEntity: EntityReference {
     }
 }
 
+/// Public entity reference API.
+/// Constructs entity references from various patterns.
+
 public struct Entity {
-    public static func identifiedBy(_ identifier: String, initialiser: EntityInitialiser? = nil) -> ResolvableEntity {
-        return ResolvableEntity(identifier: identifier, initialiser: initialiser)
+    public static func identifiedBy(_ identifier: String, initialiser: EntityInitialiser? = nil) -> EntityReference {
+        let searchers = [MatchByIdentifier(identifier: identifier)]
+        return EntityReference(MatchedID(matchers: searchers, initialiser: initialiser))
     }
     
-    public static func identifiedBy(_ identifier: String, createAs type: EntityType) -> ResolvableEntity {
-        return ResolvableEntity(identifier: identifier, initialiser: EntityInitialiser(as: type))
+    public static func identifiedBy(_ identifier: String, createAs type: EntityType) -> EntityReference {
+        let searchers = [MatchByIdentifier(identifier: identifier)]
+        return EntityReference(MatchedID(matchers: searchers, initialiser: EntityInitialiser(as: type)))
     }
     
-    public static func named(_ name: String, initialiser: EntityInitialiser? = nil) -> ResolvableEntity {
-        return ResolvableEntity(key: .name, value: name, initialiser: initialiser)
+    public static func named(_ name: String, initialiser: EntityInitialiser? = nil) -> EntityReference {
+        let searchers = [MatchByValue(key: .name, value: name)]
+        return EntityReference(MatchedID(matchers: searchers, initialiser: initialiser))
     }
 
-    public static func named(_ name: String, createAs type: EntityType) -> ResolvableEntity {
-        return ResolvableEntity(key: .name, value: name, initialiser: EntityInitialiser(as: type))
+    public static func named(_ name: String, createAs type: EntityType) -> EntityReference {
+        let searchers = [MatchByValue(key: .name, value: name)]
+        return EntityReference(MatchedID(matchers: searchers, initialiser: EntityInitialiser(as: type)))
     }
 
-    public static func whereKey(_ key: PropertyKey, equals value: String, initialiser: EntityInitialiser? = nil) -> ResolvableEntity {
-        return ResolvableEntity(key: key, value: value, initialiser: initialiser)
+    public static func with(identifier: String, orName name: String, initialiser: EntityInitialiser? = nil) -> EntityReference {
+        let searchers = [MatchByIdentifier(identifier: identifier), MatchByValue(key: .name, value: name)]
+        return EntityReference(MatchedID(matchers: searchers, initialiser: initialiser))
     }
 
-    public static func whereKey(_ key: PropertyKey, equals value: String, createAs type: EntityType) -> ResolvableEntity {
-        return ResolvableEntity(key: key, value: value, initialiser: EntityInitialiser(as: type))
+    public static func with(identifier: String, orName name: String, createAs type: EntityType) -> EntityReference {
+        let searchers = [MatchByIdentifier(identifier: identifier), MatchByValue(key: .name, value: name)]
+        return EntityReference(MatchedID(matchers: searchers, initialiser: EntityInitialiser(as: type)))
+    }
+
+    public static func whereKey(_ key: PropertyKey, equals value: String, initialiser: EntityInitialiser? = nil) -> EntityReference {
+        let searchers = [MatchByValue(key: key, value: value)]
+        return EntityReference(MatchedID(matchers: searchers, initialiser: initialiser))
+    }
+
+    public static func whereKey(_ key: PropertyKey, equals value: String, createAs type: EntityType) -> EntityReference {
+        let searchers = [ MatchByValue(key: key, value: value)]
+        return EntityReference(MatchedID(matchers: searchers, initialiser: EntityInitialiser(as: type)))
     }
 
 }

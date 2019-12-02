@@ -99,7 +99,7 @@ public extension InterchangeDecoder {
 
     func decode(entity: Any?, type: PropertyType?, store: Datastore) -> PropertyValue? {
         if let identifier = entity as? String {
-            return PropertyValue(ResolvableEntity(identifier: identifier), type: type ?? .entity)
+            return PropertyValue(Entity.identifiedBy(identifier), type: type ?? .entity)
         }
         return nil
     }

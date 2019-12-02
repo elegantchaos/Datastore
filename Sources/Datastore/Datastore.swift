@@ -21,8 +21,8 @@ public class Datastore {
     
     public typealias LoadCompletion = (LoadResult) -> Void
     public typealias SaveCompletion = (SaveResult) -> Void
-    public typealias EntitiesCompletion = ([GuaranteedEntity]) -> Void
-    public typealias EntityCompletion = (GuaranteedEntity?) -> Void
+    public typealias EntitiesCompletion = ([GuaranteedReference]) -> Void
+    public typealias EntityCompletion = (GuaranteedReference?) -> Void
     public typealias InterchangeCompletion = ([String:Any]) -> Void
     
     struct LoadingModelError: Error { }
@@ -89,11 +89,11 @@ public class Datastore {
     public func get(entitiesOfType type: EntityType, withIDs entityIDs: [EntityReference], completion: @escaping EntitiesCompletion) {
         let context = self.context
         context.perform {
-            var result: [GuaranteedEntity] = []
+            var result: [GuaranteedReference] = []
             for entityID in entityIDs {
                 if let entity = entityID.resolve(in: self) {
                     if entity.type == type.name {
-                        result.append(GuaranteedEntity(entity))
+                        result.append(GuaranteedReference(entity))
                     }
                 }
             }
@@ -137,7 +137,7 @@ public class Datastore {
                     result.append(entity)
                 }
             }
-            completion(result.map({ GuaranteedEntity($0) }))
+            completion(result.map({ GuaranteedReference($0) }))
         }
     }
 
@@ -148,7 +148,7 @@ public class Datastore {
             let request: NSFetchRequest<EntityRecord> = EntityRecord.fetcher(in: context)
             request.predicate = NSPredicate(format: "type = %@", type.name)
             if let entities = try? context.fetch(request) {
-                completion(Array(entities.map({ GuaranteedEntity($0) })))
+                completion(Array(entities.map({ GuaranteedReference($0) })))
             } else {
                 completion([])
             }
@@ -161,7 +161,7 @@ public class Datastore {
             
             let request: NSFetchRequest<EntityRecord> = EntityRecord.fetcher(in: context)
             if let entities = try? context.fetch(request) {
-                completion(Array(entities.map({ GuaranteedEntity($0) })))
+                completion(Array(entities.map({ GuaranteedReference($0) })))
             } else {
                 completion([])
             }

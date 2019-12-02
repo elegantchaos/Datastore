@@ -50,7 +50,7 @@ class DatastoreTests: DatastoreTestCase {
                          let modified = result["modified"] as! Date
                          XCTAssertEqual(modified.description, "1963-09-21 01:23:45 +0000")
                          XCTAssertEqual(result[typeWithKey: "modified"], "date")
-                         let owner = result["owner"] as! GuaranteedEntity
+                         let owner = result["owner"] as! GuaranteedReference
                          XCTAssertEqual(owner, people[n])
                          XCTAssertEqual(result[typeWithKey: "owner"], "owner")
                          n += 1
@@ -236,6 +236,54 @@ class DatastoreTests: DatastoreTestCase {
         wait(for: [done], timeout: 1.0)
     }
     
+    func testGetEntityByIdentifierOrNameMatchingID() {
+        // test looking up an entity of a given type by id
+        let done = expectation(description: "loaded")
+        loadJSON(name: "Simple", expectation: done) { datastore in
+            let entityID = Entity.with(identifier: "C41DB873-323D-4026-95D1-603120B9ADF6", orName: "Test")
+            datastore.get(entitiesOfType: .person, withIDs: [entityID]) { results in
+                XCTAssertEqual(results.count, 1)
+                let person = results[0]
+                XCTAssertEqual(person.identifier, "C41DB873-323D-4026-95D1-603120B9ADF6")
+                XCTAssertEqual(person.object.string(withKey: .name), "Test")
+                done.fulfill()
+            }
+        }
+        wait(for: [done], timeout: 1.0)
+    }
+
+    func testGetEntityByIdentifierOrNameMatchingName() {
+        // test looking up an entity of a given type by id
+        let done = expectation(description: "loaded")
+        loadJSON(name: "Simple", expectation: done) { datastore in
+            let entityID = Entity.with(identifier: "another-id", orName: "Test")
+            datastore.get(entitiesOfType: .person, withIDs: [entityID]) { results in
+                XCTAssertEqual(results.count, 1)
+                let person = results[0]
+                XCTAssertEqual(person.identifier, "C41DB873-323D-4026-95D1-603120B9ADF6")
+                XCTAssertEqual(person.object.string(withKey: .name), "Test")
+                done.fulfill()
+            }
+        }
+        wait(for: [done], timeout: 1.0)
+    }
+
+    func testGetEntityByIdentifierOrNameMissing() {
+        // test looking up an entity of a given type by id
+        let done = expectation(description: "loaded")
+        loadJSON(name: "Simple", expectation: done) { datastore in
+            let entityID = Entity.with(identifier: "missing-id", orName: "Missing Name", createAs: .person)
+            datastore.get(entitiesOfType: .person, withIDs: [entityID]) { results in
+                XCTAssertEqual(results.count, 1)
+                let person = results[0]
+                XCTAssertEqual(person.identifier, "missing-id")
+                XCTAssertEqual(person.object.string(withKey: .name), "Missing Name")
+                done.fulfill()
+            }
+        }
+        wait(for: [done], timeout: 1.0)
+    }
+
     func testGetEntityCreateWithInitialProperties() {
         // test looking up an entity by id, and creating it with some initial properties when it doesn't exist
         let done = expectation(description: "loaded")
@@ -336,7 +384,7 @@ class DatastoreTests: DatastoreTestCase {
                         XCTAssertEqual(properties["date"] as? Date, now)
                         XCTAssertEqual(properties["integer"] as? Int, 123)
                         XCTAssertEqual(properties["double"] as? Double, 456.789)
-                        XCTAssertEqual(properties["owner"] as? GuaranteedEntity, person)
+                        XCTAssertEqual(properties["owner"] as? GuaranteedReference, person)
                         done.fulfill()
                     }
                 }
@@ -360,7 +408,7 @@ class DatastoreTests: DatastoreTestCase {
                     XCTAssertEqual(properties["date"] as? Date, now)
                     XCTAssertEqual(properties["integer"] as? Int, 123)
                     XCTAssertEqual(properties["double"] as? Double, 456.789)
-                    XCTAssertEqual(properties["owner"] as? GuaranteedEntity, person)
+                    XCTAssertEqual(properties["owner"] as? GuaranteedReference, person)
                     done.fulfill()
                 }
             }

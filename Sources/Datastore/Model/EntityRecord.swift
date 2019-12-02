@@ -77,7 +77,7 @@ public class EntityRecord: NSManagedObject {
                 add(resolved, key: property, type: value.type, store: store)
             }
 
-        case let entity as GuaranteedEntity:
+        case let entity as GuaranteedReference:
             if let resolved = entity.resolve(in: store) {
                 add(resolved, key: property, type: value.type, store: store)
             }
