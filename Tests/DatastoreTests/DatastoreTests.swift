@@ -190,7 +190,24 @@ class DatastoreTests: DatastoreTestCase {
         }
         wait(for: [done], timeout: 1.0)
     }
-    
+
+    func testGetEntityByNameCreateWhenMissingWithFixedIdentifier() {
+        // test looking up an entity by name when it doesn't exist
+        let done = expectation(description: "loaded")
+        loadJSON(name: "Simple", expectation: done) { datastore in
+            let entityRef = Entity.named("Unknown", initialiser: EntityInitialiser(as: .person, properties:["foo": "bar"], identifier: "known-identifier"))
+            datastore.get(entitiesOfType: .person, withIDs: [entityRef]) { results in
+                XCTAssertEqual(results.count, 1)
+                let person = results[0]
+                XCTAssertEqual(person.identifier, "known-identifier")
+                XCTAssertEqual(person.object.string(withKey: .name), "Unknown")
+                XCTAssertEqual(person.object.string(withKey: "foo"), "bar")
+                done.fulfill()
+            }
+        }
+        wait(for: [done], timeout: 1.0)
+    }
+
     func testGetEntityByKey() {
         // test looking up an entity by an arbitrary property
         let done = expectation(description: "loaded")

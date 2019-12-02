@@ -89,6 +89,9 @@ internal struct OpaqueNamedID: ResolvableID {
         if let initialiser = initialiser {
             let entity = EntityRecord(in: store.context)
             entity.type = initialiser.type.name
+            if let identifier = initialiser.identifier {
+                entity.identifier = identifier
+            }
             initialiser.properties.add(to: entity, store: store)
             entity.add(name, key: key, type: .string, store: store)
             return OpaqueCachedID(entity)
