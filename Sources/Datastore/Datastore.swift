@@ -140,6 +140,7 @@ public class Datastore {
             completion(result.map({ GuaranteedEntity($0) }))
         }
     }
+
     public func get(allEntitiesOfType type: EntityType, completion: @escaping EntitiesCompletion) {
         let context = self.context
         context.perform {
@@ -153,7 +154,20 @@ public class Datastore {
             }
         }
     }
-    
+
+    public func getAllEntities(completion: @escaping EntitiesCompletion) {
+        let context = self.context
+        context.perform {
+            
+            let request: NSFetchRequest<EntityRecord> = EntityRecord.fetcher(in: context)
+            if let entities = try? context.fetch(request) {
+                completion(Array(entities.map({ GuaranteedEntity($0) })))
+            } else {
+                completion([])
+            }
+        }
+    }
+
     public func get(properties names: Set<PropertyKey>, of entities: [EntityReference], completion: @escaping ([PropertyDictionary]) -> Void) {
         get(properties: Set(names.map({ $0.name })), of: entities, completion: completion)
     }

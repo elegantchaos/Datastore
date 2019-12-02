@@ -198,12 +198,14 @@ public class ResolvableEntity: EntityReference {
 
 /// An Entity is an `EntityReference` that is guaranteed to back an existing entity.
 /// Internally it already has a resolved object pointer.
-/// It also keeps a copy of the object's `identifier` which is publically
+/// It also keeps a copy of the object's `identifier` and `type` which are publically
 /// accessible and can be safely read from any thread/context.
 public class GuaranteedEntity: EntityReference {
     public let identifier: String
+    public let type: EntityType
     init(_ object: EntityRecord) {
         self.identifier = object.identifier!
+        self.type = EntityType(object.type!)
         super.init(OpaqueCachedID(object))
     }
 
