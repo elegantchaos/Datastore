@@ -70,30 +70,85 @@ internal struct OpaqueCachedID: ResolvableID {
 }
 
 internal struct OpaqueNamedID: ResolvableID {
-    let name: String
-    let key: PropertyKey
-    let initialiser: EntityInitialiser?
-
-    internal func resolve(in store: Datastore) -> ResolvableID? {
+    
+    class Searcher: Hashable, Equatable {
         
-        // TODO: optimise this search to just fetch the newest string record with the relevant key
-        let request: NSFetchRequest<EntityRecord> = EntityRecord.fetcher(in: store.context)
-        if let entities = try? store.context.fetch(request) {
-            for entity in entities {
-                if let value = entity.string(withKey: key), value == name {
-                    return OpaqueCachedID(entity)
+        func find(in: NSManagedObjectContext) -> EntityRecord? { return nil }
+        func hash(into hasher: inout Hasher) {
+        }
+        func equal(to other: Searcher) -> Bool {
+            return false
+        }
+        static func == (lhs: OpaqueNamedID.Searcher, rhs: OpaqueNamedID.Searcher) -> Bool {
+            return lhs.equal(to: rhs)
+        }
+        func addInitialProperties(entity: EntityRecord, store: Datastore) {
+        }
+    }
+
+    class KeyValueSearcher: Searcher {
+        let key: PropertyKey
+        let value: String
+        init(key: PropertyKey, value: String) {
+            self.key = key
+            self.value = value
+        }
+
+        override func hash(into hasher: inout Hasher) {
+            value.hash(into: &hasher)
+            key.hash(into: &hasher)
+        }
+
+        override func find(in context: NSManagedObjectContext) -> EntityRecord? {
+            // TODO: optimise this search to just fetch the newest string record with the relevant key
+            let request: NSFetchRequest<EntityRecord> = EntityRecord.fetcher(in: context)
+            if let entities = try? context.fetch(request) {
+                for entity in entities {
+                    if let found = entity.string(withKey: key), found == value {
+                        return entity
+                    }
                 }
+            }
+            return nil
+        }
+
+        override func equal(to other: Searcher) -> Bool {
+            if let other = other as? KeyValueSearcher {
+                return (other.value == value) && (other.key == key)
+            } else {
+                return false
             }
         }
 
+        override func addInitialProperties(entity: EntityRecord, store: Datastore) {
+            entity.add(value, key: key, type: .string, store: store)
+        }
+    }
+    
+    let searchers: [Searcher]
+    let initialiser: EntityInitialiser?
+
+    func hash(into hasher: inout Hasher) {
+        searchers.hash(into: &hasher)
+    }
+    
+    internal func resolve(in store: Datastore) -> ResolvableID? {
+        for searcher in searchers {
+            if let entity = searcher.find(in: store.context) {
+                return OpaqueCachedID(entity)
+            }
+        }
+        
         if let initialiser = initialiser {
             let entity = EntityRecord(in: store.context)
             entity.type = initialiser.type.name
             if let identifier = initialiser.identifier {
                 entity.identifier = identifier
             }
+            for searcher in searchers {
+                searcher.addInitialProperties(entity: entity, store: store)
+            }
             initialiser.properties.add(to: entity, store: store)
-            entity.add(name, key: key, type: .string, store: store)
             return OpaqueCachedID(entity)
         } else {
             return NullCachedID()
@@ -101,18 +156,13 @@ internal struct OpaqueNamedID: ResolvableID {
     }
     
     internal var object: EntityRecord? {
-        identifierChannel.debug("identifier \(name) unresolved")
+        identifierChannel.debug("identifier \(searchers) unresolved")
         return nil
-    }
-
-    func hash(into hasher: inout Hasher) {
-        name.hash(into: &hasher)
-        key.hash(into: &hasher)
     }
 
     func equal(to other: ResolvableID) -> Bool {
         if let other = other as? OpaqueNamedID {
-            return (other.name == name) && (other.key == key)
+            return (other.searchers == searchers)
         } else {
             return false
         }
@@ -187,7 +237,8 @@ public class EntityReference: Equatable, Hashable {
 public class ResolvableEntity: EntityReference {
     
     init(key: PropertyKey, value: String, initialiser: EntityInitialiser? = nil) {
-        super.init(OpaqueNamedID(name: value, key: key, initialiser: initialiser))
+        let searchers = [ OpaqueNamedID.KeyValueSearcher(key: key, value: value)]
+        super.init(OpaqueNamedID(searchers: searchers, initialiser: initialiser))
     }
     
     init(identifier: String, initialiser: EntityInitialiser? = nil) {
