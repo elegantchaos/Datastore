@@ -124,7 +124,38 @@ internal struct OpaqueNamedID: ResolvableID {
             entity.add(value, key: key, type: .string, store: store)
         }
     }
-    
+
+    class IdentifierSearcher: Searcher {
+        let identifier: String
+        init(identifier: String) {
+            self.identifier = identifier
+        }
+
+        override func hash(into hasher: inout Hasher) {
+            identifier.hash(into: &hasher)
+        }
+
+        override func find(in context: NSManagedObjectContext) -> EntityRecord? {
+            if let object = EntityRecord.withIdentifier(identifier, in: context) {
+                return object
+            }
+            
+            return nil
+        }
+
+        override func equal(to other: Searcher) -> Bool {
+            if let other = other as? IdentifierSearcher {
+                return (other.identifier == identifier)
+            } else {
+                return false
+            }
+        }
+
+        override func addInitialProperties(entity: EntityRecord, store: Datastore) {
+            entity.identifier = identifier
+        }
+    }
+
     let searchers: [Searcher]
     let initialiser: EntityInitialiser?
 
@@ -168,41 +199,41 @@ internal struct OpaqueNamedID: ResolvableID {
         }
     }
 }
-
-internal struct OpaqueIdentifiedID: ResolvableID {
-    let identifier: String
-    let initialiser: EntityInitialiser?
-    
-    internal func resolve(in store: Datastore) -> ResolvableID? {
-        if let object = EntityRecord.withIdentifier(identifier, in: store.context) {
-            return OpaqueCachedID(object)
-        } else if let initialiser = initialiser {
-            let entity = EntityRecord(in: store.context)
-            entity.type = initialiser.type.name
-            entity.identifier = identifier
-            initialiser.properties.add(to: entity, store: store)
-            return OpaqueCachedID(entity)
-        } else {
-            return NullCachedID()
-        }
-    }
-    
-    internal var object: EntityRecord? {
-        identifierChannel.debug("identifier \(identifier) unresolved")
-        return nil
-    }
-
-    func hash(into hasher: inout Hasher) {
-        identifier.hash(into: &hasher)
-    }
-
-    func equal(to other: ResolvableID) -> Bool {
-        if let other = other as? Self {
-            return (other.identifier == identifier)
-        } else {
-            return false
-        }
-    }}
+//
+//internal struct OpaqueIdentifiedID: ResolvableID {
+//    let identifier: String
+//    let initialiser: EntityInitialiser?
+//    
+//    internal func resolve(in store: Datastore) -> ResolvableID? {
+//        if let object = EntityRecord.withIdentifier(identifier, in: store.context) {
+//            return OpaqueCachedID(object)
+//        } else if let initialiser = initialiser {
+//            let entity = EntityRecord(in: store.context)
+//            entity.type = initialiser.type.name
+//            entity.identifier = identifier
+//            initialiser.properties.add(to: entity, store: store)
+//            return OpaqueCachedID(entity)
+//        } else {
+//            return NullCachedID()
+//        }
+//    }
+//    
+//    internal var object: EntityRecord? {
+//        identifierChannel.debug("identifier \(identifier) unresolved")
+//        return nil
+//    }
+//
+//    func hash(into hasher: inout Hasher) {
+//        identifier.hash(into: &hasher)
+//    }
+//
+//    func equal(to other: ResolvableID) -> Bool {
+//        if let other = other as? Self {
+//            return (other.identifier == identifier)
+//        } else {
+//            return false
+//        }
+//    }}
 
 /// A reference to an entity in a store.
 /// The reference can be passed around safely in any context/thread
@@ -242,7 +273,9 @@ public class ResolvableEntity: EntityReference {
     }
     
     init(identifier: String, initialiser: EntityInitialiser? = nil) {
-        super.init(OpaqueIdentifiedID(identifier: identifier, initialiser: initialiser))
+        let searchers = [ OpaqueNamedID.IdentifierSearcher(identifier: identifier)]
+        super.init(OpaqueNamedID(searchers: searchers, initialiser: initialiser))
+//        super.init(OpaqueIdentifiedID(identifier: identifier, initialiser: initialiser))
     }
 
 }
