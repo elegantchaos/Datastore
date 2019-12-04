@@ -10,6 +10,7 @@ import XCTestExtensions
 
 extension EntityType {
     static let person: Self = "person"
+    static let book: Self = "book"
     static let test: Self = "test"
 }
 
@@ -534,4 +535,19 @@ class DatastoreTests: DatastoreTestCase {
         wait(for: [done], timeout: 1.0)
     }
     
+    func testCountEntities() {
+        let done = expectation(description: "done")
+        loadJSON(name: "Relationships", expectation: done) { store in
+            store.getAllEntities() { result in
+                print(result)
+                store.count(entitiesOfTypes: [.book, .test]) { counts in
+                    XCTAssertEqual(counts.count, 2)
+                    XCTAssertEqual(counts[0], 2)
+                    XCTAssertEqual(counts[1], 1)
+                    done.fulfill()
+                }
+            }
+        }
+        wait(for: [done], timeout: 1.0)
+    }
 }
