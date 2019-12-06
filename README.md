@@ -18,7 +18,7 @@ The datastore contains *entities*, which have *properties* and *relationships*.
 
 ### Entities
 
-For housekeeping purposes, all entities have three fixed properties:  `type`, `datestamp` and `identifier`.
+For housekeeping purposes, all entities have three guaranteed properties:  `type`, `datestamp` and `identifier`.
 
 The entity `type` is just a label that indicates what kind of thing the entity is. It's up to you whether it also implies what properties the entity will have - the datastore doesn't enforce any structure on a particular entity type.
 
@@ -28,13 +28,13 @@ The entity `datestamp` indicates the time that it was first added to the store.
 
 ### Properties
 
-In addition to these fixed properties, entities also have any number of custom properties.
+In addition to the guaranteed properties, entities also have any number of custom properties.
 
-Each of these is stored in the database as a separate  `(key, value, datestamp, type)` tuple. 
+Each of these is stored in the database as a  `(key, value, datestamp, type)` tuple. 
 
 The `key` of a property is just a label ("name", "address", etc).
 
-The `value` of a property is a primitive type (string, number, etc), or a reference to another entity. 
+The `value` of a property is a primitive type (int, double, bool, string, date, binary blob), or a reference to another entity. 
 
 The `datestamp` indicates the time that the property value was set.
 
@@ -44,7 +44,7 @@ The `type` of a property is a label that indicates the *semantic* type of the pr
 
 Properties can form relationships between entities. 
 
-Relationships are just properties that tie together two entities in some way; the `value` is the related entity, and the `type` indicates the kind of relationship.
+Relationships are just properties that tie together two entities in some way; the `value` is the related entity, and the `type` can be used to indicate the kind of relationship.
 
 ### Versioning
 
@@ -73,7 +73,7 @@ The API is designed for bulk operations; it takes a list of entities/properties 
 
 Entity references can be specified by `identifier` or by matching a particular property (eg `name`).
 
-These are lightweight structures which can be passed around safely in the client, and are not tied to a particular thread or database context.
+These are lightweight structures which can be passed around safely in the client, and are not tied to a particular thread, database context, or even datastore.
 
 Internally, an entity reference is resolved to an actual `EntityRecord`.
 
