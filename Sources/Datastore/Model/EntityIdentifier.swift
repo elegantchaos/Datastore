@@ -256,14 +256,21 @@ public class GuaranteedReference: EntityReference {
 /// Constructs entity references from various patterns.
 
 public struct Entity {
-    public static func identifiedBy(_ identifier: String, initialiser: EntityInitialiser? = nil) -> EntityReference {
+    public static func identifiedBy(_ identifier: String, initialiser: EntityInitialiser) -> EntityReference {
         let searchers = [MatchByIdentifier(identifier: identifier)]
         return EntityReference(MatchedID(matchers: searchers, initialiser: initialiser))
     }
     
-    public static func identifiedBy(_ identifier: String, createAs type: EntityType) -> EntityReference {
+    public static func identifiedBy(_ identifier: String, createAs type: EntityType? = nil, with properties: [PropertyKey:Any]? = nil) -> EntityReference {
         let searchers = [MatchByIdentifier(identifier: identifier)]
-        return EntityReference(MatchedID(matchers: searchers, initialiser: EntityInitialiser(as: type)))
+        let initialiser: EntityInitialiser?
+        if let type = type {
+            initialiser = EntityInitialiser(as: type, properties: PropertyDictionary(properties ?? [:]))
+        } else {
+            initialiser = nil
+        }
+        
+        return EntityReference(MatchedID(matchers: searchers, initialiser: initialiser))
     }
     
     public static func named(_ name: String, initialiser: EntityInitialiser? = nil) -> EntityReference {

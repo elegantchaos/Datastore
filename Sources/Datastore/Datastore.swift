@@ -124,6 +124,19 @@ public class Datastore {
         callback(.success(self))
     }
 
+    public func get(entitiesWithIDs entityIDs: [EntityReference], completion: @escaping EntitiesCompletion) {
+        let context = self.context
+        context.perform {
+            var result: [GuaranteedReference] = []
+            for entityID in entityIDs {
+                if let entity = entityID.resolve(in: self) {
+                    result.append(GuaranteedReference(entity))
+                }
+            }
+            completion(result)
+        }
+    }
+
     public func get(entitiesOfType type: EntityType, withIDs entityIDs: [EntityReference], completion: @escaping EntitiesCompletion) {
         let context = self.context
         context.perform {

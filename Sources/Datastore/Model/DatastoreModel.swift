@@ -45,6 +45,7 @@ fileprivate extension DatastoreModel {
             makeEntity("Date", type: .dateAttributeType, ownerEntity: entityRecord),
             makeEntity("Double", type: .doubleAttributeType, ownerEntity: entityRecord),
             makeEntity("Integer", type: .integer64AttributeType, ownerEntity: entityRecord),
+            makeEntity("Boolean", type: .booleanAttributeType, ownerEntity: entityRecord),
             makeRelationshipEntity(ownerEntity: entityRecord),
             makeEntity("String", type: .stringAttributeType, ownerEntity: entityRecord)
         ]
