@@ -137,18 +137,9 @@ public class Datastore {
         }
     }
 
-    public func get(entitiesOfType type: EntityType, withIDs entityIDs: [EntityReference], completion: @escaping EntitiesCompletion) {
-        let context = self.context
-        context.perform {
-            var result: [GuaranteedReference] = []
-            for entityID in entityIDs {
-                if let entity = entityID.resolve(in: self) {
-                    if entity.type == type.name {
-                        result.append(GuaranteedReference(entity))
-                    }
-                }
-            }
-            completion(result)
+    public func get(entity: EntityReference, completion: @escaping EntityCompletion) {
+        get(entitiesWithIDs: [entity]) { entities in
+            completion(entities.first)
         }
     }
 
@@ -161,11 +152,11 @@ public class Datastore {
 
     public func get(entitiesOfType type: EntityType, where key: PropertyKey, contains: Set<String>, createIfMissing: Bool = true, completion: @escaping EntitiesCompletion) {
         let context = self.context
-        
+
         context.perform {
             var result: [EntityRecord] = []
             var create: Set<String> = contains
-            
+
             let request: NSFetchRequest<EntityRecord> = EntityRecord.fetcher(in: context)
             request.predicate = NSPredicate(format: "type == %@", type.name)
             if let entities = try? context.fetch(request) {
@@ -176,7 +167,7 @@ public class Datastore {
                     }
                 }
             }
-            
+
             if createIfMissing {
                 for name in create {
                     let entity = EntityRecord(in: context)
