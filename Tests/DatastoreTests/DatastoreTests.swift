@@ -10,6 +10,7 @@ import XCTestExtensions
 
 extension EntityType {
     static let person: Self = "person"
+    static let book: Self = "book"
     static let test: Self = "test"
 }
 
@@ -50,7 +51,7 @@ class DatastoreTests: DatastoreTestCase {
                          let modified = result["modified"] as! Date
                          XCTAssertEqual(modified.description, "1963-09-21 01:23:45 +0000")
                          XCTAssertEqual(result[typeWithKey: "modified"], "date")
-                         let owner = result["owner"] as! GuaranteedEntity
+                         let owner = result["owner"] as! GuaranteedReference
                          XCTAssertEqual(owner, people[n])
                          XCTAssertEqual(result[typeWithKey: "owner"], "owner")
                          n += 1
@@ -95,24 +96,12 @@ class DatastoreTests: DatastoreTestCase {
         }
     }
     
-    func testEntityCreation() {
-        // create an entity via `get:where:` and check that the name has been set correctly
-        let created = expectation(description: "loaded")
-        loadAndCheck { (datastore) in
-            datastore.get(entityOfType: .person, where: "name", equals: "Person 1") { person in
-                XCTAssertEqual(person?.object.string(withKey: .name), "Person 1")
-                created.fulfill()
-            }
-        }
-        wait(for: [created], timeout: 1.0)
-    }
-    
     func testGetEntityByIdentifier() {
         // test looking up an entity of a given type by id
         let done = expectation(description: "loaded")
         loadJSON(name: "Simple", expectation: done) { datastore in
             let entityID = Entity.identifiedBy("C41DB873-323D-4026-95D1-603120B9ADF6")
-            datastore.get(entitiesOfType: .person, withIDs: [entityID]) { results in
+            datastore.get(entitiesWithIDs: [entityID]) { results in
                 XCTAssertEqual(results.count, 1)
                 let person = results[0]
                 XCTAssertEqual(person.object.string(withKey: .name), "Test")
@@ -127,20 +116,7 @@ class DatastoreTests: DatastoreTestCase {
         let done = expectation(description: "loaded")
         loadJSON(name: "Simple", expectation: done) { datastore in
             let entityID = Entity.identifiedBy("unknown-id")
-            datastore.get(entitiesOfType: .person, withIDs: [entityID]) { results in
-                XCTAssertEqual(results.count, 0)
-                done.fulfill()
-            }
-        }
-        wait(for: [done], timeout: 1.0)
-    }
-
-    func testGetEntityByIdentifierWrongType() {
-        // test looking up an entity of a given type by id when it exists but is a different type
-        let done = expectation(description: "loaded")
-        loadJSON(name: "Simple", expectation: done) { datastore in
-            let entityID = Entity.identifiedBy("C41DB873-323D-4026-95D1-603120B9ADF6")
-            datastore.get(entitiesOfType: .test, withIDs: [entityID]) { results in
+            datastore.get(entitiesWithIDs: [entityID]) { results in
                 XCTAssertEqual(results.count, 0)
                 done.fulfill()
             }
@@ -153,7 +129,7 @@ class DatastoreTests: DatastoreTestCase {
         let done = expectation(description: "loaded")
         loadJSON(name: "Simple", expectation: done) { datastore in
             let missingID = Entity.identifiedBy("no-such-id", createAs: .person)
-            datastore.get(entitiesOfType: .person, withIDs: [missingID]) { results in
+            datastore.get(entitiesWithIDs: [missingID]) { results in
                 XCTAssertEqual(results.count, 1)
                 let person = results[0]
                 XCTAssertEqual(person.identifier, "no-such-id")
@@ -168,7 +144,7 @@ class DatastoreTests: DatastoreTestCase {
         let done = expectation(description: "loaded")
         loadJSON(name: "Simple", expectation: done) { datastore in
             let entityRef = Entity.named("Test")
-            datastore.get(entitiesOfType: .person, withIDs: [entityRef]) { results in
+            datastore.get(entitiesWithIDs: [entityRef]) { results in
                 XCTAssertEqual(results.count, 1)
                 let person = results[0]
                 XCTAssertEqual(person.identifier, "C41DB873-323D-4026-95D1-603120B9ADF6")
@@ -183,20 +159,37 @@ class DatastoreTests: DatastoreTestCase {
         let done = expectation(description: "loaded")
         loadJSON(name: "Simple", expectation: done) { datastore in
             let entityRef = Entity.named("Unknown")
-            datastore.get(entitiesOfType: .person, withIDs: [entityRef]) { results in
+            datastore.get(entitiesWithIDs: [entityRef]) { results in
                 XCTAssertEqual(results.count, 0)
                 done.fulfill()
             }
         }
         wait(for: [done], timeout: 1.0)
     }
-    
+
+    func testGetEntityByNameCreateWhenMissingWithFixedIdentifier() {
+        // test looking up an entity by name when it doesn't exist
+        let done = expectation(description: "loaded")
+        loadJSON(name: "Simple", expectation: done) { datastore in
+            let entityRef = Entity.named("Unknown", initialiser: EntityInitialiser(as: .person, properties:["foo": "bar"], identifier: "known-identifier"))
+            datastore.get(entitiesWithIDs: [entityRef]) { results in
+                XCTAssertEqual(results.count, 1)
+                let person = results[0]
+                XCTAssertEqual(person.identifier, "known-identifier")
+                XCTAssertEqual(person.object.string(withKey: .name), "Unknown")
+                XCTAssertEqual(person.object.string(withKey: "foo"), "bar")
+                done.fulfill()
+            }
+        }
+        wait(for: [done], timeout: 1.0)
+    }
+
     func testGetEntityByKey() {
         // test looking up an entity by an arbitrary property
         let done = expectation(description: "loaded")
         loadJSON(name: "Simple", expectation: done) { datastore in
             let entityRef = Entity.whereKey("foo", equals: "bar")
-            datastore.get(entitiesOfType: .person, withIDs: [entityRef]) { results in
+            datastore.get(entitiesWithIDs: [entityRef]) { results in
                 XCTAssertEqual(results.count, 1)
                 let person = results[0]
                 XCTAssertEqual(person.identifier, "C41DB873-323D-4026-95D1-603120B9ADF6")
@@ -211,7 +204,7 @@ class DatastoreTests: DatastoreTestCase {
         let done = expectation(description: "loaded")
         loadJSON(name: "Simple", expectation: done) { datastore in
             let entityRef = Entity.whereKey("foo", equals: "unknown")
-            datastore.get(entitiesOfType: .person, withIDs: [entityRef]) { results in
+            datastore.get(entitiesWithIDs: [entityRef]) { results in
                 XCTAssertEqual(results.count, 0)
                 done.fulfill()
             }
@@ -219,12 +212,60 @@ class DatastoreTests: DatastoreTestCase {
         wait(for: [done], timeout: 1.0)
     }
     
+    func testGetEntityByIdentifierOrNameMatchingID() {
+        // test looking up an entity of a given type by id
+        let done = expectation(description: "loaded")
+        loadJSON(name: "Simple", expectation: done) { datastore in
+            let entityID = Entity.with(identifier: "C41DB873-323D-4026-95D1-603120B9ADF6", orName: "Test")
+            datastore.get(entitiesWithIDs: [entityID]) { results in
+                XCTAssertEqual(results.count, 1)
+                let person = results[0]
+                XCTAssertEqual(person.identifier, "C41DB873-323D-4026-95D1-603120B9ADF6")
+                XCTAssertEqual(person.object.string(withKey: .name), "Test")
+                done.fulfill()
+            }
+        }
+        wait(for: [done], timeout: 1.0)
+    }
+
+    func testGetEntityByIdentifierOrNameMatchingName() {
+        // test looking up an entity of a given type by id
+        let done = expectation(description: "loaded")
+        loadJSON(name: "Simple", expectation: done) { datastore in
+            let entityID = Entity.with(identifier: "another-id", orName: "Test")
+            datastore.get(entitiesWithIDs: [entityID]) { results in
+                XCTAssertEqual(results.count, 1)
+                let person = results[0]
+                XCTAssertEqual(person.identifier, "C41DB873-323D-4026-95D1-603120B9ADF6")
+                XCTAssertEqual(person.object.string(withKey: .name), "Test")
+                done.fulfill()
+            }
+        }
+        wait(for: [done], timeout: 1.0)
+    }
+
+    func testGetEntityByIdentifierOrNameMissing() {
+        // test looking up an entity of a given type by id
+        let done = expectation(description: "loaded")
+        loadJSON(name: "Simple", expectation: done) { datastore in
+            let entityID = Entity.with(identifier: "missing-id", orName: "Missing Name", createAs: .person)
+            datastore.get(entitiesWithIDs: [entityID]) { results in
+                XCTAssertEqual(results.count, 1)
+                let person = results[0]
+                XCTAssertEqual(person.identifier, "missing-id")
+                XCTAssertEqual(person.object.string(withKey: .name), "Missing Name")
+                done.fulfill()
+            }
+        }
+        wait(for: [done], timeout: 1.0)
+    }
+
     func testGetEntityCreateWithInitialProperties() {
         // test looking up an entity by id, and creating it with some initial properties when it doesn't exist
         let done = expectation(description: "loaded")
         loadAndCheck { datastore in
             let missingID = Entity.identifiedBy("no-such-id", initialiser: EntityInitialiser(as: .person, properties: [.name: "Test"]))
-            datastore.get(entitiesOfType: .person, withIDs: [missingID]) { results in
+            datastore.get(entitiesWithIDs: [missingID]) { results in
                 XCTAssertEqual(results.count, 1)
                 let person = results[0]
                 XCTAssertEqual(person.identifier, "no-such-id")
@@ -241,7 +282,7 @@ class DatastoreTests: DatastoreTestCase {
         let done = expectation(description: "loaded")
         loadJSON(name: "Simple", expectation: done) { datastore in
             let id = Entity.identifiedBy("C41DB873-323D-4026-95D1-603120B9ADF6", initialiser: EntityInitialiser(as: .person, properties: [.name: "Different Name"]))
-            datastore.get(entitiesOfType: .person, withIDs: [id]) { results in
+            datastore.get(entitiesWithIDs: [id]) { results in
                 XCTAssertEqual(results.count, 1)
                 let person = results[0]
                 XCTAssertEqual(person.object.string(withKey: .name), "Test") // new name should not have been applied since the entity already exists
@@ -303,23 +344,24 @@ class DatastoreTests: DatastoreTestCase {
         // test adding properties to an existing entity
         let done = expectation(description: "loaded")
         loadAndCheck { (datastore) in
-            datastore.get(entityOfType: .person, where: "name", equals: "Person 1") { person in
-                guard let person = person else {
-                    XCTFail("missing person")
-                    done.fulfill()
-                    return
-                }
-                
+            // make the entity first
+            let person = Entity.named("Person 1", createAs: .person)
+            datastore.get(entity: person) { result in
+                XCTAssertNotNil(result)
+                let person = result!
                 let now = Date()
+                // then add things to it
                 datastore.add(properties: [person: self.exampleProperties(date: now, owner: person, in: datastore)]) { () in
-                    datastore.get(properties : ["address", "date", "integer", "double", "owner"], of: [person]) { (results) in
+                    datastore.get(properties : ["address", "date", "integer", "double", "owner", "boolean", "data"], of: [person]) { (results) in
                         XCTAssertEqual(results.count, 1)
                         let properties = results[0]
                         XCTAssertEqual(properties["address"] as? String, "123 New St")
                         XCTAssertEqual(properties["date"] as? Date, now)
                         XCTAssertEqual(properties["integer"] as? Int, 123)
                         XCTAssertEqual(properties["double"] as? Double, 456.789)
-                        XCTAssertEqual(properties["owner"] as? GuaranteedEntity, person)
+                        XCTAssertEqual(properties["boolean"] as? Bool, true)
+                        XCTAssertEqual((properties["data"] as? Data), "encoded string".data(using: .utf8))
+                        XCTAssertEqual(properties["owner"] as? GuaranteedReference, person)
                         done.fulfill()
                     }
                 }
@@ -343,7 +385,7 @@ class DatastoreTests: DatastoreTestCase {
                     XCTAssertEqual(properties["date"] as? Date, now)
                     XCTAssertEqual(properties["integer"] as? Int, 123)
                     XCTAssertEqual(properties["double"] as? Double, 456.789)
-                    XCTAssertEqual(properties["owner"] as? GuaranteedEntity, person)
+                    XCTAssertEqual(properties["owner"] as? GuaranteedReference, person)
                     done.fulfill()
                 }
             }
@@ -469,4 +511,19 @@ class DatastoreTests: DatastoreTestCase {
         wait(for: [done], timeout: 1.0)
     }
     
+    func testCountEntities() {
+        let done = expectation(description: "done")
+        loadJSON(name: "Relationships", expectation: done) { store in
+            store.getAllEntities() { result in
+                print(result)
+                store.count(entitiesOfTypes: [.book, .test]) { counts in
+                    XCTAssertEqual(counts.count, 2)
+                    XCTAssertEqual(counts[0], 2)
+                    XCTAssertEqual(counts[1], 1)
+                    done.fulfill()
+                }
+            }
+        }
+        wait(for: [done], timeout: 1.0)
+    }
 }

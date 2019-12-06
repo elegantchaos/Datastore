@@ -15,15 +15,17 @@ public class Datastore {
 
     internal let container: NSPersistentContainer
     internal let context: NSManagedObjectContext
-    
+    internal let indexer: NSCoreDataCoreSpotlightDelegate?
+
     public typealias LoadResult = Result<Datastore, Error>
     public typealias SaveResult = Result<Void, Error>
     
     public typealias LoadCompletion = (LoadResult) -> Void
     public typealias SaveCompletion = (SaveResult) -> Void
-    public typealias EntitiesCompletion = ([GuaranteedEntity]) -> Void
-    public typealias EntityCompletion = (GuaranteedEntity?) -> Void
+    public typealias EntitiesCompletion = ([GuaranteedReference]) -> Void
+    public typealias EntityCompletion = (GuaranteedReference?) -> Void
     public typealias InterchangeCompletion = ([String:Any]) -> Void
+    public typealias CountCompletion = ([Int]) -> Void
     
     struct LoadingModelError: Error { }
     struct InvalidJSONError: Error { }
@@ -32,7 +34,7 @@ public class Datastore {
     
     static let specialProperties: [PropertyKey] = [.identifier, .datestamp, .type]
     
-    public class func load(name: String, url: URL? = nil, container: NSPersistentContainer.Type = NSPersistentContainer.self, completion: @escaping LoadCompletion) {
+    public class func load(name: String, url: URL? = nil, container: NSPersistentContainer.Type = NSPersistentContainer.self, indexed: Bool = false, completion: @escaping LoadCompletion) {
         let container = container.init(name: name, managedObjectModel: Datastore.model)
         let description = container.persistentStoreDescriptions[0]
         if let explicitURL = url {
@@ -46,13 +48,20 @@ public class Datastore {
         description.setOption(true as NSValue, forKey: NSMigratePersistentStoresAutomaticallyOption)
         description.setOption(true as NSValue, forKey: NSInferMappingModelAutomaticallyOption)
         description.type = NSSQLiteStoreType
-        
-        
+        //        description.setOption(true as NSValue, forKey: NSPersistentHistoryTrackingKey)
+        //        description.shouldAddStoreAsynchronously = true
+
+        var indexer: NSCoreDataCoreSpotlightDelegate? = nil
+        if indexed {
+            indexer = NSCoreDataCoreSpotlightDelegate(forStoreWith: description, model: model)
+            description.setOption(indexer, forKey:NSCoreDataCoreSpotlightExporter)
+        }
+
         container.loadPersistentStores { (description, error) in
             if let error = error {
                 completion(.failure(error))
             } else {
-                let store = Datastore(container: container)
+                let store = Datastore(container: container, indexer: indexer)
                 completion(.success(store))
             }
         }
@@ -72,9 +81,32 @@ public class Datastore {
         }
     }
     
-    private init(container: NSPersistentContainer) {
+    public class func destroy(storeAt url: URL, removeFiles: Bool = false) {
+        let fm = FileManager.default
+        let coordinator = NSPersistentStoreCoordinator(managedObjectModel: model)
+        do {
+            try coordinator.destroyPersistentStore(at: url, ofType: NSSQLiteStoreType, options: [:])
+            if removeFiles && fm.fileExists(atPath: url.path) {
+                try? fm.removeItem(at: url)
+            }
+        } catch {
+            datastoreChannel.log("Failed to destroy store \(url.lastPathComponent).\n\n\(error)")
+        }
+    }
+    
+    public class func replace(storeAt url: URL, withStoreAt destinationURL: URL) {
+        let coordinator = NSPersistentStoreCoordinator(managedObjectModel: model)
+        do {
+            try coordinator.replacePersistentStore(at: url, destinationOptions: [:], withPersistentStoreFrom: destinationURL, sourceOptions: [:], ofType: NSSQLiteStoreType)
+        } catch {
+            datastoreChannel.log("Failed to replace store \(url.lastPathComponent).\n\n\(error)")
+        }
+    }
+    
+    private init(container: NSPersistentContainer, indexer: NSCoreDataCoreSpotlightDelegate?) {
         self.container = container
         self.context = container.newBackgroundContext()
+        self.indexer = indexer
     }
     
     public func save(completion: @escaping SaveCompletion) {
@@ -86,18 +118,28 @@ public class Datastore {
         }
     }
     
-    public func get(entitiesOfType type: EntityType, withIDs entityIDs: [EntityReference], completion: @escaping EntitiesCompletion) {
+    open func reset(callback: @escaping LoadCompletion) {
+        context.reset()
+        context.processPendingChanges()
+        callback(.success(self))
+    }
+
+    public func get(entitiesWithIDs entityIDs: [EntityReference], completion: @escaping EntitiesCompletion) {
         let context = self.context
         context.perform {
-            var result: [GuaranteedEntity] = []
+            var result: [GuaranteedReference] = []
             for entityID in entityIDs {
                 if let entity = entityID.resolve(in: self) {
-                    if entity.type == type.name {
-                        result.append(GuaranteedEntity(entity))
-                    }
+                    result.append(GuaranteedReference(entity))
                 }
             }
             completion(result)
+        }
+    }
+
+    public func get(entity: EntityReference, completion: @escaping EntityCompletion) {
+        get(entitiesWithIDs: [entity]) { entities in
+            completion(entities.first)
         }
     }
 
@@ -110,11 +152,11 @@ public class Datastore {
 
     public func get(entitiesOfType type: EntityType, where key: PropertyKey, contains: Set<String>, createIfMissing: Bool = true, completion: @escaping EntitiesCompletion) {
         let context = self.context
-        
+
         context.perform {
             var result: [EntityRecord] = []
             var create: Set<String> = contains
-            
+
             let request: NSFetchRequest<EntityRecord> = EntityRecord.fetcher(in: context)
             request.predicate = NSPredicate(format: "type == %@", type.name)
             if let entities = try? context.fetch(request) {
@@ -125,7 +167,7 @@ public class Datastore {
                     }
                 }
             }
-            
+
             if createIfMissing {
                 for name in create {
                     let entity = EntityRecord(in: context)
@@ -137,9 +179,10 @@ public class Datastore {
                     result.append(entity)
                 }
             }
-            completion(result.map({ GuaranteedEntity($0) }))
+            completion(result.map({ GuaranteedReference($0) }))
         }
     }
+
     public func get(allEntitiesOfType type: EntityType, completion: @escaping EntitiesCompletion) {
         let context = self.context
         context.perform {
@@ -147,13 +190,43 @@ public class Datastore {
             let request: NSFetchRequest<EntityRecord> = EntityRecord.fetcher(in: context)
             request.predicate = NSPredicate(format: "type = %@", type.name)
             if let entities = try? context.fetch(request) {
-                completion(Array(entities.map({ GuaranteedEntity($0) })))
+                completion(Array(entities.map({ GuaranteedReference($0) })))
             } else {
                 completion([])
             }
         }
     }
+
+    public func count(entitiesOfTypes types: [EntityType], completion: @escaping CountCompletion) {
+        let context = self.context
+        context.perform {
+            var counts: [Int] = []
+            for type in types {
+                let request: NSFetchRequest<EntityRecord> = EntityRecord.fetcher(in: context)
+                request.predicate = NSPredicate(format: "type = %@", type.name)
+                if let result = try? context.count(for: request) {
+                    counts.append(result)
+                } else {
+                    counts.append(0)
+                }
+            }
+            completion(counts)
+        }
+    }
     
+    public func getAllEntities(completion: @escaping EntitiesCompletion) {
+        let context = self.context
+        context.perform {
+            
+            let request: NSFetchRequest<EntityRecord> = EntityRecord.fetcher(in: context)
+            if let entities = try? context.fetch(request) {
+                completion(Array(entities.map({ GuaranteedReference($0) })))
+            } else {
+                completion([])
+            }
+        }
+    }
+
     public func get(properties names: Set<PropertyKey>, of entities: [EntityReference], completion: @escaping ([PropertyDictionary]) -> Void) {
         get(properties: Set(names.map({ $0.name })), of: entities, completion: completion)
     }
@@ -205,6 +278,8 @@ public class Datastore {
     }
     
     public func update(properties: [EntityReference: PropertyDictionary], completion: @escaping () -> Void) {
+        // TODO: implement this properly, so that it only creates new property entries for properties that have actually changed value
+        add(properties: properties, completion: completion)
     }
     
     public func remove(properties names: Set<String>, of entities: [EntityReference], completion: @escaping () -> Void) {

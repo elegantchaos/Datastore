@@ -13,4 +13,5 @@ public struct EntityType: Equatable, Hashable, ExpressibleByStringLiteral {
         self.name = name
     }
     public init(stringLiteral: String) { self.name = stringLiteral }
+    public var asPropertyType: PropertyType { return PropertyType(name) }
 }

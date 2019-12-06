@@ -35,6 +35,8 @@ extension Datastore {
     fileprivate func decodeEntities(from interchange: [String : Any], with decoder: InterchangeDecoder) {
         if let entities = interchange[PropertyKey.entities.name] as? [[String:Any]] {
             for entityRecord in entities {
+                // TODO: allow missing identifiers?
+                // TODO: warn when identifier or type is missing?
                 if let identifier = entityRecord[PropertyKey.identifier.name] as? String, let type = entityRecord[PropertyKey.type.name] as? String {
                     var entity = EntityRecord.withIdentifier(identifier, in: context)
                     if entity == nil {

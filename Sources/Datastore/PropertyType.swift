@@ -19,6 +19,7 @@ public struct PropertyType: Equatable, Hashable, ExpressibleByStringLiteral {
 // MARK: - Standard Types
 
 public extension PropertyType {
+    static let boolean: Self = "boolean"
     static let data: Self = "data"
     static let date: Self = "date"
     static let double: Self = "double"

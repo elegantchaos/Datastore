@@ -12,6 +12,7 @@ public class EntityRecord: NSManagedObject {
     @NSManaged public var type: String?
     @NSManaged public var identifier: String?
     
+    @NSManaged public var booleans: NSSet?
     @NSManaged public var datas: NSSet?
     @NSManaged public var dates: NSSet?
     @NSManaged public var doubles: NSSet?
@@ -19,7 +20,7 @@ public class EntityRecord: NSManagedObject {
     @NSManaged public var strings: NSSet?
     @NSManaged public var relationships: NSSet?
     @NSManaged public var targets: NSSet?
-
+    
     public override func awakeFromInsert() {
         if identifier == nil {
             identifier = UUID().uuidString
@@ -33,59 +34,62 @@ public class EntityRecord: NSManagedObject {
         assert(managedObjectContext == store.context)
         
         switch value.value {
-        case let string as String:
-            add(string, key: property, type: value.type, store: store)
+            case let string as String:
+                add(string, key: property, type: value.type, store: store)
             
-        case let integer as Int16:
-            add(Int64(integer), key: property, type: value.type, store: store)
+            case let integer as Int16:
+                add(Int64(integer), key: property, type: value.type, store: store)
             
-        case let integer as Int32:
-            add(Int64(integer), key: property, type: value.type, store: store)
+            case let integer as Int32:
+                add(Int64(integer), key: property, type: value.type, store: store)
             
-        case let integer as Int64:
-            add(integer, key: property, type: value.type, store: store)
+            case let integer as Int64:
+                add(integer, key: property, type: value.type, store: store)
             
-        case let integer as Int:
-            add(Int64(integer), key: property, type: value.type, store: store)
+            case let integer as Int:
+                add(Int64(integer), key: property, type: value.type, store: store)
             
-        case let integer as UInt16:
-            add(Int64(integer), key: property, type: value.type, store: store)
+            case let integer as UInt16:
+                add(Int64(integer), key: property, type: value.type, store: store)
             
-        case let integer as UInt32:
-            add(Int64(integer), key: property, type: value.type, store: store)
+            case let integer as UInt32:
+                add(Int64(integer), key: property, type: value.type, store: store)
             
-        case let integer as UInt64:
-            add(Int64(integer), key: property, type: value.type, store: store)
+            case let integer as UInt64:
+                add(Int64(integer), key: property, type: value.type, store: store)
             
-        case let integer as UInt:
-            add(Int64(integer), key: property, type: value.type, store: store)
+            case let integer as UInt:
+                add(Int64(integer), key: property, type: value.type, store: store)
             
-        case let double as Double:
-            add(double, key: property, type: value.type, store: store)
+            case let double as Double:
+                add(double, key: property, type: value.type, store: store)
             
-        case let date as Date:
-            add(date, key: property, type: value.type, store: store)
+            case let boolean as Bool:
+                add(boolean, key: property, type: value.type, store: store)
             
-        case let data as Data:
-            add(data, key: property, type: value.type, store: store)
+            case let date as Date:
+                add(date, key: property, type: value.type, store: store)
             
-        case let entity as EntityRecord:
-            add(entity, key: property, type: value.type, store: store)
+            case let data as Data:
+                add(data, key: property, type: value.type, store: store)
             
-        case let entity as EntityReference:
-            if let resolved = entity.resolve(in: store) {
-                add(resolved, key: property, type: value.type, store: store)
+            case let entity as EntityRecord:
+                add(entity, key: property, type: value.type, store: store)
+            
+            case let entity as EntityReference:
+                if let resolved = entity.resolve(in: store) {
+                    add(resolved, key: property, type: value.type, store: store)
             }
-
-        case let entity as GuaranteedEntity:
-            if let resolved = entity.resolve(in: store) {
-                add(resolved, key: property, type: value.type, store: store)
+            
+            case let entity as GuaranteedReference:
+                if let resolved = entity.resolve(in: store) {
+                    add(resolved, key: property, type: value.type, store: store)
             }
-
-        default:
-            let unknown = Swift.type(of: value.value)
-            print("unknown value type \(unknown) \(String(describing: value.value))")
-            break
+            
+            default:
+                let unknown = Swift.type(of: value.value)
+                print("unknown value type \(unknown) \(String(describing: value.value))")
+                break
         }
     }
     
@@ -101,6 +105,12 @@ public class EntityRecord: NSManagedObject {
         }
     }
     
+    func add(_ value: Bool, key: Key, type: PropertyType?, store: Datastore) {
+        if let property: BooleanProperty = add(key: key, type: type ?? .boolean) {
+            property.value = value
+        }
+    }
+    
     func add(_ value: Double, key: Key, type: PropertyType?, store: Datastore) {
         if let property: DoubleProperty = add(key: key, type: type ?? .double) {
             property.value = value
@@ -112,22 +122,22 @@ public class EntityRecord: NSManagedObject {
             property.value = value
         }
     }
-
+    
     func add(_ value: Data, key: Key, type: PropertyType?, store: Datastore) {
         if let property: DataProperty = add(key: key, type: type ?? .data) {
             property.value = value
         }
     }
-
+    
     func add(_ value: EntityRecord, key: Key, type: PropertyType?, store: Datastore) {
         if let property: RelationshipProperty = add(key: key, type: type ?? .entity) {
             property.target = value
         }
     }
-        
+    
     func read(properties names: Set<String>, store: Datastore) -> PropertyDictionary {
         assert(managedObjectContext == store.context)
-
+        
         var values = PropertyDictionary()
         if names.contains(PropertyKey.datestamp.name) {
             values[valueWithKey: .datestamp] = PropertyValue(datestamp, type: .date)
@@ -138,8 +148,9 @@ public class EntityRecord: NSManagedObject {
         if names.contains(PropertyKey.type.name) {
             values[valueWithKey: .type] = PropertyValue(type, type: .entity)
         }
-
+        
         read(names: names, from: strings, as: StringProperty.self, into: &values, store: store)
+        read(names: names, from: booleans, as: BooleanProperty.self, into: &values, store: store)
         read(names: names, from: integers, as: IntegerProperty.self, into: &values, store: store)
         read(names: names, from: doubles, as: DoubleProperty.self, into: &values, store: store)
         read(names: names, from: dates, as: DateProperty.self, into: &values, store: store)
@@ -150,13 +161,15 @@ public class EntityRecord: NSManagedObject {
     
     func readAllProperties(store: Datastore) -> PropertyDictionary {
         assert(managedObjectContext == store.context)
-
+        
         var values = PropertyDictionary()
         readAll(from: strings, as: StringProperty.self, into: &values, store: store)
+        readAll(from: booleans, as: BooleanProperty.self, into: &values, store: store)
         readAll(from: integers, as: IntegerProperty.self, into: &values, store: store)
         readAll(from: doubles, as: DoubleProperty.self, into: &values, store: store)
         readAll(from: dates, as: DateProperty.self, into: &values, store: store)
         readAll(from: relationships, as: RelationshipProperty.self, into: &values, store: store)
+        readAll(from: datas, as: DataProperty.self, into: &values, store: store)
         return values
     }
     
@@ -171,12 +184,14 @@ public class EntityRecord: NSManagedObject {
     
     func remove(properties names: Set<String>, store: Datastore) {
         assert(managedObjectContext == store.context)
-
+        
         remove(names: names, from: strings, as: StringProperty.self, store: store)
         remove(names: names, from: integers, as: IntegerProperty.self, store: store)
         remove(names: names, from: doubles, as: DoubleProperty.self, store: store)
         remove(names: names, from: dates, as: DateProperty.self, store: store)
         remove(names: names, from: relationships, as: RelationshipProperty.self, store: store)
+        remove(names: names, from: datas, as: DataProperty.self, store: store)
+        remove(names: names, from: booleans, as: BooleanProperty.self, store: store)
     }
     
     // MARK: - Generic Helpers
@@ -219,7 +234,7 @@ public class EntityRecord: NSManagedObject {
             }
         }
     }
-
+    
     func readAll<T>(from properties: NSSet?, as: T.Type, into values: inout PropertyDictionary, store: Datastore) where T: NamedProperty {
         if let set = properties as? Set<T> {
             // there may be multiple entries for each property, so we sort them in date

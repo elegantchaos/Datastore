@@ -18,6 +18,7 @@ public protocol InterchangeDecoder {
     func decode(string: Any?, type: PropertyType?, store: Datastore) -> PropertyValue?
     func decode(integer: Any?, type: PropertyType?, store: Datastore) -> PropertyValue?
     func decode(double: Any?, type: PropertyType?, store: Datastore) -> PropertyValue?
+    func decode(boolean: Any?, type: PropertyType?, store: Datastore) -> PropertyValue?
     func decode(date: Any?, type: PropertyType?, store: Datastore) -> PropertyValue?
     func decode(data: Any?, type: PropertyType?, store: Datastore) -> PropertyValue?
     func decode(entity: Any?, type: PropertyType?, store: Datastore) -> PropertyValue?
@@ -35,6 +36,8 @@ public extension InterchangeDecoder {
                 decoded = decode(integer: integer, type: type, store: store)
             } else if let double = record[PropertyType.double.name] {
                 decoded = decode(double: double, type: type, store: store)
+            } else if let boolean = record[PropertyType.boolean.name] {
+                decoded = decode(boolean: boolean, type: type, store: store)
             } else if let date = record[PropertyType.date.name] {
                 decoded = decode(date: date, type: type, store: store)
             } else if let entity = record[PropertyType.entity.name] {
@@ -48,6 +51,8 @@ public extension InterchangeDecoder {
             decoded = integer
         } else if let double = decode(double: value, type: nil, store: store) {
             decoded = double
+        } else if let boolean = decode(boolean: value, type: nil, store: store) {
+            decoded = boolean
         } else if let date = decode(date: value, type: nil, store: store) {
             decoded = date
         } else if let uuid = decodePrimitive(uuid: value) {
@@ -68,7 +73,14 @@ public extension InterchangeDecoder {
         }
         return nil
     }
-    
+
+    func decode(boolean: Any?, type: PropertyType?, store: Datastore) -> PropertyValue? {
+        if let boolean = boolean as? Bool {
+            return PropertyValue(boolean, type: type ?? .boolean)
+        }
+        return nil
+    }
+
     func decode(integer: Any?, type: PropertyType?, store: Datastore) -> PropertyValue? {
         if let integer = integer as? Int {
             return PropertyValue(integer, type: type ?? .integer)
@@ -99,7 +111,7 @@ public extension InterchangeDecoder {
 
     func decode(entity: Any?, type: PropertyType?, store: Datastore) -> PropertyValue? {
         if let identifier = entity as? String {
-            return PropertyValue(ResolvableEntity(identifier: identifier), type: type ?? .entity)
+            return PropertyValue(Entity.identifiedBy(identifier), type: type ?? .entity)
         }
         return nil
     }

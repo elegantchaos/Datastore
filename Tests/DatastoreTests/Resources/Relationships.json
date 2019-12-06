@@ -1,32 +1,34 @@
 {
-  "entities" : [
-    {
-      "name" : "Book 1",
-      "type" : "book",
-      "author" : {
-        "entity" : "ADDD557A-668E-4C6B-A9A0-3BCF099646E8",
-        "type" : "author"
-      },
-    },
-    {
-      "name" : "Book 2",
-      "type" : "book",
-      "author" : {
-        "entity" : "ADDD557A-668E-4C6B-A9A0-3BCF099646E8",
-        "type" : "author"
-      },
-    },
-    {
-      "name" : "Author",
-      "identifier" : "ADDD557A-668E-4C6B-A9A0-3BCF099646E8",
-      "datestamp" : { "date" : "1969-11-12T01:23:45Z" },
-      "modified" : { "date" : "1963-09-21T01:23:45Z" },
-      "type" : "test",
-      "address" : "456 Old St",
-      "owner" : {
-        "entity" : "ADDD557A-668E-4C6B-A9A0-3BCF099646E8",
-        "type" : "owner"
-      },
-    }
-  ],
+    "entities" : [
+        {
+            "identifier": "book-1",
+            "name" : "Book 1",
+            "type" : "book",
+            "author" : {
+                "entity" : "ADDD557A-668E-4C6B-A9A0-3BCF099646E8",
+                "type" : "author"
+            },
+        },
+        {
+            "identifier" : "book-2",
+            "name" : "Book 2",
+            "type" : "book",
+            "author" : {
+                "entity" : "ADDD557A-668E-4C6B-A9A0-3BCF099646E8",
+                "type" : "author"
+            },
+        },
+        {
+            "name" : "Author",
+            "identifier" : "ADDD557A-668E-4C6B-A9A0-3BCF099646E8",
+            "datestamp" : { "date" : "1969-11-12T01:23:45Z" },
+            "modified" : { "date" : "1963-09-21T01:23:45Z" },
+            "type" : "test",
+            "address" : "456 Old St",
+            "owner" : {
+                "entity" : "ADDD557A-668E-4C6B-A9A0-3BCF099646E8",
+                "type" : "owner"
+            },
+        }
+    ],
 }

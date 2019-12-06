@@ -14,6 +14,7 @@ public protocol InterchangeEncoder {
     func encode(_ data: DataProperty, into record: inout [String:Any])
     func encode(_ string: StringProperty, into record: inout [String:Any])
     func encode(_ integer: IntegerProperty, into record: inout [String:Any])
+    func encode(_ boolean: BooleanProperty, into record: inout [String:Any])
     func encode(_ double: DoubleProperty, into record: inout [String:Any])
     func encode(_ relationship: RelationshipProperty, into record: inout [String:Any])
 }
@@ -59,6 +60,11 @@ public extension InterchangeEncoder {
     func encode(_ double: DoubleProperty, into record: inout [String:Any]) {
         record[PropertyType.double.name] = double.value
         encode(type: double.typeName, datestamp: double.datestamp, into: &record)
+    }
+
+    func encode(_ boolean: BooleanProperty, into record: inout [String:Any]) {
+        record[PropertyType.boolean.name] = boolean.value
+        encode(type: boolean.typeName, datestamp: boolean.datestamp, into: &record)
     }
 
     func encode(_ relationship: RelationshipProperty, into record: inout [String:Any]) {

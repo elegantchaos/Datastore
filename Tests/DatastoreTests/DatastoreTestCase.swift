@@ -61,6 +61,7 @@ class DatastoreTestCase: XCTestCase {
         properties["date"] = date
         properties["integer"] = 123
         properties["double"] = 456.789
+        properties["boolean"] = true
         properties["owner"] = (owner, "owner")
         properties["data"] = "encoded string".data(using: .utf8)
         return properties
