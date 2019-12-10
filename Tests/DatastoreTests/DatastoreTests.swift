@@ -526,4 +526,131 @@ class DatastoreTests: DatastoreTestCase {
         }
         wait(for: [done], timeout: 1.0)
     }
+    
+    func testAddedNotification() {
+        let done = expectation(description: "done")
+        let notified = expectation(description: "notified")
+        
+        loadAndCheck { (datastore) in
+            let person = Entity.named("Test", createAs: .person)
+            var token: NSObjectProtocol?
+            token = NotificationCenter.default.addObserver(forName: .EntityChangedNotification, object: nil, queue: OperationQueue.main) { notification in
+                let changes = notification.entityChanges
+                XCTAssertNotNil(changes)
+                
+                XCTAssertEqual(changes?.action, .add)
+                XCTAssertTrue(changes!.added.contains(person))
+                XCTAssertEqual(changes!.removed.count, 0)
+
+                // entities that are created during an add call don't contribute to the changed/keys sets, so they should be empty
+                XCTAssertEqual(changes!.changed.count, 0)
+                XCTAssertEqual(changes!.keys.count, 0)
+                NotificationCenter.default.removeObserver(token!)
+                notified.fulfill()
+            }
+            datastore.add(properties: [person: self.exampleProperties(date: Date(), owner: person, in: datastore)]) { () in
+                done.fulfill()
+            }
+        }
+        
+        wait(for: [done, notified], timeout: 1.0)
+
+    }
+
+    func testRemovedNotification() {
+        let done = expectation(description: "done")
+        let notified = expectation(description: "notified")
+        
+        loadAndCheck { (datastore) in
+            let person = Entity.named("Test", createAs: .person)
+            var token: NSObjectProtocol?
+            token = NotificationCenter.default.addObserver(forName: .EntityChangedNotification, object: nil, queue: OperationQueue.main) { notification in
+                let changes = notification.entityChanges
+                XCTAssertNotNil(changes)
+
+                XCTAssertEqual(changes?.action, .add)
+                XCTAssertTrue(changes?.added.contains(person) ?? false)
+
+
+                notified.fulfill()
+                NotificationCenter.default.removeObserver(token!)
+            }
+            datastore.add(properties: [person: self.exampleProperties(date: Date(), owner: person, in: datastore)]) {
+                done.fulfill()
+            }
+        }
+        
+        wait(for: [done, notified], timeout: 1.0)
+    }
+
+    func testChangedNotification() {
+        let done = expectation(description: "done")
+        let firstNotification = expectation(description: "notified")
+        let secondNotification = expectation(description: "notified")
+        let thirdNotification = expectation(description: "notified")
+
+        loadAndCheck { (datastore) in
+            let person = Entity.named("Test", createAs: .person)
+            var token: NSObjectProtocol?
+            token = NotificationCenter.default.addObserver(forName: .EntityChangedNotification, object: nil, queue: OperationQueue.main) { notification in
+                let changes = notification.entityChanges
+                XCTAssertNotNil(changes)
+                
+                XCTAssertEqual(changes?.action, .get)
+                XCTAssertTrue(changes!.added.contains(person))
+                XCTAssertEqual(changes!.removed.count, 0)
+                XCTAssertEqual(changes!.changed.count, 0)
+                XCTAssertEqual(changes!.keys.count, 0)
+                NotificationCenter.default.removeObserver(token!)
+                firstNotification.fulfill()
+            }
+
+            datastore.get(entity: person) { result in
+                self.wait(for: [firstNotification], timeout: 1.0)
+                
+                var token: NSObjectProtocol?
+                token = NotificationCenter.default.addObserver(forName: .EntityChangedNotification, object: nil, queue: OperationQueue.main) { notification in
+                    let changes = notification.entityChanges
+                    XCTAssertNotNil(changes)
+                    
+                    XCTAssertEqual(changes?.action, .add)
+                    XCTAssertEqual(changes!.added.count, 0)
+                    XCTAssertEqual(changes!.removed.count, 0)
+                    XCTAssertTrue(changes!.changed.contains(person))
+                    XCTAssertEqual(changes!.keys.count, 7)
+                    NotificationCenter.default.removeObserver(token!)
+                    secondNotification.fulfill()
+                }
+                
+                datastore.add(properties: [person: self.exampleProperties(date: Date(), owner: person, in: datastore)]) {
+                    self.wait(for: [secondNotification], timeout: 1.0)
+
+                    var token: NSObjectProtocol?
+                    token = NotificationCenter.default.addObserver(forName: .EntityChangedNotification, object: nil, queue: OperationQueue.main) { notification in
+                        let changes = notification.entityChanges
+                        XCTAssertNotNil(changes)
+                        
+                        XCTAssertEqual(changes?.action, .remove)
+                        XCTAssertEqual(changes!.added.count, 0)
+                        XCTAssertEqual(changes!.removed.count, 0)
+                        XCTAssertTrue(changes!.changed.contains(person))
+                        XCTAssertTrue(changes!.keys.contains(.name))
+                        NotificationCenter.default.removeObserver(token!)
+                        thirdNotification.fulfill()
+                    }
+                    
+                    datastore.remove(properties: [.name], of: [person]) {
+                        self.wait(for: [thirdNotification], timeout: 1.0)
+
+                        done.fulfill()
+                    }
+                }
+            }
+        }
+        
+        wait(for: [done], timeout: 1.0)
+    }
+
+    
 }
+

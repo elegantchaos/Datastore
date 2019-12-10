@@ -9,6 +9,27 @@ import Logger
 
 let datastoreChannel = Channel("com.elegantchaos.datastore")
 
+public extension Notification.Name {
+    static let EntityChangedNotification = NSNotification.Name(rawValue: "EntityChanged")
+}
+
+public struct EntityChanges {
+    public enum Action {
+        case get
+        case add
+        case update
+        case remove
+        case delete
+    }
+
+    let action: Action
+    let added: Set<EntityReference>
+    let removed: Set<EntityReference>
+    let changed: Set<EntityReference>
+    let keys: Set<PropertyKey>
+}
+
+
 public class Datastore {
     static var cachedModel: NSManagedObjectModel!
     static let model = DatastoreModel()
@@ -126,13 +147,20 @@ public class Datastore {
 
     public func get(entitiesWithIDs entityIDs: [EntityReference], completion: @escaping EntitiesCompletion) {
         let context = self.context
+        var added: Set<EntityReference> = []
         context.perform {
             var result: [GuaranteedReference] = []
             for entityID in entityIDs {
-                if let entity = entityID.resolve(in: self) {
-                    result.append(GuaranteedReference(entity))
+                if let (entity, wasCreated) = entityID.resolve(in: self) {
+                    let reference = GuaranteedReference(entity)
+                    result.append(reference)
+                    if wasCreated.count > 0 {
+                        added.formUnion(wasCreated.map({ GuaranteedReference($0) }))
+                    }
                 }
             }
+
+            self.notify(action: .get, added: added)
             completion(result)
         }
     }
@@ -154,7 +182,7 @@ public class Datastore {
         let context = self.context
 
         context.perform {
-            var result: [EntityRecord] = []
+            var result: [GuaranteedReference] = []
             var create: Set<String> = contains
 
             let request: NSFetchRequest<EntityRecord> = EntityRecord.fetcher(in: context)
@@ -162,12 +190,13 @@ public class Datastore {
             if let entities = try? context.fetch(request) {
                 for entity in entities {
                     if let value = entity.string(withKey: key), contains.contains(value) {
-                        result.append(entity)
+                        result.append(GuaranteedReference(entity))
                         create.remove(value)
                     }
                 }
             }
 
+            var added: Set<EntityReference> = []
             if createIfMissing {
                 for name in create {
                     let entity = EntityRecord(in: context)
@@ -176,10 +205,13 @@ public class Datastore {
                     property.owner = entity
                     property.name = key.name
                     property.value = name
-                    result.append(entity)
+                    let reference = GuaranteedReference(entity)
+                    result.append(reference)
+                    added.insert(reference)
                 }
             }
-            completion(result.map({ GuaranteedReference($0) }))
+            self.notify(action: .get, added: added)
+            completion(result)
         }
     }
 
@@ -234,16 +266,22 @@ public class Datastore {
     public func get(properties names: Set<String>, of entities: [EntityReference], completion: @escaping ([PropertyDictionary]) -> Void) {
         let context = self.context
         context.perform {
+            var added: Set<EntityReference> = []
             var result: [PropertyDictionary] = []
             for entityID in entities {
                 let values: PropertyDictionary
-                if let entity = entityID.resolve(in: self) {
+                if let (entity, wasCreated) = entityID.resolve(in: self) {
                     values = entity.read(properties: names, store: self)
+                    if wasCreated.count > 0 {
+                        added.formUnion(wasCreated.map({ GuaranteedReference($0) }))
+                    }
                 } else {
                     values = PropertyDictionary()
                 }
                 result.append(values)
             }
+
+            self.notify(action: .get, added: added)
             completion(result)
         }
     }
@@ -252,15 +290,21 @@ public class Datastore {
         let context = self.context
         context.perform {
             var result: [PropertyDictionary] = []
+            var added: Set<EntityReference> = []
             for entityID in entities {
                 let values: PropertyDictionary
-                if let entity = entityID.resolve(in: self) {
+                if let (entity, wasCreated) = entityID.resolve(in: self) {
                     values = entity.readAllProperties(store: self)
+                    if wasCreated.count > 0 {
+                        added.formUnion(wasCreated.map({ GuaranteedReference($0) }))
+                    }
                 } else {
                     values = PropertyDictionary()
                 }
                 result.append(values)
             }
+
+            self.notify(action: .get, added: added)
             completion(result)
         }
     }
@@ -268,11 +312,27 @@ public class Datastore {
     public func add(properties: [EntityReference: PropertyDictionary], completion: @escaping () -> Void) {
         let context = self.context
         context.perform {
+            var added: Set<EntityReference> = []
+            var changed: Set<EntityReference> = []
+            var keys: Set<PropertyKey> = []
             for (entityID, values) in properties {
-                if let entity = entityID.resolve(in: self) {
-                    values.add(to: entity, store: self)
+                if let (entity, wasCreated) = entityID.resolve(in: self) {
+                    let addedByRelationships = values.add(to: entity, store: self)
+                    if addedByRelationships.count > 0 {
+                        added.formUnion(addedByRelationships.map({ GuaranteedReference($0) }))
+                    }
+                    let reference = GuaranteedReference(entity)
+                    
+                    if wasCreated.count == 0 {
+                        changed.insert(reference)
+                        keys.formUnion(values.values.keys)
+                    } else {
+                        added.formUnion(wasCreated.map({ GuaranteedReference($0) }))
+                    }
                 }
             }
+
+            self.notify(action: .add, added: added, changed: changed, keys: keys)
             completion()
         }
     }
@@ -282,17 +342,44 @@ public class Datastore {
         add(properties: properties, completion: completion)
     }
     
-    public func remove(properties names: Set<String>, of entities: [EntityReference], completion: @escaping () -> Void) {
+    public func remove(properties names: Set<PropertyKey>, of entities: [EntityReference], completion: @escaping () -> Void) {
         let context = self.context
         context.perform {
+            var added: Set<EntityReference> = []
+            var changed: Set<EntityReference> = []
+            let propertyNames = Set<String>(names.map({ $0.name }))
             for entityID in entities {
-                if let entity = entityID.resolve(in: self) {
-                    entity.remove(properties: names, store: self)
+                if let (entity, wasCreated) = entityID.resolve(in: self) {
+                    entity.remove(properties: propertyNames, store: self)
+                    
+                    // in theory, resolving the reference to an entity that we want to remove a property from
+                    // could actually create it, or other entities referenced by it
+                    if wasCreated.count > 0 {
+                        added.formUnion(wasCreated.map({ GuaranteedReference($0) }))
+                        datastoreChannel.log("created objects during property removal - probably a mistake: \(added)")
+                    }
+                    
+                    let reference = GuaranteedReference(entity)
+                    changed.insert(reference)
                 }
             }
+
+            self.notify(action: .remove, changed: changed, keys: names)
             completion()
         }
     }
     
-  
+    internal func notify(action: EntityChanges.Action, added: Set<EntityReference> = [], removed: Set<EntityReference> = [], changed: Set<EntityReference> = [], keys: Set<PropertyKey> = []) {
+        if (added.count > 0) || (removed.count > 0) || (changed.count > 0) {
+            let changes = EntityChanges(action: action, added: added, removed: removed, changed: changed, keys: keys)
+            let notification = Notification(name: .EntityChangedNotification, object: self, userInfo: ["changes": changes])
+            NotificationCenter.default.post(notification)
+        }
+    }
+}
+
+extension Notification {
+    public var entityChanges: EntityChanges? {
+        return userInfo?["changes"] as? EntityChanges
+    }
 }

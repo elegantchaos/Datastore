@@ -98,16 +98,17 @@ internal class MatchByValue: EntityMatcher {
     }
 }
 
+internal typealias ResolveResult = (ResolvableID, [ResolvableID])?
 
 internal protocol ResolvableID {
-    func resolve(in store: Datastore) -> ResolvableID?
+    func resolve(in store: Datastore) -> ResolveResult
     func hash(into hasher: inout Hasher)
     func equal(to: ResolvableID) -> Bool
     var object: EntityRecord? { get }
 }
 
 internal struct NullCachedID: ResolvableID {
-    internal func resolve(in store: Datastore) -> ResolvableID? {
+    internal func resolve(in store: Datastore) -> ResolveResult {
         return nil
     }
     
@@ -133,13 +134,13 @@ internal struct OpaqueCachedID: ResolvableID {
         self.id = object.objectID
     }
     
-    internal func resolve(in store: Datastore) -> ResolvableID? {
+    internal func resolve(in store: Datastore) -> ResolveResult {
         if store.context == cached.managedObjectContext {
             return nil
         } else if let object = store.context.object(with: id) as? EntityRecord {
-            return OpaqueCachedID(object)
+            return (OpaqueCachedID(object), [])
         } else {
-            return NullCachedID()
+            return (NullCachedID(), [])
         }
     }
     
@@ -169,10 +170,10 @@ internal struct MatchedID: ResolvableID {
         matchers.hash(into: &hasher)
     }
     
-    internal func resolve(in store: Datastore) -> ResolvableID? {
+    internal func resolve(in store: Datastore) -> ResolveResult {
         for searcher in matchers {
             if let entity = searcher.find(in: store.context) {
-                return OpaqueCachedID(entity)
+                return (OpaqueCachedID(entity), [])
             }
         }
         
@@ -185,10 +186,16 @@ internal struct MatchedID: ResolvableID {
             for searcher in matchers {
                 searcher.addInitialProperties(entity: entity, store: store)
             }
-            initialiser.properties.add(to: entity, store: store)
-            return OpaqueCachedID(entity)
+            
+            let reference = OpaqueCachedID(entity)
+            var created: [ResolvableID] = [reference]
+            let addedByRelationships = initialiser.properties.add(to: entity, store: store)
+            if addedByRelationships.count > 0 {
+                created.append(contentsOf: addedByRelationships.map({ OpaqueCachedID($0) }))
+            }
+            return (reference, created)
         } else {
-            return NullCachedID()
+            return (NullCachedID(), [])
         }
     }
     
@@ -225,12 +232,19 @@ public class EntityReference: Equatable, Hashable {
         id.hash(into: &hasher)
     }
 
-    func resolve(in store: Datastore) -> EntityRecord? {
-        if let resolved = id.resolve(in: store) {
+    func resolve(in store: Datastore) -> (EntityRecord, [EntityRecord])? {
+        if let (resolved, created) = id.resolve(in: store) {
             id = resolved
+            if let object = id.object {
+                return (object, created.compactMap({ $0.object }))
+            }
         }
         
-        return id.object
+        if let object = id.object {
+            return (object, [])
+        } else {
+            return nil
+        }
     }
 }
 

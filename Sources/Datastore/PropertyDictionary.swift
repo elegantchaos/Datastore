@@ -59,10 +59,13 @@ public struct PropertyDictionary {
         }
     }
     
-    func add(to entity: EntityRecord, store: Datastore) {
+    func add(to entity: EntityRecord, store: Datastore) -> [EntityRecord] {
+        var added: [EntityRecord] = []
         for (key, value) in values {
-            entity.add(property: key, value: value, store: store)
+            let newEntities = entity.add(property: key, value: value, store: store)
+            added.append(contentsOf: newEntities)
         }
+        return added
     }
     
     

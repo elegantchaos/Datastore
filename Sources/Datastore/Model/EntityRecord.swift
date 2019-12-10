@@ -30,7 +30,16 @@ public class EntityRecord: NSManagedObject {
         }
     }
     
-    func add(property: Key, value: PropertyValue, store: Datastore) {
+    /// Add a property entry record to this entity.
+    /// If we're adding a relationship, resolving the reference to the related object
+    /// might cause one or more objects to be created. We therefore return a list of
+    /// created objects from this call; most of the time this will be empty.
+    ///
+    /// - Parameters:
+    ///   - property: the property to add
+    ///   - value: the property value
+    ///   - store: the store to add to
+    func add(property: Key, value: PropertyValue, store: Datastore) -> [EntityRecord] {
         assert(managedObjectContext == store.context)
         
         switch value.value {
@@ -77,13 +86,15 @@ public class EntityRecord: NSManagedObject {
                 add(entity, key: property, type: value.type, store: store)
             
             case let entity as EntityReference:
-                if let resolved = entity.resolve(in: store) {
+                if let (resolved, created) = entity.resolve(in: store) {
                     add(resolved, key: property, type: value.type, store: store)
+                    return created
             }
             
             case let entity as GuaranteedReference:
-                if let resolved = entity.resolve(in: store) {
+                if let (resolved, created) = entity.resolve(in: store) {
                     add(resolved, key: property, type: value.type, store: store)
+                    return created
             }
             
             default:
@@ -91,6 +102,8 @@ public class EntityRecord: NSManagedObject {
                 print("unknown value type \(unknown) \(String(describing: value.value))")
                 break
         }
+        
+        return []
     }
     
     func add(_ value: String, key: Key, type: PropertyType?, store: Datastore) {
