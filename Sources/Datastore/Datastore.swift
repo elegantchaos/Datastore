@@ -21,10 +21,10 @@ public struct EntityChanges {
         case remove
         case delete
     }
-
+    
     let action: Action
     let added: Set<EntityReference>
-    let removed: Set<EntityReference>
+    let deleted: Set<EntityReference>
     let changed: Set<EntityReference>
     let keys: Set<PropertyKey>
 }
@@ -33,11 +33,11 @@ public struct EntityChanges {
 public class Datastore {
     static var cachedModel: NSManagedObjectModel!
     static let model = DatastoreModel()
-
+    
     internal let container: NSPersistentContainer
     internal let context: NSManagedObjectContext
     internal let indexer: NSCoreDataCoreSpotlightDelegate?
-
+    
     public typealias LoadResult = Result<Datastore, Error>
     public typealias SaveResult = Result<Void, Error>
     
@@ -55,6 +55,13 @@ public class Datastore {
     
     static let specialProperties: [PropertyKey] = [.identifier, .datestamp, .type]
     
+    /// Load a store.
+    /// - Parameters:
+    ///   - name: name to use for the store
+    ///   - url: location of the store; if not supplied, the store will be created in memory
+    ///   - container: persistent container class to use
+    ///   - indexed: spotlight indexer to use, if required
+    ///   - completion: completion block
     public class func load(name: String, url: URL? = nil, container: NSPersistentContainer.Type = NSPersistentContainer.self, indexed: Bool = false, completion: @escaping LoadCompletion) {
         let container = container.init(name: name, managedObjectModel: Datastore.model)
         let description = container.persistentStoreDescriptions[0]
@@ -71,13 +78,13 @@ public class Datastore {
         description.type = NSSQLiteStoreType
         //        description.setOption(true as NSValue, forKey: NSPersistentHistoryTrackingKey)
         //        description.shouldAddStoreAsynchronously = true
-
+        
         var indexer: NSCoreDataCoreSpotlightDelegate? = nil
         if indexed {
             indexer = NSCoreDataCoreSpotlightDelegate(forStoreWith: description, model: model)
             description.setOption(indexer, forKey:NSCoreDataCoreSpotlightExporter)
         }
-
+        
         container.loadPersistentStores { (description, error) in
             if let error = error {
                 completion(.failure(error))
@@ -88,20 +95,29 @@ public class Datastore {
         }
     }
     
+    /// Load a store from JSON.
+    /// - Parameters:
+    ///   - name: name to use for the store
+    ///   - json: json string defining the store contents
+    ///   - completion: completion block
     public class func load(name: String, json: String, completion: @escaping LoadCompletion) {
         load(name: name) { (result) in
             switch result {
-            case .success(let store):
-                store.decode(json: json) { result in
-                    completion(result)
+                case .success(let store):
+                    store.decode(json: json) { result in
+                        completion(result)
                 }
                 
-            default:
-                completion(result)
+                default:
+                    completion(result)
             }
         }
     }
     
+    /// Destroy a store and remove all the backing files
+    /// - Parameters:
+    ///   - url: location of the store to destroy
+    ///   - removeFiles: should be explicitly delete the files?
     public class func destroy(storeAt url: URL, removeFiles: Bool = false) {
         let fm = FileManager.default
         let coordinator = NSPersistentStoreCoordinator(managedObjectModel: model)
@@ -115,6 +131,10 @@ public class Datastore {
         }
     }
     
+    /// Replace one store with another
+    /// - Parameters:
+    ///   - url: store to replace
+    ///   - destinationURL: store to replace it with
     public class func replace(storeAt url: URL, withStoreAt destinationURL: URL) {
         let coordinator = NSPersistentStoreCoordinator(managedObjectModel: model)
         do {
@@ -124,12 +144,18 @@ public class Datastore {
         }
     }
     
+    /// Create a store instance, with a given container and indexer.
+    /// - Parameters:
+    ///   - container: backing container
+    ///   - indexer: spotlight indexer, if required
     private init(container: NSPersistentContainer, indexer: NSCoreDataCoreSpotlightDelegate?) {
         self.container = container
         self.context = container.newBackgroundContext()
         self.indexer = indexer
     }
     
+    /// Save any outstanding changes to the store
+    /// - Parameter completion: completion block
     public func save(completion: @escaping SaveCompletion) {
         do {
             try context.save()
@@ -139,12 +165,31 @@ public class Datastore {
         }
     }
     
+    /// Reset the store.
+    /// Removes all entities.
+    /// - Parameter callback: completion block
     open func reset(callback: @escaping LoadCompletion) {
         context.reset()
         context.processPendingChanges()
         callback(.success(self))
     }
-
+    
+    /// Get a specific entity.
+    /// May create the entity if it doesn't exist and the reference has an initialiser.
+    /// - Parameters:
+    ///   - entity: entity to look for
+    ///   - completion: completion block
+    public func get(entity: EntityReference, completion: @escaping EntityCompletion) {
+        get(entitiesWithIDs: [entity]) { entities in
+            completion(entities.first)
+        }
+    }
+    
+    /// Get some entities.
+    /// May create any entities that don't already exist, if their references have an initialiser.
+    /// - Parameters:
+    ///   - entityIDs: entities to look for
+    ///   - completion: completion block
     public func get(entitiesWithIDs entityIDs: [EntityReference], completion: @escaping EntitiesCompletion) {
         let context = self.context
         var added: Set<EntityReference> = []
@@ -159,32 +204,41 @@ public class Datastore {
                     }
                 }
             }
-
+            
             self.notify(action: .get, added: added)
             completion(result)
         }
     }
+    
 
-    public func get(entity: EntityReference, completion: @escaping EntityCompletion) {
-        get(entitiesWithIDs: [entity]) { entities in
-            completion(entities.first)
-        }
-    }
-
+    /// Retrieve an entity of a given type where a property matches a specific value.
+    /// - Parameters:
+    ///   - type: entity type to look for
+    ///   - key: key to search
+    ///   - equals: value to check for
+    ///   - createIfMissing: should we create the entity if it isn't found?
+    ///   - completion: completion block
     public func get(entityOfType type: EntityType, where key: PropertyKey, equals: String, createIfMissing: Bool = true, completion: @escaping EntityCompletion) {
         get(entitiesOfType: type, where: key, contains: [equals], createIfMissing: createIfMissing) { entities in
             completion(entities.first)
         }
     }
     
-
+    
+    /// Get all entities of a given type where a given property matches one of a set of values.
+    /// - Parameters:
+    ///   - type: the entity type to retrieve
+    ///   - key: the property to filter on
+    ///   - contains: the values to filter on
+    ///   - createIfMissing: create entities for any values we didn't find
+    ///   - completion: completion block
     public func get(entitiesOfType type: EntityType, where key: PropertyKey, contains: Set<String>, createIfMissing: Bool = true, completion: @escaping EntitiesCompletion) {
         let context = self.context
-
+        
         context.perform {
             var result: [GuaranteedReference] = []
             var create: Set<String> = contains
-
+            
             let request: NSFetchRequest<EntityRecord> = EntityRecord.fetcher(in: context)
             request.predicate = NSPredicate(format: "type == %@", type.name)
             if let entities = try? context.fetch(request) {
@@ -195,7 +249,7 @@ public class Datastore {
                     }
                 }
             }
-
+            
             var added: Set<EntityReference> = []
             if createIfMissing {
                 for name in create {
@@ -214,7 +268,11 @@ public class Datastore {
             completion(result)
         }
     }
-
+    
+    /// Retrieve all entities of a given type
+    /// - Parameters:
+    ///   - type: the types to retrieve
+    ///   - completion: completion block
     public func get(allEntitiesOfType type: EntityType, completion: @escaping EntitiesCompletion) {
         let context = self.context
         context.perform {
@@ -228,7 +286,11 @@ public class Datastore {
             }
         }
     }
-
+    
+    /// Count all entities of some entity types.
+    /// - Parameters:
+    ///   - types: the types to count
+    ///   - completion: completion block
     public func count(entitiesOfTypes types: [EntityType], completion: @escaping CountCompletion) {
         let context = self.context
         context.perform {
@@ -246,6 +308,8 @@ public class Datastore {
         }
     }
     
+    /// Retrieve all entities
+    /// - Parameter completion: completion block
     public func getAllEntities(completion: @escaping EntitiesCompletion) {
         let context = self.context
         context.perform {
@@ -258,11 +322,21 @@ public class Datastore {
             }
         }
     }
-
+    
+    /// Get specific property values for a group of entities
+    /// - Parameters:
+    ///   - keys: the property keys to retrieve
+    ///   - entities: the entities to retrieve properties for
+    ///   - completion: completion block
     public func get(properties names: Set<PropertyKey>, of entities: [EntityReference], completion: @escaping ([PropertyDictionary]) -> Void) {
         get(properties: Set(names.map({ $0.name })), of: entities, completion: completion)
     }
     
+    /// Get specific property values for a group of entities
+    /// - Parameters:
+    ///   - keys: names of the properties to retrieve
+    ///   - entities: the entities to retrieve properties for
+    ///   - completion: completion block
     public func get(properties names: Set<String>, of entities: [EntityReference], completion: @escaping ([PropertyDictionary]) -> Void) {
         let context = self.context
         context.perform {
@@ -280,12 +354,16 @@ public class Datastore {
                 }
                 result.append(values)
             }
-
+            
             self.notify(action: .get, added: added)
             completion(result)
         }
     }
     
+    /// Gets all the properties for some entities.
+    /// - Parameters:
+    ///   - entities: the entities to get properties for
+    ///   - completion: completion block
     public func get(allPropertiesOf entities: [EntityReference], completion: @escaping ([PropertyDictionary]) -> Void) {
         let context = self.context
         context.perform {
@@ -303,12 +381,18 @@ public class Datastore {
                 }
                 result.append(values)
             }
-
+            
             self.notify(action: .get, added: added)
             completion(result)
         }
     }
     
+    /// Add some properties to some entities.
+    /// Always creates new property records for all the added properties, even if they
+    /// already existed and had the same values.
+    /// - Parameters:
+    ///   - properties: dictionary with entities as keys, and properties to update as values
+    ///   - completion: completion block
     public func add(properties: [EntityReference: PropertyDictionary], completion: @escaping () -> Void) {
         let context = self.context
         context.perform {
@@ -331,17 +415,51 @@ public class Datastore {
                     }
                 }
             }
-
+            
             self.notify(action: .add, added: added, changed: changed, keys: keys)
             completion()
         }
     }
     
+    /// Update property values for some entities.
+    /// Will only create new property records if a property value has changed (or didn't exist)
+    /// - Parameters:
+    ///   - properties: dictionary with entities as keys, and properties to update as values
+    ///   - completion: completion block
     public func update(properties: [EntityReference: PropertyDictionary], completion: @escaping () -> Void) {
         // TODO: implement this properly, so that it only creates new property entries for properties that have actually changed value
-        add(properties: properties, completion: completion)
+        let context = self.context
+        context.perform {
+            var added: Set<EntityReference> = []
+            var changed: Set<EntityReference> = []
+            var keys: Set<PropertyKey> = []
+            for (entityID, values) in properties {
+                if let (entity, wasCreated) = entityID.resolve(in: self) {
+                    let addedByRelationships = values.add(to: entity, store: self)
+                    if addedByRelationships.count > 0 {
+                        added.formUnion(addedByRelationships.map({ GuaranteedReference($0) }))
+                    }
+                    let reference = GuaranteedReference(entity)
+                    
+                    if wasCreated.count == 0 {
+                        changed.insert(reference)
+                        keys.formUnion(values.values.keys)
+                    } else {
+                        added.formUnion(wasCreated.map({ GuaranteedReference($0) }))
+                    }
+                }
+            }
+            
+            self.notify(action: .update, added: added, changed: changed, keys: keys)
+            completion()
+        }
     }
     
+    /// Remove some properties from some entities
+    /// - Parameters:
+    ///   - names: names of the properties to remove
+    ///   - entities: entities to remove from
+    ///   - completion: completion block
     public func remove(properties names: Set<PropertyKey>, of entities: [EntityReference], completion: @escaping () -> Void) {
         let context = self.context
         context.perform {
@@ -363,15 +481,44 @@ public class Datastore {
                     changed.insert(reference)
                 }
             }
-
+            
             self.notify(action: .remove, changed: changed, keys: names)
             completion()
         }
     }
     
-    internal func notify(action: EntityChanges.Action, added: Set<EntityReference> = [], removed: Set<EntityReference> = [], changed: Set<EntityReference> = [], keys: Set<PropertyKey> = []) {
-        if (added.count > 0) || (removed.count > 0) || (changed.count > 0) {
-            let changes = EntityChanges(action: action, added: added, removed: removed, changed: changed, keys: keys)
+    /// Remove some entities
+    /// - Parameters:
+    ///   - entities: the entities to remove
+    ///   - completion: completion block
+    public func delete(entities: [EntityReference], completion: @escaping () -> Void) {
+        let context = self.context
+        context.perform {
+            var added: Set<EntityReference> = []
+            var deleted: Set<EntityReference> = []
+            for entityID in entities {
+                if let (entity, wasCreated) = entityID.resolve(in: self) {
+                    
+                    // in theory, resolving the reference to an entity that we want to delete
+                    // could actually create it, or other entities referenced by it
+                    if wasCreated.count > 0 {
+                        added.formUnion(wasCreated.map({ GuaranteedReference($0) }))
+                        datastoreChannel.log("created objects during deletion - probably a mistake: \(added)")
+                    }
+
+                    deleted.insert(entityID)
+                    context.delete(entity)
+                }
+            }
+            
+            self.notify(action: .delete, deleted: deleted)
+            completion()
+        }
+    }
+    
+    internal func notify(action: EntityChanges.Action, added: Set<EntityReference> = [], deleted: Set<EntityReference> = [], changed: Set<EntityReference> = [], keys: Set<PropertyKey> = []) {
+        if (added.count > 0) || (deleted.count > 0) || (changed.count > 0) {
+            let changes = EntityChanges(action: action, added: added, deleted: deleted, changed: changed, keys: keys)
             let notification = Notification(name: .EntityChangedNotification, object: self, userInfo: ["changes": changes])
             NotificationCenter.default.post(notification)
         }

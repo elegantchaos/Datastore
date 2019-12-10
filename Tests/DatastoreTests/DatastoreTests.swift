@@ -488,7 +488,7 @@ class DatastoreTests: DatastoreTestCase {
         wait(for: [done], timeout: 1.0)
     }
     
-    func testDeletion() {
+    func testPropertyDeletion() {
         // test deleting a property
         let done = expectation(description: "done")
         loadJSON(name: "Deletion", expectation: done) { store in
@@ -510,7 +510,24 @@ class DatastoreTests: DatastoreTestCase {
         }
         wait(for: [done], timeout: 1.0)
     }
-    
+
+    func testEntityDeletion() {
+        // test deleting an entity
+        let done = expectation(description: "done")
+        loadJSON(name: "Deletion", expectation: done) { store in
+            store.get(entitiesOfType: .test, where: "name", contains: ["Test1"]) { (entities) in
+                store.delete(entities: entities) {
+                    store.count(entitiesOfTypes: [.test]) { counts in
+                        // there were two test entities in the JSON file, should now be just one
+                        XCTAssertEqual(counts[0], 1)
+                        done.fulfill()
+                    }
+                }
+            }
+        }
+        wait(for: [done], timeout: 1.0)
+    }
+
     func testCountEntities() {
         let done = expectation(description: "done")
         loadJSON(name: "Relationships", expectation: done) { store in
@@ -540,7 +557,7 @@ class DatastoreTests: DatastoreTestCase {
                 
                 XCTAssertEqual(changes?.action, .add)
                 XCTAssertTrue(changes!.added.contains(person))
-                XCTAssertEqual(changes!.removed.count, 0)
+                XCTAssertEqual(changes!.deleted.count, 0)
 
                 // entities that are created during an add call don't contribute to the changed/keys sets, so they should be empty
                 XCTAssertEqual(changes!.changed.count, 0)
@@ -598,7 +615,7 @@ class DatastoreTests: DatastoreTestCase {
                 
                 XCTAssertEqual(changes?.action, .get)
                 XCTAssertTrue(changes!.added.contains(person))
-                XCTAssertEqual(changes!.removed.count, 0)
+                XCTAssertEqual(changes!.deleted.count, 0)
                 XCTAssertEqual(changes!.changed.count, 0)
                 XCTAssertEqual(changes!.keys.count, 0)
                 NotificationCenter.default.removeObserver(token!)
@@ -615,7 +632,7 @@ class DatastoreTests: DatastoreTestCase {
                     
                     XCTAssertEqual(changes?.action, .add)
                     XCTAssertEqual(changes!.added.count, 0)
-                    XCTAssertEqual(changes!.removed.count, 0)
+                    XCTAssertEqual(changes!.deleted.count, 0)
                     XCTAssertTrue(changes!.changed.contains(person))
                     XCTAssertEqual(changes!.keys.count, 7)
                     NotificationCenter.default.removeObserver(token!)
@@ -632,7 +649,7 @@ class DatastoreTests: DatastoreTestCase {
                         
                         XCTAssertEqual(changes?.action, .remove)
                         XCTAssertEqual(changes!.added.count, 0)
-                        XCTAssertEqual(changes!.removed.count, 0)
+                        XCTAssertEqual(changes!.deleted.count, 0)
                         XCTAssertTrue(changes!.changed.contains(person))
                         XCTAssertTrue(changes!.keys.contains(.name))
                         NotificationCenter.default.removeObserver(token!)
