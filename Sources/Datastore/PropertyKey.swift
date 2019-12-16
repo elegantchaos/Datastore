@@ -35,12 +35,12 @@ public struct PropertyKey: Equatable, Hashable, ExpressibleByStringLiteral {
         self.reference = nil
     }
 
-    public func resolve(in store: Datastore) -> PropertyKey {
-        guard let (entity, _) = reference?.resolve(in: store), let identifier = entity.identifier else{
-            return self
+    public func resolve(in store: Datastore) -> (PropertyKey, [EntityRecord]) {
+        guard let (entity, created) = reference?.resolve(in: store), let identifier = entity.identifier else{
+            return (self, [])
         }
         
-        return PropertyKey("\(value)-\(identifier)")
+        return (PropertyKey("\(value)-\(identifier)"), created)
         
         // TODO: could we extract the resolve capabilities into a seperate protocol, so that most keys don't need the reference property?
     }

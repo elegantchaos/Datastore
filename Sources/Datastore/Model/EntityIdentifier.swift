@@ -270,6 +270,18 @@ public class GuaranteedReference: EntityReference {
 /// Constructs entity references from various patterns.
 
 public struct Entity {
+    public static func createAs(_ type: EntityType) -> EntityReference { // TODO: add test
+        let newIdentifier = UUID().uuidString // TODO: can we just pass an empty matcher list to always make a new entity?
+        let searchers = [MatchByIdentifier(identifier: newIdentifier)]
+        return EntityReference(MatchedID(matchers: searchers, initialiser: EntityInitialiser(as: type)))
+    }
+
+    public static func createWith(_ initialiser: EntityInitialiser) -> EntityReference { // TODO: add test
+        let newIdentifier = UUID().uuidString // TODO: can we just pass an empty matcher list to always make a new entity?
+        let searchers = [MatchByIdentifier(identifier: newIdentifier)]
+        return EntityReference(MatchedID(matchers: searchers, initialiser: initialiser))
+    }
+
     public static func identifiedBy(_ identifier: String, initialiser: EntityInitialiser) -> EntityReference {
         let searchers = [MatchByIdentifier(identifier: identifier)]
         return EntityReference(MatchedID(matchers: searchers, initialiser: initialiser))

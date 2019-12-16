@@ -42,7 +42,8 @@ public class EntityRecord: NSManagedObject {
     func add(property key: Key, value: PropertyValue, store: Datastore) -> [EntityRecord] {
         assert(managedObjectContext == store.context)
         
-        let property = key.resolve(in: store)
+        let (property, createdByKey) = key.resolve(in: store)
+        
         switch value.value {
             case let string as String:
                 add(string, key: property, type: value.type, store: store)
@@ -89,13 +90,13 @@ public class EntityRecord: NSManagedObject {
             case let entity as EntityReference:
                 if let (resolved, created) = entity.resolve(in: store) {
                     add(resolved, key: property, type: value.type, store: store)
-                    return created
+                    return created + createdByKey
             }
             
             case let entity as GuaranteedReference:
                 if let (resolved, created) = entity.resolve(in: store) {
                     add(resolved, key: property, type: value.type, store: store)
-                    return created
+                    return created + createdByKey
             }
             
             default:

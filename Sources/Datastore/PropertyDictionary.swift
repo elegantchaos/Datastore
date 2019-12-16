@@ -12,10 +12,12 @@ import Foundation
 public struct PropertyDictionary {
     public typealias Key = PropertyKey
     public typealias Value = PropertyValue
+    public typealias Values = [Key:Value]
     
-    var values: [Key:Value] = [:]
+    var values: Values = [:]
 
     public var count: Int { return values.count }
+    public var keys: Values.Keys { return values.keys }
     
     public init() {
     }
