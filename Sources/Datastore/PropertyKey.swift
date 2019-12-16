@@ -5,11 +5,6 @@
 
 import Foundation
 
-//public protocol PropertyKey: Equatable, Hashable,  {
-//    var value: String { get }
-//    func resolve(in store: Datastore) -> PropertyKey
-//}
-//
 public struct PropertyKey: Equatable, Hashable, ExpressibleByStringLiteral {
     public let value: String
     public let reference: EntityReference?
@@ -46,37 +41,10 @@ public struct PropertyKey: Equatable, Hashable, ExpressibleByStringLiteral {
         }
         
         return PropertyKey("\(value)-\(identifier)")
+        
+        // TODO: could we extract the resolve capabilities into a seperate protocol, so that most keys don't need the reference property?
     }
 }
-//
-//extension PropertyKey: ExpressibleByStringLiteral {
-//
-//}
-
-//
-//public protocol ResolvablePropertyKey {
-//    func resolve(in store: Datastore) -> PropertyKey
-//}
-//
-//extension PropertyKey: ResolvablePropertyKey {
-//    public func resolve(in store: Datastore) -> PropertyKey {
-//        return self
-//    }
-//}
-//
-//public struct ReferenceKey: PropertyKey {
-//    public let name: String
-//    public let reference: EntityReference? = nil
-//
-//    public func resolve(in store: Datastore) -> PropertyKey {
-//        guard let (entity, _) = reference?.resolve(in: store), let identifier = entity.identifier else{
-//            return PropertyKey(name)
-//        }
-//
-//        return PropertyKey("\(name)-\(identifier)")
-//    }
-//
-//}
 
 // MARK: - Standard Keys
 
@@ -86,4 +54,18 @@ public extension PropertyKey {
     static let identifier: Self = "identifier"
     static let name: Self = "name"
     static let type: Self = "type"
+}
+
+// MARK: - Debugging
+
+extension PropertyKey: CustomStringConvertible {
+    public var description: String {
+        if let reference = reference {
+            return "\(value-) (resolving: \(reference)"
+        } else {
+            return value
+        }
+    }
+    
+    
 }

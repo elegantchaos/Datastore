@@ -388,6 +388,7 @@ class DatastoreTests: DatastoreTestCase {
                 datastore.get(allPropertiesOf: [person]) { (results) in
                     XCTAssertEqual(results.count, 1)
                     let properties = results[0]
+                    print(properties)
                     XCTAssertEqual(properties["author-test-book"] as? GuaranteedReference, book)
                     done.fulfill()
                 }
