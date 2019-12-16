@@ -22,11 +22,11 @@ public struct EntityChanges {
         case delete
     }
     
-    let action: Action
-    let added: Set<EntityReference>
-    let deleted: Set<EntityReference>
-    let changed: Set<EntityReference>
-    let keys: Set<PropertyKey>
+    public let action: Action
+    public let added: Set<EntityReference>
+    public let deleted: Set<EntityReference>
+    public let changed: Set<EntityReference>
+    public let keys: Set<PropertyKey>
 }
 
 
@@ -257,7 +257,7 @@ public class Datastore {
                     entity.type = type.name
                     let property = StringProperty(in: context)
                     property.owner = entity
-                    property.name = key.name
+                    property.name = key.value
                     property.value = name
                     let reference = GuaranteedReference(entity)
                     result.append(reference)
@@ -329,7 +329,7 @@ public class Datastore {
     ///   - entities: the entities to retrieve properties for
     ///   - completion: completion block
     public func get(properties names: Set<PropertyKey>, of entities: [EntityReference], completion: @escaping ([PropertyDictionary]) -> Void) {
-        get(properties: Set(names.map({ $0.name })), of: entities, completion: completion)
+        get(properties: Set(names.map({ $0.value })), of: entities, completion: completion)
     }
     
     /// Get specific property values for a group of entities
@@ -465,7 +465,7 @@ public class Datastore {
         context.perform {
             var added: Set<EntityReference> = []
             var changed: Set<EntityReference> = []
-            let propertyNames = Set<String>(names.map({ $0.name }))
+            let propertyNames = Set<String>(names.map({ $0.value }))
             for entityID in entities {
                 if let (entity, wasCreated) = entityID.resolve(in: self) {
                     entity.remove(properties: propertyNames, store: self)

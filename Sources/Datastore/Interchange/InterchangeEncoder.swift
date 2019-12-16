@@ -33,8 +33,8 @@ public extension InterchangeEncoder {
     }
 
     func encode(type: String?, datestamp: Date?, into record: inout [String:Any]) {
-        record[PropertyKey.type.name] = type
-        record[PropertyKey.datestamp.name] = encodePrimitive(datestamp)
+        record[PropertyKey.type.value] = type
+        record[PropertyKey.datestamp.value] = encodePrimitive(datestamp)
     }
     
     func encode(_ date: DateProperty, into record: inout [String:Any]) {

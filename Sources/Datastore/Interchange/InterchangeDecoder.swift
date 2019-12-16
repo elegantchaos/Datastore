@@ -28,7 +28,7 @@ public extension InterchangeDecoder {
     func decode(_ value: Any?, store: Datastore) -> PropertyValue {
         var decoded: PropertyValue? = nil
         if let record = value as? [String:Any] {
-            let typeName = record[PropertyKey.type.name] as? String
+            let typeName = record[PropertyKey.type.value] as? String
             let type = PropertyType(typeName)
             if let string = record[PropertyType.string.name] {
                 decoded = decode(string: string, type: type, store: store)

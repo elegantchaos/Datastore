@@ -39,9 +39,10 @@ public class EntityRecord: NSManagedObject {
     ///   - property: the property to add
     ///   - value: the property value
     ///   - store: the store to add to
-    func add(property: Key, value: PropertyValue, store: Datastore) -> [EntityRecord] {
+    func add(property key: Key, value: PropertyValue, store: Datastore) -> [EntityRecord] {
         assert(managedObjectContext == store.context)
         
+        let property = key.resolve(in: store)
         switch value.value {
             case let string as String:
                 add(string, key: property, type: value.type, store: store)
@@ -152,13 +153,13 @@ public class EntityRecord: NSManagedObject {
         assert(managedObjectContext == store.context)
         
         var values = PropertyDictionary()
-        if names.contains(PropertyKey.datestamp.name) {
+        if names.contains(PropertyKey.datestamp.value) {
             values[valueWithKey: .datestamp] = PropertyValue(datestamp, type: .date)
         }
-        if names.contains(PropertyKey.identifier.name) {
+        if names.contains(PropertyKey.identifier.value) {
             values[valueWithKey: .identifier] = PropertyValue(identifier, type: .identifier)
         }
-        if names.contains(PropertyKey.type.name) {
+        if names.contains(PropertyKey.type.value) {
             values[valueWithKey: .type] = PropertyValue(type, type: .entity)
         }
         
@@ -188,7 +189,7 @@ public class EntityRecord: NSManagedObject {
     
     func string(withKey key: Key) -> String? {
         if let strings = strings as? Set<StringProperty> {
-            let names = strings.filter({ $0.name == key.name })
+            let names = strings.filter({ $0.name == key.value })
             let sorted = names.sorted(by: {$0.datestamp > $1.datestamp })
             return sorted.first?.value
         }
@@ -215,7 +216,7 @@ public class EntityRecord: NSManagedObject {
         }
         
         let property = R(context: context)
-        property.name = key.name
+        property.name = key.value
         property.owner = self
         property.typeName = type.name
         return property

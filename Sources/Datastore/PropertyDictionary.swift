@@ -74,10 +74,10 @@ public struct PropertyDictionary {
 
 extension PropertyDictionary: CustomStringConvertible {
     public var description: String {
-        let sortedKeys = values.keys.sorted(by: { return $0.name < $1.name })
+        let sortedKeys = values.keys.sorted(by: { return $0.value < $1.value })
         var string = ""
         for key in sortedKeys {
-            string += "\n\(key.name):"
+            string += "\n\(key.value):"
             if let value = self[key] {
                 string += " \(value)"
             }
