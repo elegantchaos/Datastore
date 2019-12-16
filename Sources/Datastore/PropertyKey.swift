@@ -61,7 +61,7 @@ public extension PropertyKey {
 extension PropertyKey: CustomStringConvertible {
     public var description: String {
         if let reference = reference {
-            return "\(value-) (resolving: \(reference)"
+            return "\(value)- (resolving: \(reference)"
         } else {
             return value
         }
