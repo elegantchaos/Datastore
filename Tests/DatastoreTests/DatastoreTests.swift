@@ -375,20 +375,20 @@ class DatastoreTests: DatastoreTestCase {
         // (the key for the property is generated on demand, incorporating the identifier of the entity being referred to)
         let done = expectation(description: "loaded")
         loadAndCheck { (datastore) in
-            let book = Entity.named("Book 1", createAs: .book)
-            let person = Entity.named("Person 1",
-                                      initialiser: EntityInitialiser(
+            let book = Entity.identifiedBy("test-book", createAs: .book)
+            let person = Entity.named("Test Person", initialiser: EntityInitialiser(
                                         as: .person,
-                                        properties: [PropertyKey(reference: book, name: "author"): book],
-                                        identifier: "test-book")
-                                    )
+                                        properties: [PropertyKey(reference: book, name: "author"): book])
+            )
+             
+            
             datastore.get(entity: person) { result in
                 XCTAssertNotNil(result)
                 let person = result!
                 datastore.get(allPropertiesOf: [person]) { (results) in
                     XCTAssertEqual(results.count, 1)
                     let properties = results[0]
-                    print(properties.values.keys)
+                    XCTAssertEqual(properties["author-test-book"] as? GuaranteedReference, book)
                     done.fulfill()
                 }
             }
