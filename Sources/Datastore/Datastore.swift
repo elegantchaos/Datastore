@@ -190,7 +190,7 @@ public class Datastore {
     /// - Parameters:
     ///   - entityIDs: entities to look for
     ///   - completion: completion block
-    public func get(entitiesWithIDs entityIDs: [EntityReference], completion: @escaping EntitiesCompletion) {
+    public func get(entitiesWithIDs entityIDs: [EntityReferenceProtocol], completion: @escaping EntitiesCompletion) {
         let context = self.context
         var added: Set<EntityReference> = []
         context.perform {
@@ -328,7 +328,7 @@ public class Datastore {
     ///   - keys: the property keys to retrieve
     ///   - entities: the entities to retrieve properties for
     ///   - completion: completion block
-    public func get(properties names: Set<PropertyKey>, of entities: [EntityReference], completion: @escaping ([PropertyDictionary]) -> Void) {
+    public func get(properties names: Set<PropertyKey>, of entities: [EntityReference], completion: @escaping ([EntityReference]) -> Void) {
         get(properties: Set(names.map({ $0.value })), of: entities, completion: completion)
     }
     
@@ -337,22 +337,21 @@ public class Datastore {
     ///   - keys: names of the properties to retrieve
     ///   - entities: the entities to retrieve properties for
     ///   - completion: completion block
-    public func get(properties names: Set<String>, of entities: [EntityReference], completion: @escaping ([PropertyDictionary]) -> Void) {
+    public func get(properties names: Set<String>, of entities: [EntityReference], completion: @escaping ([EntityReference]) -> Void) {
         let context = self.context
         context.perform {
             var added: Set<EntityReference> = []
-            var result: [PropertyDictionary] = []
+            var result: [EntityReference] = []
             for entityID in entities {
-                let values: PropertyDictionary
                 if let (entity, wasCreated) = entityID.resolve(in: self) {
-                    values = entity.read(properties: names, store: self)
+                    let values = entity.read(properties: names, store: self)
                     if wasCreated.count > 0 {
                         added.formUnion(wasCreated.map({ GuaranteedReference($0) }))
                     }
+                    result.append(GuaranteedReference(entity, properties: values))
                 } else {
-                    values = PropertyDictionary()
+                    result.append(entityID)
                 }
-                result.append(values)
             }
             
             self.notify(action: .get, added: added)
@@ -393,14 +392,15 @@ public class Datastore {
     /// - Parameters:
     ///   - properties: dictionary with entities as keys, and properties to update as values
     ///   - completion: completion block
-    public func add(properties: [EntityReference: PropertyDictionary], completion: @escaping () -> Void) {
+    public func add(properties: [EntityReference], completion: @escaping () -> Void) {
         let context = self.context
         context.perform {
             var added: Set<EntityReference> = []
             var changed: Set<EntityReference> = []
             var keys: Set<PropertyKey> = []
-            for (entityID, values) in properties {
+            for entityID in properties {
                 if let (entity, wasCreated) = entityID.resolve(in: self) {
+                    let values = entityID.updates ?? PropertyDictionary()
                     let addedByRelationships = values.add(to: entity, store: self)
                     if addedByRelationships.count > 0 {
                         added.formUnion(addedByRelationships.map({ GuaranteedReference($0) }))
@@ -426,15 +426,16 @@ public class Datastore {
     /// - Parameters:
     ///   - properties: dictionary with entities as keys, and properties to update as values
     ///   - completion: completion block
-    public func update(properties: [EntityReference: PropertyDictionary], completion: @escaping () -> Void) {
+    public func update(properties: [EntityReference], completion: @escaping () -> Void) {
         // TODO: implement this properly, so that it only creates new property entries for properties that have actually changed value
         let context = self.context
         context.perform {
             var added: Set<EntityReference> = []
             var changed: Set<EntityReference> = []
             var keys: Set<PropertyKey> = []
-            for (entityID, values) in properties {
+            for entityID in properties {
                 if let (entity, wasCreated) = entityID.resolve(in: self) {
+                    let values = entityID.updates ?? PropertyDictionary()
                     let addedByRelationships = values.add(to: entity, store: self)
                     if addedByRelationships.count > 0 {
                         added.formUnion(addedByRelationships.map({ GuaranteedReference($0) }))

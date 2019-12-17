@@ -213,15 +213,21 @@ internal struct MatchedID: ResolvableID {
     }
 }
 
+public protocol EntityReferenceProtocol {
+    func resolve(in store: Datastore) -> (EntityRecord, [EntityRecord])?
+}
+
 /// A reference to an entity in a store.
 /// The reference can be passed around safely in any context/thread
 /// It contains enough information to be resolved into a real `EntityRecord` by a store.
 /// In some cases, resolving the reference may actually create a new entity.
-public class EntityReference: Equatable, Hashable {
+public class EntityReference: Equatable, Hashable, EntityReferenceProtocol {
     var id: ResolvableID
-
-    init(_ id: ResolvableID) {
+    var updates: PropertyDictionary?
+    
+    init(_ id: ResolvableID, updates: PropertyDictionary? = nil) {
         self.id = id
+        self.updates = updates
     }
     
     public static func == (lhs: EntityReference, rhs: EntityReference) -> Bool {
@@ -232,7 +238,7 @@ public class EntityReference: Equatable, Hashable {
         id.hash(into: &hasher)
     }
 
-    func resolve(in store: Datastore) -> (EntityRecord, [EntityRecord])? {
+    public func resolve(in store: Datastore) -> (EntityRecord, [EntityRecord])? {
         if let (resolved, created) = id.resolve(in: store) {
             id = resolved
             if let object = id.object {
@@ -246,24 +252,100 @@ public class EntityReference: Equatable, Hashable {
             return nil
         }
     }
+
+    func makeUpdates() {
+        if updates == nil {
+            self.updates = PropertyDictionary()
+        }
+    }
+    
+    public func addUpdates(_ properties: PropertyDictionary) {
+        self.updates = properties // TODO: should we merge with existing?
+    }
+    
+    public subscript(_ key: PropertyKey) -> Any? {
+        get { return updates?[key] }
+        set {
+            makeUpdates()
+            updates?[key] = newValue
+        }
+    }
+    
+    public subscript(_ key: PropertyKey, as type: PropertyType) -> Any? {
+        get { return updates?[key, as: type] }
+        set {
+            makeUpdates()
+            updates?[key, as: type] = newValue
+        }
+    }
+    
+    public subscript(typeWithKey key: PropertyKey) -> PropertyType? {
+        get { return updates?[typeWithKey: key] }
+    }
+
+    public subscript(datestampWithKey key: PropertyKey) -> Date? {
+        get { return updates?[datestampWithKey: key] }
+    }
+    
+    public subscript(valueWithKey key: PropertyKey) -> PropertyValue? {
+        get { return updates?[valueWithKey: key] }
+        set {
+            makeUpdates()
+            updates?[valueWithKey: key] = newValue
+        }
+    }
+    
+    public var count: Int { return 0 }
+    public var keys: [PropertyKey] { return [] }
+
 }
 
-/// An Entity is an `EntityReference` that is guaranteed to back an existing entity.
+/// A `GuaranteedReference` is an `EntityReference` that is guaranteed to back an existing entity.
 /// Internally it already has a resolved object pointer.
 /// It also keeps a copy of the object's `identifier` and `type` which are publically
 /// accessible and can be safely read from any thread/context.
 public class GuaranteedReference: EntityReference {
     public let identifier: String
     public let type: EntityType
-    init(_ object: EntityRecord) {
+    public let properties: PropertyDictionary?
+    
+    init(_ object: EntityRecord, properties: PropertyDictionary? = nil) {
         self.identifier = object.identifier!
         self.type = EntityType(object.type!)
+        self.properties = properties
         super.init(OpaqueCachedID(object))
     }
 
     internal var object: EntityRecord {
         return id.object!
     }
+
+    override public subscript(_ key: PropertyKey) -> Any? {
+        get { return properties?[key] }
+        set { super[key] = newValue }
+    }
+    
+    override public subscript(_ key: PropertyKey, as type: PropertyType) -> Any? {
+        get { return properties?[key, as: type] }
+        set { super[key, as: type] = newValue }
+    }
+    
+    override public subscript(typeWithKey key: PropertyKey) -> PropertyType? {
+        get { return properties?[typeWithKey: key] }
+    }
+
+    override public subscript(datestampWithKey key: PropertyKey) -> Date? {
+        get { return properties?[datestampWithKey: key] }
+    }
+    
+    override public subscript(valueWithKey key: PropertyKey) -> PropertyValue? {
+        get { return properties?[valueWithKey: key] }
+        set { super[valueWithKey: key] = newValue }
+    }
+    
+    override public var count: Int { return properties?.count ?? 0 }
+    
+    override public var keys: [PropertyKey] { return properties == nil ? [] : Array(properties!.keys) }
 }
 
 /// Public entity reference API.

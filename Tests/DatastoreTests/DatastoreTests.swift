@@ -351,7 +351,8 @@ class DatastoreTests: DatastoreTestCase {
                 let person = result!
                 let now = Date()
                 // then add things to it
-                datastore.add(properties: [person: self.exampleProperties(date: now, owner: person, in: datastore)]) { () in
+                person.addUpdates(self.exampleProperties(date: now, owner: person, in: datastore))
+                datastore.add(properties: [person]) { () in
                     datastore.get(properties : ["address", "date", "integer", "double", "owner", "boolean", "data"], of: [person]) { (results) in
                         XCTAssertEqual(results.count, 1)
                         let properties = results[0]
@@ -402,7 +403,8 @@ class DatastoreTests: DatastoreTestCase {
         loadAndCheck { (datastore) in
             let person = Entity.named("Somebody New", createAs: .person)
             let now = Date()
-            datastore.add(properties: [person: self.exampleProperties(date: now, owner: person, in: datastore)]) { () in
+            person.addUpdates(self.exampleProperties(date: now, owner: person, in: datastore))
+            datastore.add(properties: [person]) { () in
                 datastore.get(properties : ["name", "address", "date", "integer", "double", "owner"], of: [person]) { (results) in
                     XCTAssertEqual(results.count, 1)
                     let properties = results[0]
@@ -438,7 +440,8 @@ class DatastoreTests: DatastoreTestCase {
             let names = Set<String>(["Person 1", "Person 2"])
             datastore.get(entitiesOfType: .person, where: "name", contains: names) { (people) in
                 let person = people[0]
-                datastore.add(properties: [person: self.exampleProperties(owner: people[1], in: datastore)]) { () in
+                person.addUpdates(self.exampleProperties(owner: people[1], in: datastore))
+                datastore.add(properties: [person]) { () in
                     datastore.encodeInterchange() { interchange in
                         self.checkInterchangeDictionary(interchange, names: names)
                         
@@ -457,7 +460,8 @@ class DatastoreTests: DatastoreTestCase {
             let names = Set<String>(["Person 1", "Person 2"])
             datastore.get(entitiesOfType: .person, where: "name", contains: names) { (people) in
                 let person = people[0]
-                datastore.add(properties: [person: self.exampleProperties(owner: people[1], in: datastore)]) { () in
+                person.addUpdates(self.exampleProperties(owner: people[1], in: datastore))
+                datastore.add(properties: [person]) { () in
                     datastore.encodeJSON() { json in
                         // convert it back from json to a dictionary
                         let interchange = (try! JSONSerialization.jsonObject(with: json.data(using: .utf8)!, options: [])) as! [String:Any]
@@ -481,9 +485,8 @@ class DatastoreTests: DatastoreTestCase {
                     return
                 }
                 
-                var properties = PropertyDictionary()
-                properties["name"] = "New Name"
-                datastore.add(properties: [person : properties]) {
+                person["name"] = "New Name"
+                datastore.add(properties: [person]) {
                     XCTAssertEqual(person.object.string(withKey: .name), "New Name")
                     created.fulfill()
                 }
@@ -499,8 +502,10 @@ class DatastoreTests: DatastoreTestCase {
             datastore.get(entitiesOfType: .test, where: "name", contains: ["test"]) { (entities) in
                 XCTAssertEqual(entities.count, 1)
                 let entity = entities[0]
-                datastore.add(properties: [entity: PropertyDictionary(["thing": "foo"])]) { () in
-                    datastore.add(properties: [entity: PropertyDictionary(["thing": "bar"])]) { () in
+                entity.addUpdates(PropertyDictionary(["thing": "foo"]))
+                datastore.add(properties: [entity]) { () in
+                    entity["thing"] = "bar"
+                    datastore.add(properties: [entity]) { () in
                         datastore.get(properties : ["thing"], of: [entity]) { (results) in
                             XCTAssertEqual(results.count, 1)
                             let properties = results[0]
@@ -591,7 +596,8 @@ class DatastoreTests: DatastoreTestCase {
                 NotificationCenter.default.removeObserver(token!)
                 notified.fulfill()
             }
-            datastore.add(properties: [person: self.exampleProperties(date: Date(), owner: person, in: datastore)]) { () in
+            person.addUpdates(self.exampleProperties(date: Date(), owner: person, in: datastore))
+            datastore.add(properties: [person]) { () in
                 done.fulfill()
             }
         }
@@ -618,7 +624,8 @@ class DatastoreTests: DatastoreTestCase {
                 notified.fulfill()
                 NotificationCenter.default.removeObserver(token!)
             }
-            datastore.add(properties: [person: self.exampleProperties(date: Date(), owner: person, in: datastore)]) {
+            person.addUpdates(self.exampleProperties(date: Date(), owner: person, in: datastore))
+            datastore.add(properties: [person]) {
                 done.fulfill()
             }
         }
@@ -665,7 +672,8 @@ class DatastoreTests: DatastoreTestCase {
                     secondNotification.fulfill()
                 }
                 
-                datastore.add(properties: [person: self.exampleProperties(date: Date(), owner: person, in: datastore)]) {
+                person.addUpdates(self.exampleProperties(date: Date(), owner: person, in: datastore))
+                datastore.add(properties: [person]) {
                     self.wait(for: [secondNotification], timeout: 1.0)
 
                     var token: NSObjectProtocol?
