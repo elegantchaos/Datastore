@@ -28,8 +28,9 @@ class PropertyKeyTests: DatastoreTestCase {
         let key = PropertyKey("test")
         let loaded = expectation(description: "loaded")
         loadAndCheck { (datastore) in
-            let resolved = key.resolve(in: datastore)
+            let (resolved, created) = key.resolve(in: datastore)
             XCTAssertEqual(resolved.value, "test")
+            XCTAssertEqual(created, [])
             loaded.fulfill()
         }
         wait(for: [loaded], timeout: 1.0)
@@ -40,8 +41,9 @@ class PropertyKeyTests: DatastoreTestCase {
         let key = PropertyKey(reference: person, name: "test")
         let loaded = expectation(description: "loaded")
         loadAndCheck { (datastore) in
-            let resolved = key.resolve(in: datastore)
+            let (resolved, created) = key.resolve(in: datastore)
             XCTAssertEqual(resolved.value, "test-some-id")
+            XCTAssertEqual(created.first?.identifier, "some-id")
             loaded.fulfill()
         }
         wait(for: [loaded], timeout: 1.0)
