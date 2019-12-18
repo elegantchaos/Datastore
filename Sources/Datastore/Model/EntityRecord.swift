@@ -93,12 +93,6 @@ public class EntityRecord: NSManagedObject {
                     return created + createdByKey
             }
             
-            case let entity as GuaranteedReference:
-                if let (resolved, created) = entity.resolve(in: store) {
-                    add(resolved, key: property, type: value.type, store: store)
-                    return created + createdByKey
-            }
-            
             default:
                 let unknown = Swift.type(of: value.value)
                 print("unknown value type \(unknown) \(String(describing: value.value))")
@@ -241,7 +235,7 @@ public class EntityRecord: NSManagedObject {
             for property in sorted {
                 let name = property.name
                 if remaining.contains(name) {
-                    let value = property.propertyValue
+                    let value = property.propertyValue(for: store)
                     assert(value.type != nil)
                     values[valueWithKey: Key(name)] = value
                     remaining.remove(name)
@@ -259,7 +253,7 @@ public class EntityRecord: NSManagedObject {
             for property in sorted {
                 let name = property.name
                 if !done.contains(name) {
-                    let value = property.propertyValue
+                    let value = property.propertyValue(for: store)
                     assert(value.type != nil)
                     values[valueWithKey: Key(name)] = value
                     done.insert(name)

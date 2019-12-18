@@ -8,7 +8,7 @@ import Foundation
 public class DoubleProperty: NamedProperty {
     @NSManaged public var value: Double
     
-    override var propertyValue: PropertyValue {
+    override func propertyValue(for store: Datastore) -> PropertyValue {
         return PropertyValue(value, type: type, datestamp: datestamp)
     }
 

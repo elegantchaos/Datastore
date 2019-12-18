@@ -90,18 +90,15 @@ extension PropertyDictionary: CustomStringConvertible {
 }
 
 public struct EntityInitialiser {
-    let type: EntityType
     let properties: PropertyDictionary
     let identifier: String?
     
-    public init(as type: EntityType, properties: PropertyDictionary = PropertyDictionary(), identifier: String? = nil) {
-        self.type = type
+    public init(properties: PropertyDictionary = PropertyDictionary(), identifier: String? = nil) {
         self.properties = properties
         self.identifier = identifier
     }
 
-    public init(as type: EntityType, properties: [PropertyKey:Any], identifier: String? = nil) {
-        self.type = type
+    public init(properties: [PropertyKey:Any], identifier: String? = nil) {
         self.properties = PropertyDictionary(properties)
         self.identifier = identifier
     }

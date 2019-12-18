@@ -7,9 +7,9 @@ import Foundation
 
 public class RelationshipProperty: NamedProperty {
     @NSManaged public var target: EntityRecord
-    
-    override var propertyValue: PropertyValue {
-        return PropertyValue(GuaranteedReference(target), type: type, datestamp: datestamp)
+
+    override func propertyValue(for store: Datastore) -> PropertyValue {
+        return PropertyValue(store.makeReference(for: target), type: type, datestamp: datestamp)
     }
     
     override func encode(with encoder: InterchangeEncoder, into record: inout [String:Any]) {

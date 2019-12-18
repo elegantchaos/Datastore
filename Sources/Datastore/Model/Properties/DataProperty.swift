@@ -8,7 +8,7 @@ import Foundation
 public class DataProperty: NamedProperty {
     @NSManaged public var value: Data
     
-    override var propertyValue: PropertyValue {
+    override func propertyValue(for store: Datastore) -> PropertyValue {
         return PropertyValue(value, type: type, datestamp: datestamp)
     }
 

@@ -8,7 +8,7 @@ import Foundation
 public class IntegerProperty: NamedProperty {
     @NSManaged public var value: Int64
     
-    override var propertyValue: PropertyValue {
+    override func propertyValue(for store: Datastore) -> PropertyValue {
         return PropertyValue(Int(value), type: type, datestamp: datestamp)
     }
 

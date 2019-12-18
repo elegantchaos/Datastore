@@ -9,7 +9,7 @@ import Foundation
 public class DateProperty: NamedProperty {
     @NSManaged public var value: Date
     
-    override var propertyValue: PropertyValue {
+    override func propertyValue(for store: Datastore) -> PropertyValue {
         return PropertyValue(value, type: type, datestamp: datestamp)
     }
 

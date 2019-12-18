@@ -37,14 +37,15 @@ public class Datastore {
     internal let container: NSPersistentContainer
     internal let context: NSManagedObjectContext
     internal let indexer: NSCoreDataCoreSpotlightDelegate?
+    internal var typeMap: [EntityType:EntityReference.Type]
     
     public typealias LoadResult = Result<Datastore, Error>
     public typealias SaveResult = Result<Void, Error>
     
     public typealias LoadCompletion = (LoadResult) -> Void
     public typealias SaveCompletion = (SaveResult) -> Void
-    public typealias EntitiesCompletion = ([GuaranteedReference]) -> Void
-    public typealias EntityCompletion = (GuaranteedReference?) -> Void
+    public typealias EntitiesCompletion = ([EntityReference]) -> Void
+    public typealias EntityCompletion = (EntityReference?) -> Void
     public typealias InterchangeCompletion = ([String:Any]) -> Void
     public typealias CountCompletion = ([Int]) -> Void
     
@@ -152,6 +153,7 @@ public class Datastore {
         self.container = container
         self.context = container.newBackgroundContext()
         self.indexer = indexer
+        self.typeMap = [:]
     }
     
     /// Save any outstanding changes to the store
@@ -173,6 +175,21 @@ public class Datastore {
         context.processPendingChanges()
         callback(.success(self))
     }
+
+    
+    internal func makeReference(for entity: EntityRecord, properties: PropertyDictionary? = nil) -> EntityReference {
+        var classToUse = EntityReference.self
+        if let entityType = entity.type, let customType = typeMap[EntityType(entityType)] {
+            classToUse = customType
+        }
+        
+        return classToUse.init(OpaqueCachedID(entity), properties: properties)
+    }
+
+    public func register(class classToUse: EntityReference.Type, forType type: EntityType) {
+        typeMap[type] = classToUse
+    }
+    
     
     /// Get a specific entity.
     /// May create the entity if it doesn't exist and the reference has an initialiser.
@@ -194,13 +211,13 @@ public class Datastore {
         let context = self.context
         var added: Set<EntityReference> = []
         context.perform {
-            var result: [GuaranteedReference] = []
+            var result: [EntityReference] = []
             for entityID in entityIDs {
                 if let (entity, wasCreated) = entityID.resolve(in: self) {
-                    let reference = GuaranteedReference(entity)
+                    let reference = self.makeReference(for: entity)
                     result.append(reference)
                     if wasCreated.count > 0 {
-                        added.formUnion(wasCreated.map({ GuaranteedReference($0) }))
+                        added.formUnion(wasCreated.map({ self.makeReference(for: $0) }))
                     }
                 }
             }
@@ -236,7 +253,7 @@ public class Datastore {
         let context = self.context
         
         context.perform {
-            var result: [GuaranteedReference] = []
+            var result: [EntityReference] = []
             var create: Set<String> = contains
             
             let request: NSFetchRequest<EntityRecord> = EntityRecord.fetcher(in: context)
@@ -244,7 +261,7 @@ public class Datastore {
             if let entities = try? context.fetch(request) {
                 for entity in entities {
                     if let value = entity.string(withKey: key), contains.contains(value) {
-                        result.append(GuaranteedReference(entity))
+                        result.append(self.makeReference(for: entity))
                         create.remove(value)
                     }
                 }
@@ -259,7 +276,7 @@ public class Datastore {
                     property.owner = entity
                     property.name = key.value
                     property.value = name
-                    let reference = GuaranteedReference(entity)
+                    let reference = self.makeReference(for: entity)
                     result.append(reference)
                     added.insert(reference)
                 }
@@ -280,7 +297,7 @@ public class Datastore {
             let request: NSFetchRequest<EntityRecord> = EntityRecord.fetcher(in: context)
             request.predicate = NSPredicate(format: "type = %@", type.name)
             if let entities = try? context.fetch(request) {
-                completion(Array(entities.map({ GuaranteedReference($0) })))
+                completion(Array(entities.map({ self.makeReference(for: $0) })))
             } else {
                 completion([])
             }
@@ -316,7 +333,7 @@ public class Datastore {
             
             let request: NSFetchRequest<EntityRecord> = EntityRecord.fetcher(in: context)
             if let entities = try? context.fetch(request) {
-                completion(Array(entities.map({ GuaranteedReference($0) })))
+                completion(Array(entities.map({ self.makeReference(for: $0) })))
             } else {
                 completion([])
             }
@@ -346,9 +363,9 @@ public class Datastore {
                 if let (entity, wasCreated) = entityID.resolve(in: self) {
                     let values = entity.read(properties: names, store: self)
                     if wasCreated.count > 0 {
-                        added.formUnion(wasCreated.map({ GuaranteedReference($0) }))
+                        added.formUnion(wasCreated.map({ self.makeReference(for: $0) }))
                     }
-                    result.append(GuaranteedReference(entity, properties: values))
+                    result.append(self.makeReference(for: entity, properties: values))
                 } else {
                     result.append(entityID)
                 }
@@ -373,7 +390,7 @@ public class Datastore {
                 if let (entity, wasCreated) = entityID.resolve(in: self) {
                     values = entity.readAllProperties(store: self)
                     if wasCreated.count > 0 {
-                        added.formUnion(wasCreated.map({ GuaranteedReference($0) }))
+                        added.formUnion(wasCreated.map({ self.makeReference(for: $0) }))
                     }
                 } else {
                     values = PropertyDictionary()
@@ -403,15 +420,15 @@ public class Datastore {
                     let values = entityID.updates ?? PropertyDictionary()
                     let addedByRelationships = values.add(to: entity, store: self)
                     if addedByRelationships.count > 0 {
-                        added.formUnion(addedByRelationships.map({ GuaranteedReference($0) }))
+                        added.formUnion(addedByRelationships.map({ self.makeReference(for: $0) }))
                     }
-                    let reference = GuaranteedReference(entity)
+                    let reference = self.makeReference(for: entity)
                     
                     if wasCreated.count == 0 {
                         changed.insert(reference)
                         keys.formUnion(values.values.keys)
                     } else {
-                        added.formUnion(wasCreated.map({ GuaranteedReference($0) }))
+                        added.formUnion(wasCreated.map({ self.makeReference(for: $0) }))
                     }
                 }
             }
@@ -438,15 +455,15 @@ public class Datastore {
                     let values = entityID.updates ?? PropertyDictionary()
                     let addedByRelationships = values.add(to: entity, store: self)
                     if addedByRelationships.count > 0 {
-                        added.formUnion(addedByRelationships.map({ GuaranteedReference($0) }))
+                        added.formUnion(addedByRelationships.map({ self.makeReference(for:$0) }))
                     }
-                    let reference = GuaranteedReference(entity)
+                    let reference = self.makeReference(for: entity)
                     
                     if wasCreated.count == 0 {
                         changed.insert(reference)
                         keys.formUnion(values.values.keys)
                     } else {
-                        added.formUnion(wasCreated.map({ GuaranteedReference($0) }))
+                        added.formUnion(wasCreated.map({ self.makeReference(for: $0) }))
                     }
                 }
             }
@@ -474,11 +491,11 @@ public class Datastore {
                     // in theory, resolving the reference to an entity that we want to remove a property from
                     // could actually create it, or other entities referenced by it
                     if wasCreated.count > 0 {
-                        added.formUnion(wasCreated.map({ GuaranteedReference($0) }))
+                        added.formUnion(wasCreated.map({ self.makeReference(for: $0) }))
                         datastoreChannel.log("created objects during property removal - probably a mistake: \(added)")
                     }
                     
-                    let reference = GuaranteedReference(entity)
+                    let reference = self.makeReference(for: entity)
                     changed.insert(reference)
                 }
             }
@@ -503,7 +520,7 @@ public class Datastore {
                     // in theory, resolving the reference to an entity that we want to delete
                     // could actually create it, or other entities referenced by it
                     if wasCreated.count > 0 {
-                        added.formUnion(wasCreated.map({ GuaranteedReference($0) }))
+                        added.formUnion(wasCreated.map({ self.makeReference(for: $0) }))
                         datastoreChannel.log("created objects during deletion - probably a mistake: \(added)")
                     }
 

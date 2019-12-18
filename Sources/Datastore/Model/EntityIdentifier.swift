@@ -101,14 +101,16 @@ internal class MatchByValue: EntityMatcher {
 internal typealias ResolveResult = (ResolvableID, [ResolvableID])?
 
 internal protocol ResolvableID {
-    func resolve(in store: Datastore) -> ResolveResult
+    func resolve(in store: Datastore, for reference: EntityReference) -> ResolveResult
     func hash(into hasher: inout Hasher)
     func equal(to: ResolvableID) -> Bool
     var object: EntityRecord? { get }
+    var identifier: String { get }
+    var type: EntityType { get }
 }
 
 internal struct NullCachedID: ResolvableID {
-    internal func resolve(in store: Datastore) -> ResolveResult {
+    internal func resolve(in store: Datastore, for reference: EntityReference) -> ResolveResult {
         return nil
     }
     
@@ -123,18 +125,29 @@ internal struct NullCachedID: ResolvableID {
     func equal(to other: ResolvableID) -> Bool {
         return other is NullCachedID
     }
+    
+    var identifier: String {
+        return "unknown-identifier"
+    }
+    
+    var type: EntityType { return EntityType("unknown-type") }
 }
+
 
 internal struct OpaqueCachedID: ResolvableID {
     let cached: EntityRecord
     let id: NSManagedObjectID
+    let identifier: String
+    let type: EntityType
     
     internal init(_ object: EntityRecord) {
         self.cached = object
         self.id = object.objectID
+        self.identifier = object.identifier ?? "unknown-identifier"
+        self.type = EntityType(object.type ?? "unknown-type")
     }
     
-    internal func resolve(in store: Datastore) -> ResolveResult {
+    internal func resolve(in store: Datastore, for reference: EntityReference) -> ResolveResult {
         if store.context == cached.managedObjectContext {
             return nil
         } else if let object = store.context.object(with: id) as? EntityRecord {
@@ -170,7 +183,7 @@ internal struct MatchedID: ResolvableID {
         matchers.hash(into: &hasher)
     }
     
-    internal func resolve(in store: Datastore) -> ResolveResult {
+    internal func resolve(in store: Datastore, for reference: EntityReference) -> ResolveResult {
         for searcher in matchers {
             if let entity = searcher.find(in: store.context) {
                 return (OpaqueCachedID(entity), [])
@@ -179,7 +192,7 @@ internal struct MatchedID: ResolvableID {
         
         if let initialiser = initialiser {
             let entity = EntityRecord(in: store.context)
-            entity.type = initialiser.type.name
+            entity.type = reference.type.name
             if let identifier = initialiser.identifier {
                 entity.identifier = identifier
             }
@@ -211,6 +224,9 @@ internal struct MatchedID: ResolvableID {
             return false
         }
     }
+    
+    var identifier: String { return "unknown-identifier" } // TODO: try to find this from a matcher or the initial properties
+    var type: EntityType { return EntityType("unknown-type") } // TODO: try to find this from a matcher or the initial properties
 }
 
 public protocol EntityReferenceProtocol {
@@ -224,10 +240,15 @@ public protocol EntityReferenceProtocol {
 public class EntityReference: Equatable, Hashable, EntityReferenceProtocol {
     var id: ResolvableID
     var updates: PropertyDictionary?
+    public var identifier: String { id.identifier }
+    public var type: EntityType { id.type }
     
-    init(_ id: ResolvableID, updates: PropertyDictionary? = nil) {
+    public let properties: PropertyDictionary?
+    
+    required init(_ id: ResolvableID, properties: PropertyDictionary? = nil, updates: PropertyDictionary? = nil) {
         self.id = id
         self.updates = updates
+        self.properties = properties
     }
     
     public static func == (lhs: EntityReference, rhs: EntityReference) -> Bool {
@@ -239,7 +260,7 @@ public class EntityReference: Equatable, Hashable, EntityReferenceProtocol {
     }
 
     public func resolve(in store: Datastore) -> (EntityRecord, [EntityRecord])? {
-        if let (resolved, created) = id.resolve(in: store) {
+        if let (resolved, created) = id.resolve(in: store, for: self) {
             id = resolved
             if let object = id.object {
                 return (object, created.compactMap({ $0.object }))
@@ -264,7 +285,11 @@ public class EntityReference: Equatable, Hashable, EntityReferenceProtocol {
     }
     
     public subscript(_ key: PropertyKey) -> Any? {
-        get { return updates?[key] }
+
+        get {
+            return updates?[key] ?? properties?[key]
+        }
+        
         set {
             makeUpdates()
             updates?[key] = newValue
@@ -272,7 +297,10 @@ public class EntityReference: Equatable, Hashable, EntityReferenceProtocol {
     }
     
     public subscript(_ key: PropertyKey, as type: PropertyType) -> Any? {
-        get { return updates?[key, as: type] }
+        get {
+            return updates?[key, as: type] ?? properties?[key, as: type]
+        }
+        
         set {
             makeUpdates()
             updates?[key, as: type] = newValue
@@ -280,72 +308,77 @@ public class EntityReference: Equatable, Hashable, EntityReferenceProtocol {
     }
     
     public subscript(typeWithKey key: PropertyKey) -> PropertyType? {
-        get { return updates?[typeWithKey: key] }
+        get {
+            return updates?[typeWithKey: key] ?? properties?[typeWithKey: key]
+        }
     }
 
     public subscript(datestampWithKey key: PropertyKey) -> Date? {
-        get { return updates?[datestampWithKey: key] }
+        get {
+            return updates?[datestampWithKey: key] ?? properties?[datestampWithKey: key]
+        }
     }
     
     public subscript(valueWithKey key: PropertyKey) -> PropertyValue? {
-        get { return updates?[valueWithKey: key] }
+        get {
+            return updates?[valueWithKey: key] ?? properties?[valueWithKey: key]
+        }
+        
         set {
             makeUpdates()
             updates?[valueWithKey: key] = newValue
         }
     }
     
-    public var count: Int { return 0 }
-    public var keys: [PropertyKey] { return [] }
-
-}
-
-/// A `GuaranteedReference` is an `EntityReference` that is guaranteed to back an existing entity.
-/// Internally it already has a resolved object pointer.
-/// It also keeps a copy of the object's `identifier` and `type` which are publically
-/// accessible and can be safely read from any thread/context.
-public class GuaranteedReference: EntityReference {
-    public let identifier: String
-    public let type: EntityType
-    public let properties: PropertyDictionary?
+    public var count: Int { return keys.count }
     
-    init(_ object: EntityRecord, properties: PropertyDictionary? = nil) {
-        self.identifier = object.identifier!
-        self.type = EntityType(object.type!)
-        self.properties = properties
-        super.init(OpaqueCachedID(object))
+    public var keys: Set<PropertyKey> {
+        var all: Set<PropertyKey>  = []
+        if let keys = properties?.keys {
+            all.formUnion(keys)
+        }
+        if let keys = updates?.keys {
+            all.formUnion(keys)
+        }
+        return all
     }
+
 
     internal var object: EntityRecord {
         return id.object!
     }
+    
+}
 
-    override public subscript(_ key: PropertyKey) -> Any? {
-        get { return properties?[key] }
-        set { super[key] = newValue }
-    }
+class TypedReference: EntityReference {
+    let storedType: EntityType
     
-    override public subscript(_ key: PropertyKey, as type: PropertyType) -> Any? {
-        get { return properties?[key, as: type] }
-        set { super[key, as: type] = newValue }
-    }
-    
-    override public subscript(typeWithKey key: PropertyKey) -> PropertyType? {
-        get { return properties?[typeWithKey: key] }
+    override var type: EntityType { return storedType }
+
+    required init(_ id: ResolvableID, properties: PropertyDictionary? = nil, updates: PropertyDictionary? = nil) {
+        fatalError("typed reference created without type")
     }
 
-    override public subscript(datestampWithKey key: PropertyKey) -> Date? {
-        get { return properties?[datestampWithKey: key] }
+    init(_ id: ResolvableID, type: EntityType, properties: PropertyDictionary? = nil, updates: PropertyDictionary? = nil) {
+        self.storedType = type
+        super.init(id, properties: properties, updates: updates)
+    }
+}
+
+
+class CustomReference: EntityReference {
+    static var type: EntityType { return EntityType("unknown-type") }
+    
+    override var type: EntityType { return Swift.type(of: self).type }
+    
+    required init(_ id: ResolvableID, properties: PropertyDictionary? = nil, updates: PropertyDictionary? = nil) {
+        super.init(id, properties: properties, updates: updates)
     }
     
-    override public subscript(valueWithKey key: PropertyKey) -> PropertyValue? {
-        get { return properties?[valueWithKey: key] }
-        set { super[valueWithKey: key] = newValue }
+    init(named name: String) {
+        let searchers = [MatchByValue(key: .name, value: name)]
+        super.init(MatchedID(matchers: searchers, initialiser: EntityInitialiser()))
     }
-    
-    override public var count: Int { return properties?.count ?? 0 }
-    
-    override public var keys: [PropertyKey] { return properties == nil ? [] : Array(properties!.keys) }
 }
 
 /// Public entity reference API.
@@ -355,7 +388,7 @@ public struct Entity {
     public static func createAs(_ type: EntityType) -> EntityReference { // TODO: add test
         let newIdentifier = UUID().uuidString // TODO: can we just pass an empty matcher list to always make a new entity?
         let searchers = [MatchByIdentifier(identifier: newIdentifier)]
-        return EntityReference(MatchedID(matchers: searchers, initialiser: EntityInitialiser(as: type)))
+        return TypedReference(MatchedID(matchers: searchers, initialiser: EntityInitialiser()), type: type)
     }
 
     public static func createWith(_ initialiser: EntityInitialiser) -> EntityReference { // TODO: add test
@@ -371,24 +404,27 @@ public struct Entity {
     
     public static func identifiedBy(_ identifier: String, createAs type: EntityType? = nil, with properties: [PropertyKey:Any]? = nil) -> EntityReference {
         let searchers = [MatchByIdentifier(identifier: identifier)]
-        let initialiser: EntityInitialiser?
         if let type = type {
-            initialiser = EntityInitialiser(as: type, properties: PropertyDictionary(properties ?? [:]))
+            let initialiser = EntityInitialiser(properties: PropertyDictionary(properties ?? [:]))
+            return TypedReference(MatchedID(matchers: searchers, initialiser: initialiser), type: type)
         } else {
-            initialiser = nil
+            return EntityReference(MatchedID(matchers: searchers, initialiser: nil))
         }
         
-        return EntityReference(MatchedID(matchers: searchers, initialiser: initialiser))
     }
     
-    public static func named(_ name: String, initialiser: EntityInitialiser? = nil) -> EntityReference {
+    public static func named(_ name: String, as type: EntityType? = nil, initialiser: EntityInitialiser? = nil) -> EntityReference {
         let searchers = [MatchByValue(key: .name, value: name)]
-        return EntityReference(MatchedID(matchers: searchers, initialiser: initialiser))
+        if let type = type {
+            return TypedReference(MatchedID(matchers: searchers, initialiser: initialiser), type: type)
+        } else {
+            return EntityReference(MatchedID(matchers: searchers, initialiser: initialiser))
+        }
     }
 
     public static func named(_ name: String, createAs type: EntityType) -> EntityReference {
         let searchers = [MatchByValue(key: .name, value: name)]
-        return EntityReference(MatchedID(matchers: searchers, initialiser: EntityInitialiser(as: type)))
+        return TypedReference(MatchedID(matchers: searchers, initialiser: EntityInitialiser()), type: type)
     }
 
     public static func with(identifier: String, orName name: String, initialiser: EntityInitialiser? = nil) -> EntityReference {
@@ -398,7 +434,7 @@ public struct Entity {
 
     public static func with(identifier: String, orName name: String, createAs type: EntityType) -> EntityReference {
         let searchers = [MatchByIdentifier(identifier: identifier), MatchByValue(key: .name, value: name)]
-        return EntityReference(MatchedID(matchers: searchers, initialiser: EntityInitialiser(as: type)))
+        return TypedReference(MatchedID(matchers: searchers, initialiser: EntityInitialiser()), type: type)
     }
 
     public static func whereKey(_ key: PropertyKey, equals value: String, initialiser: EntityInitialiser? = nil) -> EntityReference {
@@ -408,7 +444,7 @@ public struct Entity {
 
     public static func whereKey(_ key: PropertyKey, equals value: String, createAs type: EntityType) -> EntityReference {
         let searchers = [ MatchByValue(key: key, value: value)]
-        return EntityReference(MatchedID(matchers: searchers, initialiser: EntityInitialiser(as: type)))
+        return TypedReference(MatchedID(matchers: searchers, initialiser: EntityInitialiser()), type: type)
     }
 
 }
