@@ -186,8 +186,8 @@ public class Datastore {
         return classToUse.init(OpaqueCachedID(entity), properties: properties)
     }
 
-    public func register(class classToUse: EntityReference.Type, forType type: EntityType) {
-        typeMap[type] = classToUse
+    public func register(class classToUse: CustomReference.Type) {
+        typeMap[classToUse.staticType()] = classToUse
     }
     
     

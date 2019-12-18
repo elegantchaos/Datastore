@@ -98,9 +98,9 @@ internal class MatchByValue: EntityMatcher {
     }
 }
 
-internal typealias ResolveResult = (ResolvableID, [ResolvableID])?
+public typealias ResolveResult = (ResolvableID, [ResolvableID])?
 
-internal protocol ResolvableID {
+public protocol ResolvableID {
     func resolve(in store: Datastore, for reference: EntityReference) -> ResolveResult
     func hash(into hasher: inout Hasher)
     func equal(to: ResolvableID) -> Bool
@@ -237,7 +237,7 @@ public protocol EntityReferenceProtocol {
 /// The reference can be passed around safely in any context/thread
 /// It contains enough information to be resolved into a real `EntityRecord` by a store.
 /// In some cases, resolving the reference may actually create a new entity.
-public class EntityReference: Equatable, Hashable, EntityReferenceProtocol {
+open class EntityReference: Equatable, Hashable, EntityReferenceProtocol {
     var id: ResolvableID
     var updates: PropertyDictionary?
     public var identifier: String { id.identifier }
@@ -245,7 +245,7 @@ public class EntityReference: Equatable, Hashable, EntityReferenceProtocol {
     
     public let properties: PropertyDictionary?
     
-    required init(_ id: ResolvableID, properties: PropertyDictionary? = nil, updates: PropertyDictionary? = nil) {
+    public required init(_ id: ResolvableID, properties: PropertyDictionary? = nil, updates: PropertyDictionary? = nil) {
         self.id = id
         self.updates = updates
         self.properties = properties
@@ -366,12 +366,12 @@ class TypedReference: EntityReference {
 }
 
 
-class CustomReference: EntityReference {
-    static var type: EntityType { return EntityType("unknown-type") }
+open class CustomReference: EntityReference {
+    class open func staticType() -> EntityType { return EntityType("unknown-type") }
     
-    override var type: EntityType { return Swift.type(of: self).type }
+    override public var type: EntityType { return Swift.type(of: self).staticType() }
     
-    required init(_ id: ResolvableID, properties: PropertyDictionary? = nil, updates: PropertyDictionary? = nil) {
+    public required init(_ id: ResolvableID, properties: PropertyDictionary? = nil, updates: PropertyDictionary? = nil) {
         super.init(id, properties: properties, updates: updates)
     }
     

@@ -707,13 +707,13 @@ class DatastoreTests: DatastoreTestCase {
 
     func testCreateCustomType() {
         class Person: CustomReference {
-            override var type: EntityType { return .person }
+            override class func staticType() -> EntityType { .person }
         }
         
         // test registering a custom type for an entity, then creating an entity and checking it's the right type
         let done = expectation(description: "loaded")
         loadAndCheck { (datastore) in
-            datastore.register(class: Person.self, forType: .person)
+            datastore.register(class: Person.self)
             let entityID = Person(named: "Test Person")
             datastore.get(entitiesWithIDs: [entityID]) { results in
                 XCTAssertEqual(results.count, 1)
