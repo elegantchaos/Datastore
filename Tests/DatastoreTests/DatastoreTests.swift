@@ -171,7 +171,7 @@ class DatastoreTests: DatastoreTestCase {
         // test looking up an entity by name when it doesn't exist
         let done = expectation(description: "loaded")
         loadJSON(name: "Simple", expectation: done) { datastore in
-            let entityRef = Entity.named("Unknown", as: .person, initialIdentifier: "known-identifier", with:["foo": "bar"])
+            let entityRef = Entity.named("Unknown", createAs: .person, initialIdentifier: "known-identifier", with:["foo": "bar"])
             datastore.get(entitiesWithIDs: [entityRef]) { results in
                 XCTAssertEqual(results.count, 1)
                 let person = results[0]
@@ -380,7 +380,7 @@ class DatastoreTests: DatastoreTestCase {
         let done = expectation(description: "loaded")
         loadAndCheck { (datastore) in
             let book = Entity.identifiedBy("test-book", createAs: .book)
-            let person = Entity.named("Test Person", as: .person, with: [PropertyKey(reference: book, name: "author"): book])
+            let person = Entity.named("Test Person", createAs: .person, with: [PropertyKey(reference: book, name: "author"): book])
             
             datastore.get(entity: person) { result in
                 XCTAssertNotNil(result)

@@ -136,7 +136,7 @@ protocol EntityInitialiser {
     var initialProperties: PropertyDictionary { get }
 }
 
-class TypedReference: EntityReference {
+class InitialisingReference: EntityReference {
     let storedType: EntityType
     let storedIdentifier: String?
     
@@ -154,7 +154,7 @@ class TypedReference: EntityReference {
     }
 }
 
-extension TypedReference: EntityInitialiser {
+extension InitialisingReference: EntityInitialiser {
     var initialType: EntityType { return storedType }
     var initialIdentifier: String? { return storedIdentifier }
     var initialProperties: PropertyDictionary { return updates ?? PropertyDictionary() }
@@ -188,42 +188,32 @@ public struct Entity {
     public static func createAs(_ type: EntityType, with properties: [PropertyKey:Any]? = nil) -> EntityReference { // TODO: add test
         let newIdentifier = UUID().uuidString // TODO: can we just pass an empty matcher list to always make a new entity?
         let searchers = [MatchByIdentifier(identifier: newIdentifier)]
-        return TypedReference(MatchedID(matchers: searchers), type: type, updates: PropertyDictionary(properties ?? [:]))
+        return InitialisingReference(MatchedID(matchers: searchers), type: type, updates: PropertyDictionary(properties ?? [:]))
     }
 
-    public static func identifiedBy(_ identifier: String) -> EntityReference {
-        let searchers = [MatchByIdentifier(identifier: identifier)]
-        return EntityReference(MatchedID(matchers: searchers))
-    }
-    
     public static func identifiedBy(_ identifier: String, createAs type: EntityType? = nil, initialIdentifier: String? = nil, with properties: [PropertyKey:Any]? = nil) -> EntityReference {
         let searchers = [MatchByIdentifier(identifier: identifier)]
         if let type = type {
-            return TypedReference(MatchedID(matchers: searchers), type: type, initialIdentifier: initialIdentifier, updates: PropertyDictionary(properties ?? [:]))
+            return InitialisingReference(MatchedID(matchers: searchers), type: type, initialIdentifier: initialIdentifier, updates: PropertyDictionary(properties ?? [:]))
         } else {
             return EntityReference(MatchedID(matchers: searchers))
         }
         
     }
     
-    public static func named(_ name: String, as type: EntityType? = nil, initialIdentifier: String? = nil, with properties: [PropertyKey:Any]? = nil) -> EntityReference {
+    public static func named(_ name: String, createAs type: EntityType? = nil, initialIdentifier: String? = nil, with properties: [PropertyKey:Any]? = nil) -> EntityReference {
         let searchers = [MatchByValue(key: .name, value: name)]
         if let type = type {
-            return TypedReference(MatchedID(matchers: searchers), type: type, initialIdentifier: initialIdentifier, updates: PropertyDictionary(properties ?? [:]))
+            return InitialisingReference(MatchedID(matchers: searchers), type: type, initialIdentifier: initialIdentifier, updates: PropertyDictionary(properties ?? [:]))
         } else {
             return EntityReference(MatchedID(matchers: searchers))
         }
     }
 
-    public static func named(_ name: String, createAs type: EntityType) -> EntityReference {
-        let searchers = [MatchByValue(key: .name, value: name)]
-        return TypedReference(MatchedID(matchers: searchers), type: type)
-    }
-
     public static func with(identifier: String, orName name: String, createAs type: EntityType? = nil, initialIdentifier: String? = nil, with properties: [PropertyKey:Any]? = nil) -> EntityReference {
         let searchers = [MatchByIdentifier(identifier: identifier), MatchByValue(key: .name, value: name)]
         if let type = type {
-            return TypedReference(MatchedID(matchers: searchers), type: type, initialIdentifier: initialIdentifier, updates: PropertyDictionary(properties ?? [:]))
+            return InitialisingReference(MatchedID(matchers: searchers), type: type, initialIdentifier: initialIdentifier, updates: PropertyDictionary(properties ?? [:]))
         } else {
             return EntityReference(MatchedID(matchers: searchers))
         }
@@ -232,7 +222,7 @@ public struct Entity {
     public static func whereKey(_ key: PropertyKey, equals value: String, createAs type: EntityType? = nil, initialIdentifier: String? = nil, with properties: [PropertyKey:Any]? = nil) -> EntityReference {
         let searchers = [MatchByValue(key: key, value: value)]
         if let type = type {
-                return TypedReference(MatchedID(matchers: searchers), type: type, initialIdentifier: initialIdentifier, updates: PropertyDictionary(properties ?? [:]))
+                return InitialisingReference(MatchedID(matchers: searchers), type: type, initialIdentifier: initialIdentifier, updates: PropertyDictionary(properties ?? [:]))
             } else {
                 return EntityReference(MatchedID(matchers: searchers))
             }
