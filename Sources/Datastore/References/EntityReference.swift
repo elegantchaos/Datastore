@@ -17,37 +17,52 @@ open class EntityReference: Equatable, Hashable, EntityReferenceProtocol {
     static let unresolvedIdentifier = "«unresolved»"
     static let nullIdentifier = "«null»"
 
-    var id: EntityResolver
-    var updates: PropertyDictionary?
-
-    public var identifier: String { id.identifier }
-    public var type: EntityType { id.type }
-
+    /// identifier for the entity this reference represents; may not be known yet if the reference is unresolved
+    public var identifier: String { resolver.identifier }
+    
+    /// type of the entity this reference represents; may not be known yet if the reference is unresolved
+    public var type: EntityType { resolver.type }
+    
+    /// has this reference been resolved?
+    public var isResolved: Bool { resolver.isResolved }
+    
+    /// fetched properties for the entity
+    /// these represent the result of the operation that returned this entity; they may not represent all of
+    /// the properties of the entity - just the ones that were requested; they may also no longer be the latest
+    /// values for the entity
     public let properties: PropertyDictionary?
+
+    /// object which is used internally to turn this reference into an actual `EntityRecord`
+    var resolver: EntityResolver
+    
+    /// property updates stored for the entity
+    /// these represent changes to the entities properties that we would like to make; they have no effect
+    /// to the actual database until they are committed with an `add` or `update` operation
+    var updates: PropertyDictionary?
     
     public required init(_ id: EntityResolver, properties: PropertyDictionary? = nil, updates: PropertyDictionary? = nil) {
-        self.id = id
+        self.resolver = id
         self.updates = updates
         self.properties = properties
     }
     
     public static func == (lhs: EntityReference, rhs: EntityReference) -> Bool {
-        return lhs.id.equal(to: rhs.id)
+        return lhs.resolver.equal(to: rhs.resolver)
     }
     
     public func hash(into hasher: inout Hasher) {
-        id.hash(into: &hasher)
+        resolver.hash(into: &hasher)
     }
 
     public func resolve(in store: Datastore) -> (EntityRecord, [EntityRecord])? {
-        if let (resolved, created) = id.resolve(in: store, for: self) {
-            id = resolved
-            if let object = id.object {
+        if let (resolved, created) = resolver.resolve(in: store, for: self) {
+            resolver = resolved
+            if let object = resolver.object {
                 return (object, created.compactMap({ $0.object }))
             }
         }
         
-        if let object = id.object {
+        if let object = resolver.object {
             return (object, [])
         } else {
             return nil
@@ -125,60 +140,9 @@ open class EntityReference: Equatable, Hashable, EntityReferenceProtocol {
 
 
     internal var object: EntityRecord {
-        return id.object!
+        return resolver.object!
     }
     
-}
-
-protocol EntityInitialiser {
-    var initialType: EntityType { get }
-    var initialIdentifier: String? { get }
-    var initialProperties: PropertyDictionary { get }
-}
-
-class InitialisingReference: EntityReference {
-    let storedType: EntityType
-    let storedIdentifier: String?
-    
-    override var type: EntityType { return storedType }
-    override var identifier: String { return storedIdentifier ?? super.identifier }
-    
-    required init(_ id: EntityResolver, properties: PropertyDictionary? = nil, updates: PropertyDictionary? = nil) {
-        fatalError("typed reference created without type")
-    }
-
-    init(_ id: EntityResolver, type: EntityType, initialIdentifier: String? = nil, properties: PropertyDictionary? = nil, updates: PropertyDictionary? = nil) {
-        self.storedType = type
-        self.storedIdentifier = initialIdentifier
-        super.init(id, properties: properties, updates: updates)
-    }
-}
-
-extension InitialisingReference: EntityInitialiser {
-    var initialType: EntityType { return storedType }
-    var initialIdentifier: String? { return storedIdentifier }
-    var initialProperties: PropertyDictionary { return updates ?? PropertyDictionary() }
-}
-
-open class CustomReference: EntityReference {
-    class open func staticType() -> EntityType { return EntityType("unknown-type") }
-    
-    override public var type: EntityType { return Swift.type(of: self).staticType() }
-    
-    public required init(_ id: EntityResolver, properties: PropertyDictionary? = nil, updates: PropertyDictionary? = nil) {
-        super.init(id, properties: properties, updates: updates)
-    }
-    
-    init(named name: String) {
-        let searchers = [MatchByValue(key: .name, value: name)]
-        super.init(MatchedID(matchers: searchers))
-    }
-}
-
-extension CustomReference: EntityInitialiser {
-    var initialType: EntityType { return type }
-    var initialIdentifier: String? { return nil }
-    var initialProperties: PropertyDictionary { return updates ?? PropertyDictionary() }
 }
 
 /// Public entity reference API.
