@@ -183,7 +183,7 @@ public class Datastore {
             classToUse = customType
         }
         
-        return classToUse.init(OpaqueCachedID(entity), properties: properties)
+        return classToUse.init(CachedResolver(entity), properties: properties)
     }
 
     public func register(class classToUse: CustomReference.Type) {

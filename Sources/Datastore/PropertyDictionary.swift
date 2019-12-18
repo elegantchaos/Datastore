@@ -91,16 +91,13 @@ extension PropertyDictionary: CustomStringConvertible {
 
 public struct EntityInitialiser {
     let properties: PropertyDictionary
-    let identifier: String?
     
-    public init(properties: PropertyDictionary = PropertyDictionary(), identifier: String? = nil) {
+    public init(properties: PropertyDictionary = PropertyDictionary()) {
         self.properties = properties
-        self.identifier = identifier
     }
 
-    public init(properties: [PropertyKey:Any], identifier: String? = nil) {
+    public init(properties: [PropertyKey:Any]) {
         self.properties = PropertyDictionary(properties)
-        self.identifier = identifier
     }
 
 }
