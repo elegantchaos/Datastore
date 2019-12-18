@@ -171,7 +171,7 @@ class DatastoreTests: DatastoreTestCase {
         // test looking up an entity by name when it doesn't exist
         let done = expectation(description: "loaded")
         loadJSON(name: "Simple", expectation: done) { datastore in
-            let entityRef = Entity.named("Unknown", as: .person, initialIdentifier: "known-identifier", initialiser: EntityInitialiser(properties:["foo": "bar"]))
+            let entityRef = Entity.named("Unknown", as: .person, initialIdentifier: "known-identifier", with:["foo": "bar"])
             datastore.get(entitiesWithIDs: [entityRef]) { results in
                 XCTAssertEqual(results.count, 1)
                 let person = results[0]
@@ -283,7 +283,7 @@ class DatastoreTests: DatastoreTestCase {
         // not having the properties applied because the entity already existed
         let done = expectation(description: "loaded")
         loadJSON(name: "Simple", expectation: done) { datastore in
-            let id = Entity.identifiedBy("C41DB873-323D-4026-95D1-603120B9ADF6", initialiser: EntityInitialiser(properties: [.name: "Different Name"]))
+            let id = Entity.identifiedBy("C41DB873-323D-4026-95D1-603120B9ADF6", createAs: .person, with: [.name: "Different Name"])
             datastore.get(entitiesWithIDs: [id]) { results in
                 XCTAssertEqual(results.count, 1)
                 let person = results[0]
@@ -380,9 +380,7 @@ class DatastoreTests: DatastoreTestCase {
         let done = expectation(description: "loaded")
         loadAndCheck { (datastore) in
             let book = Entity.identifiedBy("test-book", createAs: .book)
-            let person = Entity.named("Test Person", as: .person, initialiser: EntityInitialiser(properties: [PropertyKey(reference: book, name: "author"): book])
-            )
-             
+            let person = Entity.named("Test Person", as: .person, with: [PropertyKey(reference: book, name: "author"): book])
             
             datastore.get(entity: person) { result in
                 XCTAssertNotNil(result)

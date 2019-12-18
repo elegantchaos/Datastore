@@ -88,16 +88,3 @@ extension PropertyDictionary: CustomStringConvertible {
     }
     
 }
-
-public struct EntityInitialiser {
-    let properties: PropertyDictionary
-    
-    public init(properties: PropertyDictionary = PropertyDictionary()) {
-        self.properties = properties
-    }
-
-    public init(properties: [PropertyKey:Any]) {
-        self.properties = PropertyDictionary(properties)
-    }
-
-}

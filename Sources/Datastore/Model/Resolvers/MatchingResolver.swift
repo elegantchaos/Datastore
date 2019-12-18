@@ -106,7 +106,6 @@ public protocol EntityReferenceProtocol {
 
 internal struct MatchedID: EntityResolver {
     let matchers: [EntityMatcher]
-    let initialiser: EntityInitialiser?
 
     func hash(into hasher: inout Hasher) {
         matchers.hash(into: &hasher)
@@ -119,10 +118,10 @@ internal struct MatchedID: EntityResolver {
             }
         }
         
-        if let initialiser = initialiser {
+        if let initialiser = reference as? EntityInitialiser {
             let entity = EntityRecord(in: store.context)
-            entity.type = reference.type.name
-            if let identifier = reference.identifierForCreation {
+            entity.type = initialiser.initialType.name
+            if let identifier = initialiser.initialIdentifier {
                 entity.identifier = identifier
             }
             for searcher in matchers {
@@ -131,7 +130,7 @@ internal struct MatchedID: EntityResolver {
             
             let reference = CachedResolver(entity)
             var created: [EntityResolver] = [reference]
-            let addedByRelationships = initialiser.properties.add(to: entity, store: store)
+            let addedByRelationships = initialiser.initialProperties.add(to: entity, store: store)
             if addedByRelationships.count > 0 {
                 created.append(contentsOf: addedByRelationships.map({ CachedResolver($0) }))
             }
