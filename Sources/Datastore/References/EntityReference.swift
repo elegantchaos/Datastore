@@ -159,38 +159,38 @@ public struct Entity {
         return InitialisingReference(MatchingResolver(matchers: searchers), type: type, updates: properties)
     }
 
-    public static func identifiedBy(_ identifier: String, createAs type: EntityType? = nil, initialIdentifier: String? = nil, with properties: PropertyDictionary? = nil) -> EntityReference {
+    public static func identifiedBy(_ identifier: String, createAs type: EntityType? = nil, with properties: PropertyDictionary? = nil) -> EntityReference {
         let searchers = [MatchByIdentifier(identifier: identifier)]
         if let type = type {
-            return InitialisingReference(MatchingResolver(matchers: searchers), type: type, initialIdentifier: initialIdentifier, updates: properties)
+            return InitialisingReference(MatchingResolver(matchers: searchers), type: type, updates: properties)
         } else {
             return EntityReference(MatchingResolver(matchers: searchers))
         }
         
     }
     
-    public static func named(_ name: String, createAs type: EntityType? = nil, initialIdentifier: String? = nil, with properties: PropertyDictionary? = nil) -> EntityReference {
+    public static func named(_ name: String, createAs type: EntityType? = nil, with properties: PropertyDictionary? = nil) -> EntityReference {
         let searchers = [MatchByValue(key: .name, value: name)]
         if let type = type {
-            return InitialisingReference(MatchingResolver(matchers: searchers), type: type, initialIdentifier: initialIdentifier, updates: properties)
+            return InitialisingReference(MatchingResolver(matchers: searchers), type: type, updates: properties)
         } else {
             return EntityReference(MatchingResolver(matchers: searchers))
         }
     }
 
-    public static func with(identifier: String, orName name: String, createAs type: EntityType? = nil, initialIdentifier: String? = nil, with properties: PropertyDictionary? = nil) -> EntityReference {
+    public static func with(identifier: String, orName name: String, createAs type: EntityType? = nil, with properties: PropertyDictionary? = nil) -> EntityReference {
         let searchers = [MatchByIdentifier(identifier: identifier), MatchByValue(key: .name, value: name)]
         if let type = type {
-            return InitialisingReference(MatchingResolver(matchers: searchers), type: type, initialIdentifier: initialIdentifier, updates: properties)
+            return InitialisingReference(MatchingResolver(matchers: searchers), type: type, updates: properties)
         } else {
             return EntityReference(MatchingResolver(matchers: searchers))
         }
     }
 
-    public static func whereKey(_ key: PropertyKey, equals value: String, createAs type: EntityType? = nil, initialIdentifier: String? = nil, with properties: PropertyDictionary? = nil) -> EntityReference {
+    public static func whereKey(_ key: PropertyKey, equals value: String, createAs type: EntityType? = nil, with properties: PropertyDictionary? = nil) -> EntityReference {
         let searchers = [MatchByValue(key: key, value: value)]
         if let type = type {
-                return InitialisingReference(MatchingResolver(matchers: searchers), type: type, initialIdentifier: initialIdentifier, updates: properties)
+                return InitialisingReference(MatchingResolver(matchers: searchers), type: type, updates: properties)
             } else {
                 return EntityReference(MatchingResolver(matchers: searchers))
             }

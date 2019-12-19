@@ -68,8 +68,10 @@ public struct PropertyDictionary {
     func add(to entity: EntityRecord, store: Datastore) -> [EntityRecord] {
         var added: [EntityRecord] = []
         for (key, value) in values {
-            let newEntities = entity.add(property: key, value: value, store: store)
-            added.append(contentsOf: newEntities)
+            if !Datastore.specialProperties.contains(key) {
+                let newEntities = entity.add(property: key, value: value, store: store)
+                added.append(contentsOf: newEntities)
+            }
         }
         return added
     }

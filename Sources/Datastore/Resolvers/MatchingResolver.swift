@@ -121,7 +121,7 @@ internal struct MatchingResolver: EntityResolver {
         if let initialiser = reference as? EntityInitialiser {
             let entity = EntityRecord(in: store.context)
             entity.type = initialiser.initialType.name
-            if let identifier = initialiser.initialIdentifier {
+            if let identifier = initialiser.initialProperties[.identifier] as? String {
                 entity.identifier = identifier
             }
             for searcher in matchers {
