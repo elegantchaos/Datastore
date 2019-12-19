@@ -104,7 +104,7 @@ public protocol EntityReferenceProtocol {
     func resolve(in store: Datastore) -> (EntityRecord, [EntityRecord])?
 }
 
-internal struct MatchedID: EntityResolver {
+internal struct MatchingResolver: EntityResolver {
     let matchers: [EntityMatcher]
 
     func hash(into hasher: inout Hasher) {
@@ -146,7 +146,7 @@ internal struct MatchedID: EntityResolver {
     }
 
     func equal(to other: EntityResolver) -> Bool {
-        if let other = other as? MatchedID {
+        if let other = other as? MatchingResolver {
             return (other.matchers == matchers)
         } else {
             return false

@@ -186,8 +186,10 @@ public class Datastore {
         return classToUse.init(CachedResolver(entity), properties: properties)
     }
 
-    public func register(class classToUse: CustomReference.Type) {
-        typeMap[classToUse.staticType()] = classToUse
+    public func register(classes: [CustomReference.Type]) {
+        for classToUse in classes {
+            typeMap[classToUse.staticType()] = classToUse
+        }
     }
     
     

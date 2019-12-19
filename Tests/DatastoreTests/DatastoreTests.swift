@@ -711,13 +711,14 @@ class DatastoreTests: DatastoreTestCase {
         // test registering a custom type for an entity, then creating an entity and checking it's the right type
         let done = expectation(description: "loaded")
         loadAndCheck { (datastore) in
-            datastore.register(class: Person.self)
+            datastore.register(classes: [Person.self])
             let entityID = Person(named: "Test Person")
             datastore.get(entitiesWithIDs: [entityID]) { results in
                 XCTAssertEqual(results.count, 1)
                 let person = results[0]
                 XCTAssertEqual(person.type, .person)
                 XCTAssertTrue(person is Person)
+                XCTAssertEqual(person.object.string(withKey: .name), "Test Person")
                 done.fulfill()
             }
         }

@@ -7,7 +7,7 @@ import Foundation
 
 
 open class CustomReference: EntityReference {
-    class open func staticType() -> EntityType { return EntityType("unknown-type") }
+    class open func staticType() -> EntityType { return .unknown }
     
     override public var type: EntityType { return Swift.type(of: self).staticType() }
     
@@ -15,9 +15,18 @@ open class CustomReference: EntityReference {
         super.init(id, properties: properties, updates: updates)
     }
     
-    init(named name: String) {
-        let searchers = [MatchByValue(key: .name, value: name)]
-        super.init(MatchedID(matchers: searchers))
+    init(with properties: PropertyDictionary? = nil) {
+        super.init(MatchingResolver(matchers: []), updates: properties)
+    }
+    
+    init(named name: String, with properties: PropertyDictionary? = nil) {
+        let matchers = [MatchByValue(key: .name, value: name)]
+        super.init(MatchingResolver(matchers: matchers), updates: properties)
+    }
+    
+    init(identifiedBy identifier: String, with properties: PropertyDictionary?) {
+        let matchers = [MatchByIdentifier(identifier: identifier)]
+        super.init(MatchingResolver(matchers: matchers), updates: properties)
     }
 }
 

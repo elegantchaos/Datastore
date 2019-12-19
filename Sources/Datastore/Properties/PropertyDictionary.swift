@@ -10,9 +10,8 @@ import Foundation
 /// Other subscript operators are provided to access the type, or to get/set the raw semantic value.
 
 public struct PropertyDictionary {
-    public typealias Key = PropertyKey
-    public typealias Value = PropertyValue
-    public typealias Values = [Key:Value]
+    public typealias Values = [PropertyKey:PropertyValue]
+    public typealias RawValues = [PropertyKey:Any]
     
     var values: Values = [:]
 
@@ -22,42 +21,47 @@ public struct PropertyDictionary {
     public init() {
     }
     
-    public init(_ values: [Key:Any]) {
+    public init(_ values: RawValues) {
         self.values = values.mapValues({ asValue($0) })
     }
     
-    public subscript(_ key: Key) -> Any? {
+//    public init?(_ values: RawValues?) {
+//        guard let values = values else { return nil }
+//        self.values = values.mapValues({ asValue($0) })
+//    }
+    
+    public subscript(_ key: PropertyKey) -> Any? {
         get { return values[key]?.value }
         set { values[key] = asValue(newValue) }
     }
     
-    public subscript(_ key: Key, as type: PropertyType) -> Any? {
+    public subscript(_ key: PropertyKey, as type: PropertyType) -> Any? {
         get { return values[key]?.value }
-        set { values[key] = Value(newValue, type: type, datestamp: nil) }
+        set { values[key] = PropertyValue(newValue, type: type, datestamp: nil) }
     }
     
-    public subscript(typeWithKey key: Key) -> PropertyType? {
+    public subscript(typeWithKey key: PropertyKey) -> PropertyType? {
         get { return values[key]?.type }
     }
 
-    public subscript(datestampWithKey key: Key) -> Date? {
+    public subscript(datestampWithKey key: PropertyKey) -> Date? {
         get { return values[key]?.datestamp }
     }
     
-    public subscript(valueWithKey key: Key) -> Value? {
+    public subscript(valueWithKey key: PropertyKey) -> PropertyValue? {
         get { return values[key] }
         set { values[key] = newValue }
     }
     
-    internal func asValue(_ value: Any?) -> Value {
-        if let value = value as? Value {
+    internal func asValue(_ value: Any?) -> PropertyValue {
+        if let value = value as? PropertyValue {
             return value
         } else if let (value, type) = value as? (Any?, PropertyType) {
-            return Value(value, type: type, datestamp: nil)
+            return PropertyValue(value, type: type, datestamp: nil)
         } else if let (value, type) = value as? (Any?, String) {
-            return Value(value, type: PropertyType(type), datestamp: nil)
+            return PropertyValue(value, type: PropertyType(type), datestamp: nil)
         } else {
-            return Value(value, type: nil, datestamp: nil)
+            return PropertyValue(value, type: nil, datestamp: nil)
         }
     }
     
@@ -73,6 +77,18 @@ public struct PropertyDictionary {
     
 }
 
+extension PropertyDictionary: ExpressibleByDictionaryLiteral {
+    public typealias Key = PropertyKey
+    public typealias Value = Any
+    
+    public init(dictionaryLiteral elements: (PropertyKey, Any)...) {
+        var values = Values()
+        for (key, value) in elements {
+            values[key] = PropertyValue(value)
+        }
+        self.values = values
+    }
+}
 
 extension PropertyDictionary: CustomStringConvertible {
     public var description: String {
