@@ -159,11 +159,14 @@ public class Datastore {
     /// Save any outstanding changes to the store
     /// - Parameter completion: completion block
     public func save(completion: @escaping SaveCompletion) {
-        do {
-            try context.save()
-            completion(.success(Void()))
-        } catch {
-            completion(.failure(error))
+        let context = self.context
+        context.perform {
+            do {
+                try context.save()
+                completion(.success(Void()))
+            } catch {
+                completion(.failure(error))
+            }
         }
     }
     
