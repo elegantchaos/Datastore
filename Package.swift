@@ -13,6 +13,7 @@ let package = Package(
         ],
     dependencies: [
         .package(url: "https://github.com/elegantchaos/Logger.git", from: "1.3.6"),
+        .package(url: "https://github.com/elegantchaos/Layout.git", from: "1.0.1"),
         .package(url: "https://github.com/elegantchaos/XCTestExtensions.git", from: "1.0.5"),
     ],
     targets: [
@@ -21,7 +22,7 @@ let package = Package(
             dependencies: ["Logger"]),
         .target(
             name: "DatastoreKit",
-            dependencies: ["Datastore", "Logger"]),
+            dependencies: ["Datastore", "Layout", "Logger"]),
         .testTarget(
             name: "DatastoreTests",
             dependencies: ["Datastore", "XCTestExtensions"]),

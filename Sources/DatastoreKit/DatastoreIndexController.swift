@@ -1,47 +1,19 @@
-//
-//  File.swift
-//  
-//
-//  Created by Developer on 20/12/2019.
-//
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+//  Created by Sam Deane on 20/12/2019.
+//  All code (c) 2020 - present day, Elegant Chaos Limited.
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 import UIKit
 import Datastore
-
-public protocol DatastoreViewContextSupplier {
-    var viewDatastore: Datastore { get }
-}
-
-extension UIViewController {
-    func findStore() -> Datastore? {
-        if let supplier = self as? DatastoreViewContextSupplier {
-            return supplier.viewDatastore
-        } else {
-            return parent?.findStore()
-        }
-    }
-}
-
-extension UIView {
-    func stickTo(view: UIView) {
-        translatesAutoresizingMaskIntoConstraints = false
-        leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
-        rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
-        bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
-        topAnchor.constraint(equalTo: view.topAnchor).isActive = true
-    }
-}
-public class SelfSizingTable: UITableView {
-    public override var intrinsicContentSize: CGSize {
-        return contentSize
-    }
-}
+import Layout
 
 public class DatastoreIndexController: UIViewController {
     var table: UITableView!
     var datastore: Datastore?
     var items: [EntityReference] = []
-    let labelKey: PropertyKey = .name
+    var labelKey: PropertyKey = .name
+    var sortingKeys: [PropertyKey] = [.name]
+    var sortAscending = true
     
     override public func viewDidLoad() {
         super.viewDidLoad()
@@ -54,12 +26,10 @@ public class DatastoreIndexController: UIViewController {
         stack.distribution = .fill
         view.addSubview(stack)
 
-        let label = UILabel()
-        label.text = "Test"
-        label.textAlignment = .center
-        label.font = .systemFont(ofSize: 20)
-        label.backgroundColor = .red
-        stack.addArrangedSubview(label)
+        let sortButton = UIButton(type: .custom)
+        updateSortIcon(for: sortButton)
+        sortButton.addTarget(self, action: #selector(sort(_:)), for: .primaryActionTriggered)
+        stack.addArrangedSubview(sortButton)
 
         table = SelfSizingTable()
         table.delegate = self
@@ -89,12 +59,37 @@ public class DatastoreIndexController: UIViewController {
         requestIndex()
     }
     
+    func updateSortIcon(for button: UIButton) {
+        let imageName = sortAscending ? "chevron.up.circle" : "chevron.down.circle"
+        button.setImage(UIImage(systemName: imageName), for: .normal)
+    }
+    
+    @IBAction func sort(_ sender: Any) {
+        sortAscending = !sortAscending
+        requestIndex()
+        if let button = sender as? UIButton {
+            updateSortIcon(for: button)
+        }
+    }
+    
     func requestIndex() {
         if let store = datastore {
             store.getAllEntities() { results in
                 store.get(properties: [self.labelKey], of: results) { items in
                     DispatchQueue.main.async {
-                        self.items = items
+                        let sorted = items.sorted { (i1, i2) -> Bool in
+                            for key in self.sortingKeys {
+                                if let s1 = i1[key] as? String, let s2 = i2[key] as? String {
+                                    if s1 < s2 {
+                                        return self.sortAscending
+                                    } else if s2 < s1 {
+                                        return !self.sortAscending
+                                    }
+                                }
+                            }
+                            return false
+                        }
+                        self.items = sorted
                         self.table.reloadData()
                         self.table.invalidateIntrinsicContentSize()
                     }
@@ -120,9 +115,5 @@ extension DatastoreIndexController: UITableViewDataSource, UITableViewDelegate {
         return cell
     }
     
-    
-}
-
-public class DatastoreEntityController: UIViewController {
     
 }
