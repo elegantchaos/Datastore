@@ -6,6 +6,21 @@
 //
 
 import UIKit
+import Datastore
+
+public protocol DatastoreViewContextSupplier {
+    var viewDatastore: Datastore { get }
+}
+
+extension UIViewController {
+    func findStore() -> Datastore? {
+        if let supplier = self as? DatastoreViewContextSupplier {
+            return supplier.viewDatastore
+        } else {
+            return parent?.findStore()
+        }
+    }
+}
 
 extension UIView {
     func stickTo(view: UIView) {
@@ -24,6 +39,9 @@ public class SelfSizingTable: UITableView {
 
 public class DatastoreIndexController: UIViewController {
     var table: UITableView!
+    var datastore: Datastore?
+    var items: [EntityReference] = []
+    let labelKey: PropertyKey = .name
     
     override public func viewDidLoad() {
         super.viewDidLoad()
@@ -68,11 +86,29 @@ public class DatastoreIndexController: UIViewController {
 //        stack.widthAnchor.constraint(equalTo: view.widthAnchor).isActive = true
 //        stack.heightAnchor.constraint(equalTo: view.heightAnchor).isActive = true
     }
+    
+    public override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        datastore = findStore()
+        requestIndex()
+    }
+    
+    func requestIndex() {
+        if let store = datastore {
+            store.getAllEntities() { results in
+                DispatchQueue.main.async {
+                    self.items = results
+                    self.table.reloadData()
+                }
+            }
+        }
+    }
 }
 
 extension DatastoreIndexController: UITableViewDataSource, UITableViewDelegate {
     public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 2
+        return items.count
     }
     
     public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -81,7 +117,8 @@ extension DatastoreIndexController: UITableViewDataSource, UITableViewDelegate {
             cell = UITableViewCell(style: .default, reuseIdentifier: "cell")
         }
         
-        cell.textLabel?.text = "Cell \(indexPath)"
+        let item = items[indexPath.row]
+        cell.textLabel?.text = (item[labelKey] as? String) ?? "Unknown"
         return cell
     }
     
