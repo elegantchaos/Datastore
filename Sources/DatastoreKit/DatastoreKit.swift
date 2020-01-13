@@ -80,11 +80,6 @@ public class DatastoreIndexController: UIViewController {
 
         stack.translatesAutoresizingMaskIntoConstraints = false
         stack.stickTo(view: view)
-//        stack.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
-//        stack.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-//        stack.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
-//        stack.widthAnchor.constraint(equalTo: view.widthAnchor).isActive = true
-//        stack.heightAnchor.constraint(equalTo: view.heightAnchor).isActive = true
     }
     
     public override func viewWillAppear(_ animated: Bool) {
@@ -97,9 +92,12 @@ public class DatastoreIndexController: UIViewController {
     func requestIndex() {
         if let store = datastore {
             store.getAllEntities() { results in
-                DispatchQueue.main.async {
-                    self.items = results
-                    self.table.reloadData()
+                store.get(properties: [self.labelKey], of: results) { items in
+                    DispatchQueue.main.async {
+                        self.items = items
+                        self.table.reloadData()
+                        self.table.invalidateIntrinsicContentSize()
+                    }
                 }
             }
         }
