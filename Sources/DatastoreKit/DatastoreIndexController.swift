@@ -13,10 +13,12 @@ public class DatastoreIndexController: UIViewController {
     var items: [EntityReference] = []
     var labelKey: PropertyKey = .name
     var sortingKeys: [PropertyKey] = [.name]
+    var filter: String?
     var sortAscending = true
     var addSortButton = true
-    var searchController: UISearchController? = nil
+    
     var tableView: UITableView!
+    var searchBar: UISearchBar!
     
     override public func viewDidLoad() {
         super.viewDidLoad()
@@ -35,21 +37,34 @@ public class DatastoreIndexController: UIViewController {
         self.tableView = table
         stack.addArrangedSubview(table)
 
-        let searchController = UISearchController(searchResultsController: nil)
-        searchController.searchResultsUpdater = self
-        searchController.hidesNavigationBarDuringPresentation = true
-        searchController.obscuresBackgroundDuringPresentation = true
-        searchController.searchBar.sizeToFit()
-        self.searchController = searchController
-        
-        searchController.searchBar.showsScopeBar = true
-        searchController.searchBar.showsSearchResultsButton = true
         let headerStack = UIStackView()
         headerStack.axis = .horizontal
-        headerStack.alignment = .bottom
+        headerStack.alignment = .center
         headerStack.distribution = .fill
-        headerStack.addArrangedSubview(searchController.searchBar)
 
+        let searchBar = UISearchBar()
+        searchBar.delegate = self
+        searchBar.searchBarStyle = .minimal
+//        searchBar.scopeButtonTitles = ["Person", "Book"]
+//        searchBar.showsScopeBar = true
+        searchBar.showsSearchResultsButton = true
+        searchBar.showsBookmarkButton = true
+        searchBar.isHidden = true
+        headerStack.addArrangedSubview(searchBar)
+        self.searchBar = searchBar
+
+        let spacer = UIView(frame: .zero)
+//        spacer.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        spacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        headerStack.addArrangedSubview(spacer)
+        
+        let filterButton = UIButton(type: .custom)
+        filterButton.setImage(UIImage(systemName: "line.horizontal.3.decrease.circle"), for: .normal)
+        headerStack.addArrangedSubview(filterButton)
+
+        let searchButton = DatastoreIndexSearchButton(index: self)
+        headerStack.addArrangedSubview(searchButton)
+        
         if addSortButton {
             let sortButton = DatastoreIndexSortButton(index: self)
             headerStack.addArrangedSubview(sortButton)
@@ -85,12 +100,40 @@ public class DatastoreIndexController: UIViewController {
         requestIndex()
     }
     
+    func toggleSearchBar() {
+        searchBar.isHidden = !searchBar.isHidden
+        if searchBar.isHidden {
+            searchBar.resignFirstResponder()
+        } else {
+            searchBar.becomeFirstResponder()
+        }
+
+        view.setNeedsLayout()
+        tableView.setNeedsLayout()
+        tableView.setNeedsUpdateConstraints()
+    }
+    
+    func filter(items: [EntityReference]) -> [EntityReference] {
+        guard let filter = filter, filter.count > 0 else {
+            return items
+        }
+        
+        return items.filter({
+            if let string = $0[labelKey] as? String {
+                return string.contains(filter)
+            } else {
+                return false
+            }
+        })
+    }
+        
     func requestIndex() {
         if let store = datastore {
             store.getAllEntities() { results in
                 store.get(properties: [self.labelKey], of: results) { items in
                     DispatchQueue.main.async {
-                        let sorted = items.sorted { (i1, i2) -> Bool in
+                        let filtered = self.filter(items: items)
+                        let sorted = filtered.sorted { (i1, i2) -> Bool in
                             for key in self.sortingKeys {
                                 if let s1 = i1[key] as? String, let s2 = i2[key] as? String {
                                     if s1 < s2 {
@@ -131,8 +174,31 @@ extension DatastoreIndexController: UITableViewDelegate, UITableViewDataSource {
     
 }
 
-extension DatastoreIndexController: UISearchResultsUpdating {
-    public func updateSearchResults(for searchController: UISearchController) {
-        
+extension DatastoreIndexController: UISearchBarDelegate {
+    public func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        filter = searchText
+        requestIndex()
+        if searchText.isEmpty {
+            DispatchQueue.main.async {
+                searchBar.resignFirstResponder()
+            }
+        }
+    }
+
+    public func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        print("search button")
+    }
+    
+    public func searchBarResultsListButtonClicked(_ searchBar: UISearchBar) {
+        print("results list")
+    }
+    
+    public func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        print("cancel")
+    }
+    
+    public func searchBarBookmarkButtonClicked(_ searchBar: UISearchBar) {
+        print("bookmark")
     }
 }
+
