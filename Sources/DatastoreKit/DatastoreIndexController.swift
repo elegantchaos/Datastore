@@ -5,15 +5,18 @@
 
 import UIKit
 import Datastore
-import Layout
+import LayoutExtensions
+import ViewExtensions
 
 public class DatastoreIndexController: UIViewController {
-    var table: UITableView!
     var datastore: Datastore?
     var items: [EntityReference] = []
     var labelKey: PropertyKey = .name
     var sortingKeys: [PropertyKey] = [.name]
     var sortAscending = true
+    var addSortButton = true
+    var searchController: UISearchController? = nil
+    var tableView: UITableView!
     
     override public func viewDidLoad() {
         super.viewDidLoad()
@@ -26,17 +29,35 @@ public class DatastoreIndexController: UIViewController {
         stack.distribution = .fill
         view.addSubview(stack)
 
-        let sortButton = UIButton(type: .custom)
-        updateSortIcon(for: sortButton)
-        sortButton.addTarget(self, action: #selector(sort(_:)), for: .primaryActionTriggered)
-        stack.addArrangedSubview(sortButton)
-
-        table = SelfSizingTable()
+        let table = EnhancedTableView()
         table.delegate = self
         table.dataSource = self
-        table.showsVerticalScrollIndicator = false
-        table.isScrollEnabled = false
+        self.tableView = table
         stack.addArrangedSubview(table)
+
+        let searchController = UISearchController(searchResultsController: nil)
+        searchController.searchResultsUpdater = self
+        searchController.hidesNavigationBarDuringPresentation = true
+        searchController.obscuresBackgroundDuringPresentation = true
+        searchController.searchBar.sizeToFit()
+        self.searchController = searchController
+        
+        searchController.searchBar.showsScopeBar = true
+        searchController.searchBar.showsSearchResultsButton = true
+        let headerStack = UIStackView()
+        headerStack.axis = .horizontal
+        headerStack.alignment = .bottom
+        headerStack.distribution = .fill
+        headerStack.addArrangedSubview(searchController.searchBar)
+
+        if addSortButton {
+            let sortButton = DatastoreIndexSortButton(index: self)
+            headerStack.addArrangedSubview(sortButton)
+        }
+
+
+        headerStack.sizeToFit()
+        table.tableHeaderView = headerStack
 
         let label2 = UILabel()
         label2.text = "Another Test Which Is Long Enough To Wrap Around Onto A Second Line"
@@ -58,18 +79,10 @@ public class DatastoreIndexController: UIViewController {
         datastore = findStore()
         requestIndex()
     }
-    
-    func updateSortIcon(for button: UIButton) {
-        let imageName = sortAscending ? "chevron.up.circle" : "chevron.down.circle"
-        button.setImage(UIImage(systemName: imageName), for: .normal)
-    }
-    
-    @IBAction func sort(_ sender: Any) {
+        
+    func toggleSortDirection() {
         sortAscending = !sortAscending
         requestIndex()
-        if let button = sender as? UIButton {
-            updateSortIcon(for: button)
-        }
     }
     
     func requestIndex() {
@@ -90,8 +103,8 @@ public class DatastoreIndexController: UIViewController {
                             return false
                         }
                         self.items = sorted
-                        self.table.reloadData()
-                        self.table.invalidateIntrinsicContentSize()
+                        self.tableView.reloadData()
+                        self.tableView.invalidateIntrinsicContentSize()
                     }
                 }
             }
@@ -99,7 +112,7 @@ public class DatastoreIndexController: UIViewController {
     }
 }
 
-extension DatastoreIndexController: UITableViewDataSource, UITableViewDelegate {
+extension DatastoreIndexController: UITableViewDelegate, UITableViewDataSource {
     public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return items.count
     }
@@ -116,4 +129,10 @@ extension DatastoreIndexController: UITableViewDataSource, UITableViewDelegate {
     }
     
     
+}
+
+extension DatastoreIndexController: UISearchResultsUpdating {
+    public func updateSearchResults(for searchController: UISearchController) {
+        
+    }
 }
