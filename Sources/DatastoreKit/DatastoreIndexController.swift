@@ -25,11 +25,9 @@ public class DatastoreIndexController: UIViewController {
         
         view.translatesAutoresizingMaskIntoConstraints = false
         
-        let stack = UIStackView()
-        stack.axis = .vertical
-        stack.alignment = .fill
-        stack.distribution = .fill
+        let stack = UIStackView(axis: .vertical)
         view.addSubview(stack)
+        stack.stickTo(view: view)
 
         let table = EnhancedTableView()
         table.delegate = self
@@ -37,55 +35,49 @@ public class DatastoreIndexController: UIViewController {
         self.tableView = table
         stack.addArrangedSubview(table)
 
-        let headerStack = UIStackView()
-        headerStack.axis = .horizontal
-        headerStack.alignment = .center
-        headerStack.distribution = .fill
+        setupFooter()
+        
+//        let label2 = UILabel()
+//        label2.text = "Another Test Which Is Long Enough To Wrap Around Onto A Second Line"
+//        label2.textAlignment = .center
+//        label2.numberOfLines = 0
+//        label2.sizeToFit()
+//        label2.lineBreakMode = .byWordWrapping
+//        label2.font = .systemFont(ofSize: 20)
+//        label2.backgroundColor = .red
+//        stack.addArrangedSubview(label2)
+    }
+    
+    func setupFooter() {
+        let stack = UIStackView(axis: .horizontal, alignment: .center)
 
         let searchBar = UISearchBar()
         searchBar.delegate = self
         searchBar.searchBarStyle = .minimal
-//        searchBar.scopeButtonTitles = ["Person", "Book"]
-//        searchBar.showsScopeBar = true
-        searchBar.showsSearchResultsButton = true
-        searchBar.showsBookmarkButton = true
+//        searchBar.showsSearchResultsButton = true
+//        searchBar.showsBookmarkButton = true
         searchBar.isHidden = true
-        headerStack.addArrangedSubview(searchBar)
+        stack.addArrangedSubview(searchBar)
         self.searchBar = searchBar
-
-        let spacer = UIView(frame: .zero)
-//        spacer.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-        spacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
-        headerStack.addArrangedSubview(spacer)
         
-        let filterButton = UIButton(type: .custom)
-        filterButton.setImage(UIImage(systemName: "line.horizontal.3.decrease.circle"), for: .normal)
-        headerStack.addArrangedSubview(filterButton)
-
+        let spacer = UIView(frame: .zero)
+        //        spacer.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        spacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        stack.addArrangedSubview(spacer)
+        
+        let filterButton = DatastoreIndexFilterButton()
+        stack.addArrangedSubview(filterButton)
+        
         let searchButton = DatastoreIndexSearchButton(index: self)
-        headerStack.addArrangedSubview(searchButton)
+        stack.addArrangedSubview(searchButton)
         
         if addSortButton {
             let sortButton = DatastoreIndexSortButton(index: self)
-            headerStack.addArrangedSubview(sortButton)
+            stack.addArrangedSubview(sortButton)
         }
-
-
-        headerStack.sizeToFit()
-        table.tableHeaderView = headerStack
-
-        let label2 = UILabel()
-        label2.text = "Another Test Which Is Long Enough To Wrap Around Onto A Second Line"
-        label2.textAlignment = .center
-        label2.numberOfLines = 0
-        label2.sizeToFit()
-        label2.lineBreakMode = .byWordWrapping
-        label2.font = .systemFont(ofSize: 20)
-        label2.backgroundColor = .red
-        stack.addArrangedSubview(label2)
-
-        stack.translatesAutoresizingMaskIntoConstraints = false
-        stack.stickTo(view: view)
+        
+        stack.sizeToFit()
+        tableView.tableFooterView = stack
     }
     
     public override func viewWillAppear(_ animated: Bool) {
@@ -109,6 +101,7 @@ public class DatastoreIndexController: UIViewController {
         }
 
         view.setNeedsLayout()
+        tableView.tableHeaderView = tableView.tableHeaderView
         tableView.setNeedsLayout()
         tableView.setNeedsUpdateConstraints()
     }
