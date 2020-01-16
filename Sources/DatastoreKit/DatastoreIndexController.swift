@@ -65,11 +65,11 @@ public class DatastoreIndexController: UIViewController {
         spacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
         stack.addArrangedSubview(spacer)
         
-        let filterButton = DatastoreIndexFilterButton()
-        stack.addArrangedSubview(filterButton)
-        
         let searchButton = DatastoreIndexSearchButton(index: self)
         stack.addArrangedSubview(searchButton)
+        
+        let filterButton = DatastoreIndexFilterButton()
+        stack.addArrangedSubview(filterButton)
         
         if addSortButton {
             let sortButton = DatastoreIndexSortButton(index: self)
