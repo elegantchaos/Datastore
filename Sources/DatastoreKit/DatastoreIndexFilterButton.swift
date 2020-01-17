@@ -5,15 +5,25 @@
 
 import UIKit
 import ViewExtensions
+import Datastore
 
 public class DatastoreIndexFilterButton: PopoverMenuButton {
-    public convenience init() {
+    public convenience init(forTypes entityTypes: [EntityType]) {
+        var items = ["All", "-"]
+        items.append(contentsOf: entityTypes.map { $0.name })
         self.init(
-            items: ["Foo", "Bar", "Fubar", "Wibble"],
-            systemIconName: "line.horizontal.3.decrease.circle",
-            onSelect: { item in
-                print("selected \(item)")
-        })
+            items: items,
+            systemIconName: "line.horizontal.3.decrease.circle"
+        )
     }
     
+    override open func select(item: MenuItem) {
+        if let controller = self.findViewController() as? DatastoreIndexController, let string = item as? String {
+            if string == "All" {
+                controller.clearFilter()
+            } else {
+                controller.filter(by: EntityType(string))
+            }
+        }
+    }
 }

@@ -11,9 +11,11 @@ import ViewExtensions
 public class DatastoreIndexController: UIViewController {
     var datastore: Datastore?
     var items: [EntityReference] = []
-    var labelKey: PropertyKey = .name
-    var sortingKeys: [PropertyKey] = [.name]
-    var filter: String?
+    public var labelKey: PropertyKey = .name
+    public var sortingKeys: [PropertyKey] = [.name]
+    public var filterTypes: [EntityType] = []
+    var filterString: String?
+    var filterType: EntityType?
     var sortAscending = true
     var addSortButton = true
     
@@ -34,18 +36,6 @@ public class DatastoreIndexController: UIViewController {
         table.dataSource = self
         self.tableView = table
         stack.addArrangedSubview(table)
-
-        setupFooter()
-        
-//        let label2 = UILabel()
-//        label2.text = "Another Test Which Is Long Enough To Wrap Around Onto A Second Line"
-//        label2.textAlignment = .center
-//        label2.numberOfLines = 0
-//        label2.sizeToFit()
-//        label2.lineBreakMode = .byWordWrapping
-//        label2.font = .systemFont(ofSize: 20)
-//        label2.backgroundColor = .red
-//        stack.addArrangedSubview(label2)
     }
     
     func setupFooter() {
@@ -54,8 +44,6 @@ public class DatastoreIndexController: UIViewController {
         let searchBar = UISearchBar()
         searchBar.delegate = self
         searchBar.searchBarStyle = .minimal
-//        searchBar.showsSearchResultsButton = true
-//        searchBar.showsBookmarkButton = true
         searchBar.isHidden = true
         stack.addArrangedSubview(searchBar)
         self.searchBar = searchBar
@@ -68,8 +56,10 @@ public class DatastoreIndexController: UIViewController {
         let searchButton = DatastoreIndexSearchButton(index: self)
         stack.addArrangedSubview(searchButton)
         
-        let filterButton = DatastoreIndexFilterButton()
-        stack.addArrangedSubview(filterButton)
+        if filterTypes.count > 0 {
+            let filterButton = DatastoreIndexFilterButton(forTypes: filterTypes)
+            stack.addArrangedSubview(filterButton)
+        }
         
         if addSortButton {
             let sortButton = DatastoreIndexSortButton(index: self)
@@ -83,6 +73,7 @@ public class DatastoreIndexController: UIViewController {
     public override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
+        setupFooter()
         datastore = findStore()
         requestIndex()
     }
@@ -106,8 +97,18 @@ public class DatastoreIndexController: UIViewController {
         tableView.setNeedsUpdateConstraints()
     }
     
-    func filter(items: [EntityReference]) -> [EntityReference] {
-        guard let filter = filter, filter.count > 0 else {
+    public func clearFilter() {
+        filterType = nil
+        requestIndex()
+    }
+    
+    public func filter(by type: EntityType) {
+        filterType = type
+        requestIndex()
+    }
+    
+    func filterByString(items: [EntityReference]) -> [EntityReference] {
+        guard let filter = filterString, !filter.isEmpty else {
             return items
         }
         
@@ -119,14 +120,23 @@ public class DatastoreIndexController: UIViewController {
             }
         })
     }
+    
+    func filterByType(items: [EntityReference]) -> [EntityReference] {
+        guard let type = filterType else {
+            return items
+        }
         
+        return items.filter({ $0.type == type })
+    }
+    
     func requestIndex() {
         if let store = datastore {
             store.getAllEntities() { results in
                 store.get(properties: [self.labelKey], of: results) { items in
                     DispatchQueue.main.async {
-                        let filtered = self.filter(items: items)
-                        let sorted = filtered.sorted { (i1, i2) -> Bool in
+                        let filteredForType = self.filterByType(items: items)
+                        let filteredForTypeAndString = self.filterByString(items: filteredForType)
+                        let sorted = filteredForTypeAndString.sorted { (i1, i2) -> Bool in
                             for key in self.sortingKeys {
                                 if let s1 = i1[key] as? String, let s2 = i2[key] as? String {
                                     if s1 < s2 {
@@ -169,7 +179,7 @@ extension DatastoreIndexController: UITableViewDelegate, UITableViewDataSource {
 
 extension DatastoreIndexController: UISearchBarDelegate {
     public func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        filter = searchText
+        filterString = searchText
         requestIndex()
         if searchText.isEmpty {
             DispatchQueue.main.async {
