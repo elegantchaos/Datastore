@@ -32,9 +32,7 @@ public class DatastoreIndexController: UIViewController {
     
     override public func viewDidLoad() {
         super.viewDidLoad()
-        
-        view.translatesAutoresizingMaskIntoConstraints = false
-        
+
         let table = EnhancedTableView()
         table.selfSizing = selfSizing
         table.delegate = self
@@ -83,6 +81,11 @@ public class DatastoreIndexController: UIViewController {
         requestIndex()
     }
         
+    public override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        view.backgroundColor = .red
+    }
+    
     func toggleSortDirection() {
         sortAscending = !sortAscending
         requestIndex()
