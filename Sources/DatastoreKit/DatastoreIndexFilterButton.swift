@@ -20,7 +20,14 @@ public class DatastoreIndexFilterButton: PopoverMenuButton {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
+    override open func updateIcon() {
+        if let index = index {
+            let imageName = index.filterType == nil ? "line.horizontal.3.decrease.circle" : "line.horizontal.3.decrease.circle.fill"
+            setImage(UIImage(systemName: imageName), for: .normal)
+        }
+    }
+
     override open func itemCount() -> Int {
         return types.count
     }
@@ -39,6 +46,7 @@ public class DatastoreIndexFilterButton: PopoverMenuButton {
     override open func select(item: Any) {
         if let type = item as? EntityType, let index = index {
             index.toggleFilter(for: type)
+            updateIcon()
         }
     }
 }
