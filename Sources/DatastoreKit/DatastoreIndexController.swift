@@ -9,11 +9,19 @@ import LayoutExtensions
 import ViewExtensions
 
 public class DatastoreIndexController: UIViewController {
-    var datastore: Datastore?
-    var items: [EntityReference] = []
+    public typealias SelectionHandler = (EntityReference) -> ()
+
+    // MARK: Configuration Properties
     public var labelKey: PropertyKey = .name
     public var sortingKeys: [PropertyKey] = [.name]
     public var filterTypes: [EntityType] = []
+    public var onSelect: SelectionHandler?
+    
+    // MARK: Private Properties
+    
+    var datastore: Datastore?
+    var items: [EntityReference] = []
+    
     var filterString: String?
     var filterType: EntityType?
     var sortAscending = true
@@ -170,7 +178,10 @@ extension DatastoreIndexController: UITableViewDelegate, UITableViewDataSource {
         return cell
     }
     
-    
+    public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let item = items[indexPath.row]
+        onSelect?(item)
+    }
 }
 
 extension DatastoreIndexController: UISearchBarDelegate {
