@@ -8,22 +8,37 @@ import ViewExtensions
 import Datastore
 
 public class DatastoreIndexFilterButton: PopoverMenuButton {
-    public convenience init(forTypes entityTypes: [EntityType]) {
-        var items = ["All", "-"]
-        items.append(contentsOf: entityTypes.map { $0.name })
-        self.init(
-            items: items,
-            systemIconName: "line.horizontal.3.decrease.circle"
-        )
+    let index: DatastoreIndexController?
+    let types: [EntityType]
+    
+    public init(index: DatastoreIndexController, forTypes entityTypes: [EntityType]) {
+        self.index = index
+        self.types = entityTypes
+        super.init(systemIconName: "line.horizontal.3.decrease.circle", label: "filter by:")
     }
     
-    override open func select(item: MenuItem) {
-        if let controller = self.findViewController() as? DatastoreIndexController, let string = item as? String {
-            if string == "All" {
-                controller.clearFilter()
-            } else {
-                controller.filter(by: EntityType(string))
-            }
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    override open func itemCount() -> Int {
+        return types.count
+    }
+    
+    override open func item(at row: Int) -> Any? {
+        return types[row]
+    }
+    
+    override open func configure(cell: UITableViewCell, for item: Any) {
+        if let type = item as? EntityType, let index = index {
+            cell.textLabel?.text = type.name
+            cell.accessoryType = index.filterType == type ? .checkmark : .none
+        }
+    }
+    
+    override open func select(item: Any) {
+        if let type = item as? EntityType, let index = index {
+            index.toggleFilter(for: type)
         }
     }
 }

@@ -57,7 +57,7 @@ public class DatastoreIndexController: UIViewController {
         stack.addArrangedSubview(searchButton)
         
         if filterTypes.count > 0 {
-            let filterButton = DatastoreIndexFilterButton(forTypes: filterTypes)
+            let filterButton = DatastoreIndexFilterButton(index: self, forTypes: filterTypes)
             stack.addArrangedSubview(filterButton)
         }
         
@@ -97,13 +97,12 @@ public class DatastoreIndexController: UIViewController {
         tableView.setNeedsUpdateConstraints()
     }
     
-    public func clearFilter() {
-        filterType = nil
-        requestIndex()
-    }
-    
-    public func filter(by type: EntityType) {
-        filterType = type
+    public func toggleFilter(for type: EntityType) {
+        if filterType == type {
+            filterType = nil
+        } else {
+            filterType = type
+        }
         requestIndex()
     }
     
