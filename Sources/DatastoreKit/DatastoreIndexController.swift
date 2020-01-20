@@ -18,7 +18,7 @@ public class DatastoreIndexController: UIViewController {
     var filterType: EntityType?
     var sortAscending = true
     var addSortButton = true
-    
+    var selfSizing = false
     var tableView: UITableView!
     var searchBar: UISearchBar!
     
@@ -27,19 +27,17 @@ public class DatastoreIndexController: UIViewController {
         
         view.translatesAutoresizingMaskIntoConstraints = false
         
-        let stack = UIStackView(axis: .vertical)
-        view.addSubview(stack)
-        stack.stickTo(view: view)
-
         let table = EnhancedTableView()
+        table.selfSizing = selfSizing
         table.delegate = self
         table.dataSource = self
         self.tableView = table
-        stack.addArrangedSubview(table)
+        view.addSubview(table)
+        table.stickTo(view: view)
     }
     
     func setupFooter() {
-        let stack = UIStackView(axis: .horizontal, alignment: .center)
+        let stack = UIStackView(axis: .horizontal, alignment: .top)
 
         let searchBar = UISearchBar()
         searchBar.delegate = self
@@ -49,7 +47,6 @@ public class DatastoreIndexController: UIViewController {
         self.searchBar = searchBar
         
         let spacer = UIView(frame: .zero)
-        //        spacer.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         spacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
         stack.addArrangedSubview(spacer)
         
