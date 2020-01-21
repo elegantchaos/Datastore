@@ -9,15 +9,22 @@ let package = Package(
     ],
     products: [
         .library(name: "Datastore", targets: ["Datastore"]),
+        .library(name: "DatastoreKit", targets: ["DatastoreKit"]),
         ],
     dependencies: [
         .package(url: "https://github.com/elegantchaos/Logger.git", from: "1.3.6"),
-        .package(url: "https://github.com/elegantchaos/XCTestExtensions.git", from: "1.0.5"),
+        .package(url: "https://github.com/elegantchaos/LayoutExtensions.git", from: "1.0.3"),
+        .package(url: "https://github.com/elegantchaos/ViewExtensions.git", from: "1.0.3"),
+        .package(url: "https://github.com/elegantchaos/ApplicationExtensions.git", from: "1.0.0"),
+        .package(url: "https://github.com/elegantchaos/XCTestExtensions.git", from: "1.0.7"),
     ],
     targets: [
         .target(
             name: "Datastore",
             dependencies: ["Logger"]),
+        .target(
+            name: "DatastoreKit",
+            dependencies: ["Datastore", "LayoutExtensions", "ViewExtensions", "Logger"]),
         .testTarget(
             name: "DatastoreTests",
             dependencies: ["Datastore", "XCTestExtensions"]),

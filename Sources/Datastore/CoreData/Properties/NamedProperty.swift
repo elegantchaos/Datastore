@@ -13,7 +13,7 @@ public class NamedProperty: NSManagedObject {
     
     var type: PropertyType { return PropertyType(typeName) }
     
-    var propertyValue: PropertyValue {
+    func propertyValue(for store: Datastore) -> PropertyValue {
         return PropertyValue(nil)
     }
     

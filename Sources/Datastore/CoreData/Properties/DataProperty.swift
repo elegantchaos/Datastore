@@ -1,15 +1,14 @@
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-//  Created by Sam Deane on 19/09/2019.
+//  Created by Sam Deane on 26/09/2019.
 //  All code (c) 2019 - present day, Elegant Chaos Limited.
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 import Foundation
 
-
-public class DateProperty: NamedProperty {
-    @NSManaged public var value: Date
+public class DataProperty: NamedProperty {
+    @NSManaged public var value: Data
     
-    override var propertyValue: PropertyValue {
+    override func propertyValue(for store: Datastore) -> PropertyValue {
         return PropertyValue(value, type: type, datestamp: datestamp)
     }
 

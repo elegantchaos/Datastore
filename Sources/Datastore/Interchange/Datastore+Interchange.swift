@@ -33,11 +33,11 @@ extension Datastore {
 
  
     fileprivate func decodeEntities(from interchange: [String : Any], with decoder: InterchangeDecoder) {
-        if let entities = interchange[PropertyKey.entities.name] as? [[String:Any]] {
+        if let entities = interchange[PropertyKey.entities.value] as? [[String:Any]] {
             for entityRecord in entities {
                 // TODO: allow missing identifiers?
                 // TODO: warn when identifier or type is missing?
-                if let identifier = entityRecord[PropertyKey.identifier.name] as? String, let type = entityRecord[PropertyKey.type.name] as? String {
+                if let identifier = entityRecord[PropertyKey.identifier.value] as? String, let type = entityRecord[PropertyKey.type.value] as? String {
                     var entity = EntityRecord.withIdentifier(identifier, in: context)
                     if entity == nil {
                         let newEntity = EntityRecord(in: context)
@@ -55,17 +55,17 @@ extension Datastore {
     }
     
     fileprivate func decodeEntity(_ entity: EntityRecord, with decoder: InterchangeDecoder, values entityRecord: [String : Any]) {
-        entity.datestamp = decoder.decode(entityRecord[PropertyKey.datestamp.name], store: self).coerced(or: Date())
+        entity.datestamp = decoder.decode(entityRecord[PropertyKey.datestamp.value], store: self).coerced(or: Date())
          var entityProperties = entityRecord
          for key in Datastore.specialProperties {
-            entityProperties.removeValue(forKey: key.name)
+            entityProperties.removeValue(forKey: key.value)
          }
         decode(properties: entityProperties, of: entity, with: decoder)
      }
      
     fileprivate func decode(properties: [String:Any], of entity: EntityRecord, with decoder: InterchangeDecoder) {
         for (key, value) in properties {
-            entity.add(property: PropertyKey(key), value: decoder.decode(value, store: self), store: self)
+            let _ = entity.add(property: PropertyKey(key), value: decoder.decode(value, store: self), store: self)
         }
     }
 
@@ -77,9 +77,9 @@ extension Datastore {
             if let entities = try? context.fetch(request) {
                 for entity in entities {
                     var record: [String:Any] = [:]
-                    record[PropertyKey.type.name] = entity.type
-                    record[PropertyKey.datestamp.name] = encoder.encodePrimitive(entity.datestamp)
-                    record[PropertyKey.identifier.name] = entity.identifier
+                    record[PropertyKey.type.value] = entity.type
+                    record[PropertyKey.datestamp.value] = encoder.encodePrimitive(entity.datestamp)
+                    record[PropertyKey.identifier.value] = entity.identifier
                     entity.encode(from: entity.strings, as: StringProperty.self, into: &record, encoder: encoder)
                     entity.encode(from: entity.integers, as: IntegerProperty.self, into: &record, encoder: encoder)
                     entity.encode(from: entity.dates, as: DateProperty.self, into: &record, encoder: encoder)
@@ -89,7 +89,7 @@ extension Datastore {
                 }
             }
             let result = [
-                PropertyKey.entities.name : entityResults
+                PropertyKey.entities.value : entityResults
             ]
             completion(result)
         }
