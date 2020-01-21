@@ -3,6 +3,7 @@
 //  All code (c) 2020 - present day, Elegant Chaos Limited.
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
+#if targetEnvironment(macCatalyst) || !os(macOS)
 import UIKit
 import ViewExtensions
 import Datastore
@@ -50,3 +51,4 @@ public class DatastoreIndexFilterButton: PopoverMenuButton {
         }
     }
 }
+#endif

@@ -3,6 +3,7 @@
 //  All code (c) 2020 - present day, Elegant Chaos Limited.
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
+#if targetEnvironment(macCatalyst) || !os(macOS)
 import UIKit
 
 public class DatastoreIndexSearchButton: UIButton {
@@ -33,3 +34,4 @@ public class DatastoreIndexSearchButton: UIButton {
     }
 
 }
+#endif
