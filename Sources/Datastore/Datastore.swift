@@ -45,6 +45,7 @@ public class Datastore {
     public typealias LoadCompletion = (LoadResult) -> Void
     public typealias SaveCompletion = (SaveResult) -> Void
     public typealias EntitiesCompletion = ([EntityReference]) -> Void
+    public typealias TypesCompletion = ([EntityType]) -> Void
     public typealias EntityCompletion = (EntityReference?) -> Void
     public typealias InterchangeCompletion = ([String:Any]) -> Void
     public typealias CountCompletion = ([Int]) -> Void
@@ -339,6 +340,22 @@ public class Datastore {
             let request: NSFetchRequest<EntityRecord> = EntityRecord.fetcher(in: context)
             if let entities = try? context.fetch(request) {
                 completion(Array(entities.map({ self.makeReference(for: $0) })))
+            } else {
+                completion([])
+            }
+        }
+    }
+
+    /// Retrieve all entity types
+    /// - Parameter completion: completion block
+    public func getAllEntityTypes(completion: @escaping TypesCompletion) {
+        let context = self.context
+        context.perform {
+            
+            let request: NSFetchRequest<EntityRecord> = EntityRecord.fetcher(in: context)
+            if let entities = try? context.fetch(request) {
+                let typeNames = Set(entities.compactMap({ $0.type }))
+                completion(Array(typeNames.map({ EntityType($0) })))
             } else {
                 completion([])
             }

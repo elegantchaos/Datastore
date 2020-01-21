@@ -295,6 +295,32 @@ class DatastoreTests: DatastoreTestCase {
         wait(for: [done], timeout: 1.0)
     }
     
+    func testGetAllEntities() {
+        let done = expectation(description: "done")
+        loadJSON(name: "Relationships", expectation: done) { datastore in
+            datastore.getAllEntities { (entities) in
+                XCTAssertEqual(entities.count, 3)
+                done.fulfill()
+            }
+        }
+        wait(for: [done], timeout: 1.0)
+    }
+    
+    func testGetAllEntityTypes() {
+        let done = expectation(description: "done")
+        loadJSON(name: "Relationships", expectation: done) { datastore in
+            datastore.getAllEntityTypes { (types) in
+                XCTAssertEqual(types.count, 2)
+                let expected: [EntityType] = ["book", "test"]
+                for type in types {
+                    XCTAssertTrue(expected.contains(type), "didn't contain \(type)")
+                }
+                done.fulfill()
+            }
+        }
+        wait(for: [done], timeout: 1.0)
+    }
+    
     func testGetProperties() {
         // test getting some properties of an existing entity
         let done = expectation(description: "done")

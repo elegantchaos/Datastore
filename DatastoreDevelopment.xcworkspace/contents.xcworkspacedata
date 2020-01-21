@@ -11,9 +11,12 @@
       location = "group:../ViewExtensions">
    </FileRef>
    <FileRef
+      location = "group:../ApplicationExtensions">
+   </FileRef>
+   <FileRef
       location = "group:../XCTestExtensions">
    </FileRef>
    <FileRef
-      location = "group:Packages/XCTestExtensions">
+      location = "group:../Logger">
    </FileRef>
 </Workspace>
