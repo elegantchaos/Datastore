@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/elegantchaos/LayoutExtensions.git",
         "state": {
           "branch": null,
-          "revision": "bc64454cbd24cbfa4175725598ba93b5f02ab6e4",
-          "version": "1.0.2"
+          "revision": "83221ab90e37b3fb4a8f145f81825cbf590603da",
+          "version": "1.0.3"
         }
       },
       {
@@ -33,8 +33,8 @@
         "repositoryURL": "https://github.com/elegantchaos/ViewExtensions.git",
         "state": {
           "branch": null,
-          "revision": "a3ce86a0623d1d0a906a131d93bc331797f95a6f",
-          "version": "1.0.2"
+          "revision": "8cce15c52b8e2248fb62b68bdbdb4c7d56868ddb",
+          "version": "1.0.3"
         }
       },
       {
