@@ -57,6 +57,8 @@ public class Datastore {
     
     static let specialProperties: [PropertyKey] = [.identifier, .datestamp, .type]
     
+    public var url: URL { container.viewContext.persistentStoreCoordinator!.persistentStores.first!.url! }
+    
     /// Load a store.
     /// - Parameters:
     ///   - name: name to use for the store

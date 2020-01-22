@@ -9,7 +9,7 @@ import Datastore
 import LayoutExtensions
 import ViewExtensions
 
-public class DatastoreEntityController: UIViewController {
+public class DatastorePropertyController: UIViewController {
     public typealias SectionOrder = [PropertyKey]
     public typealias SectionsList = [SectionOrder]
     
@@ -21,7 +21,10 @@ public class DatastoreEntityController: UIViewController {
     var entity: EntityReference
     var sections: SectionsList
 
-    var valueViews: [PropertyType : PropertyView.Type] = [ .string: StringPropertyView.self ]
+    var valueViews: [PropertyType : DatastorePropertyView.Type] = [
+        .string: StringPropertyView.self,
+        .date: DatePropertyView.self
+    ]
     
     var tableView: UITableView!
     
@@ -53,7 +56,7 @@ public class DatastoreEntityController: UIViewController {
         view.backgroundColor = .red
     }
     
-    func registeredViewClass(for value: PropertyValue) -> PropertyView.Type {
+    func registeredViewClass(for value: PropertyValue) -> DatastorePropertyView.Type {
         guard let type = value.type, let entry = valueViews[type] else {
             return GenericPropertyView.self
         }
@@ -62,7 +65,7 @@ public class DatastoreEntityController: UIViewController {
     }
 }
 
-extension DatastoreEntityController: UITableViewDelegate, UITableViewDataSource {
+extension DatastorePropertyController: UITableViewDelegate, UITableViewDataSource {
     public func numberOfSections(in tableView: UITableView) -> Int {
         return sections.count
     }
@@ -93,7 +96,7 @@ extension DatastoreEntityController: UITableViewDelegate, UITableViewDataSource 
         if let value = item {
             let viewClass = registeredViewClass(for: value)
             let valueView = viewClass.init()
-            valueView.setup(value: value, withKey: key, forEntity: entity)
+            valueView.setup(value: value, withKey: key, for: self)
             stack.addArrangedSubview(valueView)
         }
         
@@ -104,26 +107,5 @@ extension DatastoreEntityController: UITableViewDelegate, UITableViewDataSource 
 //        let item = items[indexPath.row]
 //        onSelect?(item)
 //    }
-}
-
-protocol PropertyView: UIView {
-    func setup(value: PropertyValue, withKey: PropertyKey, forEntity: EntityReference)
-}
-
-class GenericPropertyView: UILabel, PropertyView {
-    func setup(value: PropertyValue, withKey: PropertyKey, forEntity: EntityReference) {
-        if let actualValue = value.value {
-            let type = value.type?.name ?? "<unknown type>"
-            text = "\(actualValue) (\(type))"
-        } else {
-            text = "<nil>"
-        }
-    }
-}
-
-class StringPropertyView: UILabel, PropertyView {
-    func setup(value: PropertyValue, withKey: PropertyKey, forEntity: EntityReference) {
-        text = value.coerced(or: "")
-    }
 }
 #endif
