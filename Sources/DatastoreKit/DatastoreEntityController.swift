@@ -112,7 +112,12 @@ protocol PropertyView: UIView {
 
 class GenericPropertyView: UILabel, PropertyView {
     func setup(value: PropertyValue, withKey: PropertyKey, forEntity: EntityReference) {
-        text = String(describing: value)
+        if let actualValue = value.value {
+            let type = value.type?.name ?? "<unknown type>"
+            text = "\(actualValue) (\(type))"
+        } else {
+            text = "<nil>"
+        }
     }
 }
 
