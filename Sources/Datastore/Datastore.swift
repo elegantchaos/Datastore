@@ -402,22 +402,22 @@ public class Datastore {
     /// - Parameters:
     ///   - entities: the entities to get properties for
     ///   - completion: completion block
-    public func get(allPropertiesOf entities: [EntityReference], completion: @escaping ([PropertyDictionary]) -> Void) {
+    public func get(allPropertiesOf entities: [EntityReference], completion: @escaping ([EntityReference]) -> Void) {
         let context = self.context
         context.perform {
-            var result: [PropertyDictionary] = []
+            var result: [EntityReference] = []
             var added: Set<EntityReference> = []
             for entityID in entities {
-                let values: PropertyDictionary
                 if let (entity, wasCreated) = entityID.resolve(in: self) {
-                    values = entity.readAllProperties(store: self)
+                    let values = entity.readAllProperties(store: self)
+                    let refWithValues = self.makeReference(for: entity, properties: values)
                     if wasCreated.count > 0 {
                         added.formUnion(wasCreated.map({ self.makeReference(for: $0) }))
                     }
+                    result.append(refWithValues)
                 } else {
-                    values = PropertyDictionary()
+                    result.append(entityID)
                 }
-                result.append(values)
             }
             
             self.notify(action: .get, added: added)

@@ -45,7 +45,9 @@ public class DatastoreIndexController: UIViewController {
     
     func setupFooter() {
         let stack = UIStackView(axis: .horizontal, alignment: .top)
-
+        stack.isLayoutMarginsRelativeArrangement = true
+        stack.directionalLayoutMargins.trailing = 8.0
+        
         let searchBar = UISearchBar()
         searchBar.delegate = self
         searchBar.searchBarStyle = .minimal

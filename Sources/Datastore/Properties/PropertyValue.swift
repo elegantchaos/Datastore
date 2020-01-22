@@ -12,9 +12,9 @@ import Foundation
 /// view subclass to use to display a property.
 
 public struct PropertyValue {
-    let value: Any?
-    let type: PropertyType?
-    let datestamp: Date?
+    public let value: Any?
+    public let type: PropertyType?
+    public let datestamp: Date?
     
     init(_ value: Any?, type: PropertyType? = .value, datestamp: Date? = Date()) {
         self.value = value
