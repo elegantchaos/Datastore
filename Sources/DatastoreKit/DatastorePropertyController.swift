@@ -51,11 +51,6 @@ public class DatastorePropertyController: UIViewController {
         table.stickTo(view: view)
     }
     
-    public override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        view.backgroundColor = .red
-    }
-    
     func registeredViewClass(for value: PropertyValue) -> DatastorePropertyView.Type {
         guard let type = value.type, let entry = valueViews[type] else {
             return GenericPropertyView.self
@@ -86,7 +81,7 @@ extension DatastorePropertyController: UITableViewDelegate, UITableViewDataSourc
         let stack = UIStackView(axis: .horizontal)
         cell.addSubview(stack)
         stack.stickTo(view: cell)
-        stack.spacing = 20.0
+        stack.spacing = DatastoreKit.spacing
 
         let label = UILabel()
         label.text = key.value

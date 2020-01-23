@@ -28,25 +28,36 @@ public class DatastoreIndexController: UIViewController {
     var sortAscending = true
     var addSortButton = true
     var selfSizing = false
+    
+    var rootStack: UIStackView!
     var tableView: UITableView!
     var searchBar: UISearchBar!
     
     override public func viewDidLoad() {
         super.viewDidLoad()
 
+        let stack = UIStackView()
+        stack.axis = .vertical
+        stack.alignment = .fill
+        stack.distribution = .fill
+        stack.spacing = DatastoreKit.spacing
+        view.addSubview(stack)
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        stack.stickTo(view: view)
+        rootStack = stack
+        
         let table = EnhancedTableView()
         table.selfSizing = selfSizing
         table.delegate = self
         table.dataSource = self
         self.tableView = table
-        view.addSubview(table)
-        table.stickTo(view: view)
+        stack.addArrangedSubview(table)
     }
     
     func setupFooter() {
-        let stack = UIStackView(axis: .horizontal, alignment: .top)
+        let stack = UIStackView(axis: .horizontal, alignment: .center)
         stack.isLayoutMarginsRelativeArrangement = true
-        stack.directionalLayoutMargins.trailing = 8.0
+        stack.directionalLayoutMargins.trailing = DatastoreKit.spacing
         
         let searchBar = UISearchBar()
         searchBar.delegate = self
@@ -73,7 +84,9 @@ public class DatastoreIndexController: UIViewController {
         }
         
         stack.sizeToFit()
-        tableView.tableFooterView = stack
+        
+//        tableView.tableFooterView = stack
+        rootStack.addArrangedSubview(stack)
     }
     
     public override func viewWillAppear(_ animated: Bool) {
@@ -84,11 +97,6 @@ public class DatastoreIndexController: UIViewController {
         requestIndex()
     }
         
-    public override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        view.backgroundColor = .red
-    }
-    
     func toggleSortDirection() {
         sortAscending = !sortAscending
         requestIndex()

@@ -15,7 +15,7 @@ public class DatastoreIndexFilterButton: PopoverMenuButton {
     public init(index: DatastoreIndexController, forTypes entityTypes: [EntityType]) {
         self.index = index
         self.types = entityTypes
-        super.init(systemIconName: "line.horizontal.3.decrease.circle", label: "filter by:")
+        super.init(systemIconName: "line.horizontal.3.decrease.circle", label: "filter by:", spacing: DatastoreKit.spacing)
     }
     
     required init?(coder: NSCoder) {
