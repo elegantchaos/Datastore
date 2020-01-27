@@ -39,6 +39,15 @@ public class Datastore {
     internal let indexer: NSCoreDataCoreSpotlightDelegate?
     internal var typeMap: [EntityType:EntityReference.Type]
     
+    class EntityCache {
+        var index: [String:EntityRecord] = [:]
+        var cacheHits = 0
+        var cacheMisses = 0
+        var cacheRewrites = 0
+    }
+    
+    internal var entityCache: EntityCache?
+    
     public typealias LoadResult = Result<Datastore, Error>
     public typealias SaveResult = Result<Void, Error>
     
@@ -563,6 +572,42 @@ public class Datastore {
             let changes = EntityChanges(action: action, added: added, deleted: deleted, changed: changed, keys: keys)
             let notification = Notification(name: .EntityChangedNotification, object: self, userInfo: ["changes": changes])
             NotificationCenter.default.post(notification)
+        }
+    }
+}
+
+// MARK: Caching
+
+extension Datastore {
+    func startCaching() {
+        entityCache = EntityCache()
+    }
+    
+    func stopCaching() {
+        entityCache = nil
+    }
+    
+    func getCached(identifier: String) -> EntityRecord? {
+        if let cache = entityCache {
+            if let cached = cache.index[identifier] {
+                cache.cacheHits += 1
+                return cached
+            }
+            
+            cache.cacheMisses += 1
+        }
+        
+        return nil
+    }
+    
+    func addCached(identifier: String, entity: EntityRecord) {
+        if let cache = entityCache {
+            if let cached = cache.index[identifier] {
+                cache.cacheRewrites += 1
+                assert(cached === entity)
+            } else {
+                cache.index[identifier] = entity
+            }
         }
     }
 }

@@ -5,6 +5,9 @@
 
 import Foundation
 import CoreData
+import Logger
+
+let InterchangeChannel = Channel("com.elegantchaos.datastore.Interchange")
 
 extension Datastore {
     
@@ -27,31 +30,46 @@ extension Datastore {
     
     public func decode(interchange: [String:Any], decoder: InterchangeDecoder, completion: @escaping (LoadResult) -> Void) {
         decodeEntities(from: interchange, with: decoder)
+
         try? context.save()
         completion(.success(self))
     }
 
  
     fileprivate func decodeEntities(from interchange: [String : Any], with decoder: InterchangeDecoder) {
+        let start = clock_gettime_nsec_np(CLOCK_UPTIME_RAW)
+        let startCount = context.countEntities(type: EntityRecord.self)
+        startCaching()
+
         if let entities = interchange[PropertyKey.entities.value] as? [[String:Any]] {
-            for entityRecord in entities {
+            for entityInterchange in entities {
                 // TODO: allow missing identifiers?
                 // TODO: warn when identifier or type is missing?
-                if let identifier = entityRecord[PropertyKey.identifier.value] as? String, let type = entityRecord[PropertyKey.type.value] as? String {
-                    var entity = EntityRecord.withIdentifier(identifier, in: context)
+                if let identifier = entityInterchange[PropertyKey.identifier.value] as? String, let type = entityInterchange[PropertyKey.type.value] as? String {
+                    var entity = getCached(identifier: identifier) ?? EntityRecord.withIdentifier(identifier, in: context)
                     if entity == nil {
                         let newEntity = EntityRecord(in: context)
                         newEntity.identifier = identifier
                         newEntity.type = type
                         entity = newEntity
-                        try? context.save()
+                        addCached(identifier: identifier, entity: newEntity)
                     }
+                    
                     if let entity = entity {
-                        decodeEntity(entity, with: decoder, values: entityRecord)
+                        decodeEntity(entity, with: decoder, values: entityInterchange)
                     }
                 }
             }
         }
+
+        let finish = clock_gettime_nsec_np(CLOCK_UPTIME_RAW)
+        let finishCount = context.countEntities(type: EntityRecord.self)
+        let elapsed = Double(finish - start) / 1000000000.0
+        InterchangeChannel.log("Decoded \(finishCount - startCount) entities in \(elapsed) seconds.")
+        if let cache = entityCache {
+            InterchangeChannel.log("\(cache.cacheHits) hits, \(cache.cacheMisses) misses, \(cache.cacheRewrites) rewrites.")
+        }
+        stopCaching()
     }
     
     fileprivate func decodeEntity(_ entity: EntityRecord, with decoder: InterchangeDecoder, values entityRecord: [String : Any]) {

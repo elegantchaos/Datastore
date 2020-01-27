@@ -8,7 +8,7 @@ import CoreData
 /// Helper object which can match against entities in the database.
 internal class EntityMatcher: Hashable, Equatable {
     
-    func find(in: NSManagedObjectContext) -> EntityRecord? { return nil }
+    func find(in: Datastore) -> EntityRecord? { return nil }
     func hash(into hasher: inout Hasher) {
     }
     func equal(to other: EntityMatcher) -> Bool {
@@ -33,8 +33,14 @@ internal class MatchByIdentifier: EntityMatcher {
         identifier.hash(into: &hasher)
     }
 
-    override func find(in context: NSManagedObjectContext) -> EntityRecord? {
+    override func find(in store: Datastore) -> EntityRecord? {
+        if let cached = store.getCached(identifier: identifier) {
+            return cached
+        }
+        
+        let context = store.context
         if let object = EntityRecord.withIdentifier(identifier, in: context) {
+            store.addCached(identifier: identifier, entity: object)
             return object
         }
         
@@ -68,8 +74,9 @@ internal class MatchByValue: EntityMatcher {
         key.hash(into: &hasher)
     }
 
-    override func find(in context: NSManagedObjectContext) -> EntityRecord? {
+    override func find(in store: Datastore) -> EntityRecord? {
         // TODO: optimise this search to just fetch the newest string record with the relevant key
+        let context = store.context
         let request: NSFetchRequest<EntityRecord> = EntityRecord.fetcher(in: context)
         if let entities = try? context.fetch(request) {
             for entity in entities {
@@ -113,7 +120,7 @@ internal struct MatchingResolver: EntityResolver {
     
     internal func resolve(in store: Datastore, for reference: EntityReference) -> ResolveResult {
         for searcher in matchers {
-            if let entity = searcher.find(in: store.context) {
+            if let entity = searcher.find(in: store) {
                 return (CachedResolver(entity), [])
             }
         }
@@ -130,10 +137,14 @@ internal struct MatchingResolver: EntityResolver {
             
             let reference = CachedResolver(entity)
             var created: [EntityResolver] = [reference]
+//            store.entityCache?[entity.identifier!] = entity
+            
             let addedByRelationships = initialiser.initialProperties.add(to: entity, store: store)
-            if addedByRelationships.count > 0 {
-                created.append(contentsOf: addedByRelationships.map({ CachedResolver($0) }))
+            for addedEntity in addedByRelationships {
+                created.append(CachedResolver(addedEntity))
+//                store.entityCache?[addedEntity.identifier!] = addedEntity
             }
+            
             return (reference, created)
         } else {
             return (NullResolver(), [])
