@@ -47,6 +47,7 @@ public class Datastore {
     }
     
     internal var entityCache: EntityCache?
+    internal var notificationsPaused = 0
     
     public typealias LoadResult = Result<Datastore, Error>
     public typealias SaveResult = Result<Void, Error>
@@ -294,6 +295,7 @@ public class Datastore {
                     property.name = key.value
                     property.value = name
                     let reference = self.makeReference(for: entity)
+                    self.addCached(identifier: entity.identifier!, entity: entity)
                     result.append(reference)
                     added.insert(reference)
                 }
@@ -568,11 +570,19 @@ public class Datastore {
     }
     
     internal func notify(action: EntityChanges.Action, added: Set<EntityReference> = [], deleted: Set<EntityReference> = [], changed: Set<EntityReference> = [], keys: Set<PropertyKey> = []) {
-        if (added.count > 0) || (deleted.count > 0) || (changed.count > 0) {
+        if notificationsPaused == 0 && ((added.count > 0) || (deleted.count > 0) || (changed.count > 0)) {
             let changes = EntityChanges(action: action, added: added, deleted: deleted, changed: changed, keys: keys)
             let notification = Notification(name: .EntityChangedNotification, object: self, userInfo: ["changes": changes])
             NotificationCenter.default.post(notification)
         }
+    }
+    
+    func suspendNotifications() {
+        notificationsPaused += 1
+    }
+    
+    func resumeNotifications() {
+        notificationsPaused -= 1
     }
 }
 

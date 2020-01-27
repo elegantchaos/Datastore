@@ -39,6 +39,8 @@ extension Datastore {
     fileprivate func decodeEntities(from interchange: [String : Any], with decoder: InterchangeDecoder) {
         let start = clock_gettime_nsec_np(CLOCK_UPTIME_RAW)
         let startCount = context.countEntities(type: EntityRecord.self)
+
+        suspendNotifications()
         startCaching()
 
         if let entities = interchange[PropertyKey.entities.value] as? [[String:Any]] {
@@ -69,7 +71,9 @@ extension Datastore {
         if let cache = entityCache {
             InterchangeChannel.log("\(cache.cacheHits) hits, \(cache.cacheMisses) misses, \(cache.cacheRewrites) rewrites.")
         }
+        
         stopCaching()
+        resumeNotifications()
     }
     
     fileprivate func decodeEntity(_ entity: EntityRecord, with decoder: InterchangeDecoder, values entityRecord: [String : Any]) {

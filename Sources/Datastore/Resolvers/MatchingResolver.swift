@@ -137,12 +137,12 @@ internal struct MatchingResolver: EntityResolver {
             
             let reference = CachedResolver(entity)
             var created: [EntityResolver] = [reference]
-//            store.entityCache?[entity.identifier!] = entity
+            store.addCached(identifier: entity.identifier!, entity: entity)
             
             let addedByRelationships = initialiser.initialProperties.add(to: entity, store: store)
             for addedEntity in addedByRelationships {
                 created.append(CachedResolver(addedEntity))
-//                store.entityCache?[addedEntity.identifier!] = addedEntity
+                    store.addCached(identifier: addedEntity.identifier!, entity: addedEntity)
             }
             
             return (reference, created)
