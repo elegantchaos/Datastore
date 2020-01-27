@@ -9,9 +9,26 @@ import Logger
 
 let InterchangeChannel = Channel("com.elegantchaos.datastore.Interchange")
 
+
+public struct Profiler { // TODO: move this to a different package
+    let start = clock_gettime_nsec_np(CLOCK_UPTIME_RAW)
+    
+    var elapsedNanoseconds: UInt {
+        let finish = clock_gettime_nsec_np(CLOCK_UPTIME_RAW)
+        return UInt(finish - start)
+    }
+    
+    var elapsed: Double {
+        let finish = clock_gettime_nsec_np(CLOCK_UPTIME_RAW)
+        return Double(finish - start) / 1000000000.0
+    }
+}
+
+
 extension Datastore {
     
     public func decode(json: String, completion: @escaping (LoadResult) -> Void) {
+        let jsonTimer = Profiler()
         guard let data = json.data(using: .utf8) else {
             completion(.failure(InvalidJSONError()))
             return
@@ -19,6 +36,7 @@ extension Datastore {
         
         do {
             if let interchange = try JSONSerialization.jsonObject(with: data, options: []) as? [String:Any] {
+                InterchangeChannel.log("Converted JSON in \(jsonTimer.elapsed) seconds.")
                 decode(interchange: interchange, decoder: JSONInterchangeDecoder(), completion: completion)
             } else {
                 completion(.failure(InvalidJSONError()))
@@ -30,14 +48,20 @@ extension Datastore {
     
     public func decode(interchange: [String:Any], decoder: InterchangeDecoder, completion: @escaping (LoadResult) -> Void) {
         decodeEntities(from: interchange, with: decoder)
+        save() { result in
+            switch result {
+                case .success():
+                    completion(.success(self))
 
-        try? context.save()
-        completion(.success(self))
+                case .failure(let error):
+                    completion(.failure(error))
+            }
+        }
     }
 
  
     fileprivate func decodeEntities(from interchange: [String : Any], with decoder: InterchangeDecoder) {
-        let start = clock_gettime_nsec_np(CLOCK_UPTIME_RAW)
+        let decodeTimer = Profiler()
         let startCount = context.countEntities(type: EntityRecord.self)
 
         suspendNotifications()
@@ -64,10 +88,8 @@ extension Datastore {
             }
         }
 
-        let finish = clock_gettime_nsec_np(CLOCK_UPTIME_RAW)
         let finishCount = context.countEntities(type: EntityRecord.self)
-        let elapsed = Double(finish - start) / 1000000000.0
-        InterchangeChannel.log("Decoded \(finishCount - startCount) entities in \(elapsed) seconds.")
+        InterchangeChannel.log("Decoded \(finishCount - startCount) entities in \(decodeTimer.elapsed) seconds.")
         if let cache = entityCache {
             InterchangeChannel.log("\(cache.cacheHits) hits, \(cache.cacheMisses) misses, \(cache.cacheRewrites) rewrites.")
         }
