@@ -61,41 +61,44 @@ extension Datastore {
 
  
     fileprivate func decodeEntities(from interchange: [String : Any], with decoder: InterchangeDecoder) {
-        let decodeTimer = Profiler()
-        let startCount = context.countEntities(type: EntityRecord.self)
+        let context = self.context
+        context.perform {
+            let decodeTimer = Profiler()
+            let startCount = context.countEntities(type: EntityRecord.self)
 
-        suspendNotifications()
-        startCaching()
+            self.suspendNotifications()
+            self.startCaching()
 
-        if let entities = interchange[PropertyKey.entities.value] as? [[String:Any]] {
-            for entityInterchange in entities {
-                // TODO: allow missing identifiers?
-                // TODO: warn when identifier or type is missing?
-                if let identifier = entityInterchange[PropertyKey.identifier.value] as? String, let type = entityInterchange[PropertyKey.type.value] as? String {
-                    var entity = getCached(identifier: identifier) ?? EntityRecord.withIdentifier(identifier, in: context)
-                    if entity == nil {
-                        let newEntity = EntityRecord(in: context)
-                        newEntity.identifier = identifier
-                        newEntity.type = type
-                        entity = newEntity
-                        addCached(identifier: identifier, entity: newEntity)
-                    }
-                    
-                    if let entity = entity {
-                        decodeEntity(entity, with: decoder, values: entityInterchange)
+            if let entities = interchange[PropertyKey.entities.value] as? [[String:Any]] {
+                for entityInterchange in entities {
+                    // TODO: allow missing identifiers?
+                    // TODO: warn when identifier or type is missing?
+                    if let identifier = entityInterchange[PropertyKey.identifier.value] as? String, let type = entityInterchange[PropertyKey.type.value] as? String {
+                        var entity = self.getCached(identifier: identifier) ?? (startCount > 0 ? EntityRecord.withIdentifier(identifier, in: context) : nil)
+                        if entity == nil {
+                            let newEntity = EntityRecord(in: context)
+                            newEntity.identifier = identifier
+                            newEntity.type = type
+                            entity = newEntity
+                            self.addCached(identifier: identifier, entity: newEntity)
+                        }
+                        
+                        if let entity = entity {
+                            self.decodeEntity(entity, with: decoder, values: entityInterchange)
+                        }
                     }
                 }
             }
-        }
 
-        let finishCount = context.countEntities(type: EntityRecord.self)
-        InterchangeChannel.log("Decoded \(finishCount - startCount) entities in \(decodeTimer.elapsed) seconds.")
-        if let cache = entityCache {
-            InterchangeChannel.log("\(cache.cacheHits) hits, \(cache.cacheMisses) misses, \(cache.cacheRewrites) rewrites.")
+            let finishCount = context.countEntities(type: EntityRecord.self)
+            InterchangeChannel.log("Decoded \(finishCount - startCount) entities in \(decodeTimer.elapsed) seconds.")
+            if let cache = self.entityCache {
+                InterchangeChannel.log("\(cache.cacheHits) hits, \(cache.cacheMisses) misses, \(cache.cacheRewrites) rewrites.")
+            }
+            
+            self.stopCaching()
+            self.resumeNotifications()
         }
-        
-        stopCaching()
-        resumeNotifications()
     }
     
     fileprivate func decodeEntity(_ entity: EntityRecord, with decoder: InterchangeDecoder, values entityRecord: [String : Any]) {
