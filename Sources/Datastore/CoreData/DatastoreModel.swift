@@ -39,6 +39,12 @@ fileprivate extension DatastoreModel {
         identifier.isOptional = false
         
         entityRecord.properties = [datestamp, type, identifier]
+        entityRecord.indexes = [NSFetchIndexDescription(name: "index", elements: [
+            NSFetchIndexElementDescription(property: identifier, collationType: .binary),
+            NSFetchIndexElementDescription(property: type, collationType: .binary),
+            NSFetchIndexElementDescription(property: datestamp, collationType: .binary)
+        ])]
+
         self.entities = [
             entityRecord,
             makeEntity("Data", type: .binaryDataAttributeType, ownerEntity: entityRecord),
@@ -49,6 +55,7 @@ fileprivate extension DatastoreModel {
             makeRelationshipEntity(ownerEntity: entityRecord),
             makeEntity("String", type: .stringAttributeType, ownerEntity: entityRecord)
         ]
+        
     }
     
     func makeEntity(_ entityName: String, type attributeType: NSAttributeType?, ownerEntity: NSEntityDescription) -> NSEntityDescription {
@@ -93,6 +100,12 @@ fileprivate extension DatastoreModel {
             entity.properties.append(value)
         }
         
+        entity.indexes = [NSFetchIndexDescription(name: "index", elements: [
+            NSFetchIndexElementDescription(property: name, collationType: .binary),
+            NSFetchIndexElementDescription(property: type, collationType: .binary),
+            NSFetchIndexElementDescription(property: owner, collationType: .binary)
+        ])]
+
         return entity
     }
     
