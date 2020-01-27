@@ -70,20 +70,24 @@ extension Datastore {
             self.startCaching()
 
             if let entities = interchange[PropertyKey.entities.value] as? [[String:Any]] {
+                // first pass, fill the cache, making any missing entities
                 for entityInterchange in entities {
-                    // TODO: allow missing identifiers?
-                    // TODO: warn when identifier or type is missing?
-                    if let identifier = entityInterchange[PropertyKey.identifier.value] as? String, let type = entityInterchange[PropertyKey.type.value] as? String {
+                    if let identifier = entityInterchange[PropertyKey.identifier.value] as? String {
                         var entity = self.getCached(identifier: identifier) ?? (startCount > 0 ? EntityRecord.withIdentifier(identifier, in: context) : nil)
-                        if entity == nil {
+                        if entity == nil, let type = entityInterchange[PropertyKey.type.value] as? String {
                             let newEntity = EntityRecord(in: context)
                             newEntity.identifier = identifier
                             newEntity.type = type
                             entity = newEntity
                             self.addCached(identifier: identifier, entity: newEntity)
                         }
-                        
-                        if let entity = entity {
+                    }
+                }
+
+                // second pass, decode properties
+                for entityInterchange in entities {
+                    if let identifier = entityInterchange[PropertyKey.identifier.value] as? String {
+                        if let entity = self.getCached(identifier: identifier) {
                             self.decodeEntity(entity, with: decoder, values: entityInterchange)
                         }
                     }
