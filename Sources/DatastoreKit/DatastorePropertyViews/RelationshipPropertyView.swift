@@ -1,5 +1,5 @@
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-//  Created by Sam Deane on 22/01/20.
+//  Created by Sam Deane on 27/01/20.
 //  All code (c) 2020 - present day, Elegant Chaos Limited.
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
@@ -7,13 +7,10 @@
 import UIKit
 import Datastore
 
-class DatePropertyView: UILabel, DatastorePropertyView {
+class RelationshipPropertyView: UILabel, DatastorePropertyView {
     func setup(value: PropertyValue, withKey: PropertyKey, for controller: DatastorePropertyController) {
-        if let date = value.value as? Date {
-            text = "\(date) (date)"
-        } else {
-            text = "<not date>"
-        }
+        text = value.coerced(or: "")
     }
 }
 #endif
+

@@ -13,7 +13,6 @@ public struct PropertyType: Equatable, Hashable, ExpressibleByStringLiteral {
         self.name = name
     }
     public init(stringLiteral: String) { self.name = stringLiteral }
-//    public var rawValue: String { return name }
 }
 
 // MARK: - Standard Types

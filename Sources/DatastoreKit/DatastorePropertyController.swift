@@ -22,8 +22,12 @@ public class DatastorePropertyController: UIViewController {
     var sections: SectionsList
 
     var valueViews: [PropertyType : DatastorePropertyView.Type] = [
+        .boolean: BooleanPropertyView.self,
+        .date: DatePropertyView.self,
+        .double: DoublePropertyView.self,
+        .entity: RelationshipPropertyView.self,
+        .integer: IntegerPropertyView.self,
         .string: StringPropertyView.self,
-        .date: DatePropertyView.self
     ]
     
     var tableView: UITableView!

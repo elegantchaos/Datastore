@@ -9,7 +9,8 @@ import Datastore
 
 class StringPropertyView: UILabel, DatastorePropertyView {
     func setup(value: PropertyValue, withKey: PropertyKey, for controller: DatastorePropertyController) {
-        text = value.coerced(or: "")
+        let string = value.coerced(or: "")
+        text = "\(string) (string)"
     }
 }
 #endif
