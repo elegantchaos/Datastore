@@ -73,16 +73,19 @@ public class DatastorePropertyController: UIViewController {
     }
     
     func registeredViewClass(for value: PropertyValue) -> DatastorePropertyView.Type {
-        var type = value.type
-        if let entityType = type?.asEntityType, let mapped = typeMap[entityType]?.asPropertyType {
-            type = mapped
+        if let type = value.type {
+            if let entry = valueViews[type] {
+                // if we have a specific view for the value type, use it
+                return entry
+            }
+
+            if let mapped = typeMap[type.asEntityType]?.asPropertyType, let entry = valueViews[mapped] {
+                // if we have a view for the mapped value type, use that
+                return entry
+            }
         }
         
-        guard let entryType = type, let entry = valueViews[entryType] else {
-            return GenericPropertyView.self
-        }
-        
-        return entry
+        return GenericPropertyView.self
     }
     
     func updateLabelConstraints() {
