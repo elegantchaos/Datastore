@@ -8,7 +8,7 @@ import UIKit
 import Datastore
 
 class IntegerPropertyView: UILabel, DatastorePropertyView {
-    func setup(value: PropertyValue, withKey: PropertyKey, for controller: DatastorePropertyController) {
+    func setup(value: PropertyValue, withKey: PropertyKey, label: UILabel, for controller: DatastorePropertyController) {
         let coerced: Int = value.coerced(or: 0)
         text = "\(coerced) (int)"
     }

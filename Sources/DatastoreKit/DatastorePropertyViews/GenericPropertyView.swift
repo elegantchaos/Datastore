@@ -8,7 +8,7 @@ import UIKit
 import Datastore
 
 class GenericPropertyView: UILabel, DatastorePropertyView {
-    func setup(value: PropertyValue, withKey: PropertyKey, for controller: DatastorePropertyController) {
+    func setup(value: PropertyValue, withKey: PropertyKey, label: UILabel, for controller: DatastorePropertyController) {
         if let actualValue = value.value {
             let type = value.type?.name ?? "<unknown type>"
             text = "\(actualValue) (\(type))"

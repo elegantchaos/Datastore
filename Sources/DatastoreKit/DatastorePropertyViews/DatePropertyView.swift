@@ -8,7 +8,7 @@ import UIKit
 import Datastore
 
 class DatePropertyView: UILabel, DatastorePropertyView {
-    func setup(value: PropertyValue, withKey: PropertyKey, for controller: DatastorePropertyController) {
+    func setup(value: PropertyValue, withKey: PropertyKey, label: UILabel, for controller: DatastorePropertyController) {
         if let date = value.value as? Date {
             text = "\(date) (date)"
         } else {

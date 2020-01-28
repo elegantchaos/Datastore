@@ -8,6 +8,6 @@ import UIKit
 import Datastore
 
 protocol DatastorePropertyView: UIView {
-    func setup(value: PropertyValue, withKey: PropertyKey, for controller: DatastorePropertyController)
+    func setup(value: PropertyValue, withKey: PropertyKey, label: UILabel, for controller: DatastorePropertyController)
 }
 #endif
