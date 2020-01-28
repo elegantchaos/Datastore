@@ -63,10 +63,13 @@ public class DatastorePropertyController: UIViewController {
     override public func viewDidLoad() {
         super.viewDidLoad()
         
-        let table = EnhancedTableView()
+        let table = EnhancedTableView(frame: .zero, style: .grouped)
         table.selfSizing = selfSizing
         table.delegate = self
         table.dataSource = self
+        table.allowsSelection = false
+        table.separatorStyle = .none
+        table.backgroundColor = .systemBackground
         self.tableView = table
         view.addSubview(table)
         table.stickTo(view: view)

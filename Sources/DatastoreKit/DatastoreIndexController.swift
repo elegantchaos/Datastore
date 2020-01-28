@@ -52,6 +52,8 @@ public class DatastoreIndexController: UIViewController {
         table.dataSource = self
         self.tableView = table
         stack.addArrangedSubview(table)
+
+        setupFooter()
     }
     
     func setupFooter() {
@@ -92,7 +94,6 @@ public class DatastoreIndexController: UIViewController {
     public override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        setupFooter()
         datastore = findStore()
         requestIndex()
     }
