@@ -20,7 +20,8 @@ public class DatastorePropertyController: UIViewController {
     
     var entity: EntityReference
     var sections: SectionsList
-
+    let store: Datastore
+    
     var valueViews: [PropertyType : DatastorePropertyView.Type] = [
         .boolean: BooleanPropertyView.self,
         .date: DatePropertyView.self,
@@ -30,17 +31,29 @@ public class DatastorePropertyController: UIViewController {
         .string: StringPropertyView.self,
     ]
     
+    var typeMap: [EntityType: EntityType] = [ // TODO: move this into the datastore, build it automatically
+        EntityType("author"): EntityType("entity"),
+        EntityType("publisher"): EntityType("entity"),
+        EntityType("editor"): EntityType("entity"),
+        EntityType("tag"): EntityType("entity")
+    ]
+
     var tableView: UITableView!
     
     var labelConstraints: [NSLayoutConstraint] = []
     var labelWidth: CGFloat = 0.0
     var labelMaxWidth: CGFloat = 100.0
+    var labelFont: UIFont!
     
-    public init(for entity: EntityReference, sections: SectionsList) {
+    public init(for entity: EntityReference, sections: SectionsList, store: Datastore) {
         self.entity = entity
         self.sections = sections
-
+        self.store = store
+        
         super.init(nibName: nil, bundle: nil)
+
+        let font = UIFont.preferredFont(forTextStyle: .body, compatibleWith: traitCollection)
+        labelFont = font.withSize(font.fontDescriptor.pointSize - 2.0)
     }
     
     required init(coder: NSCoder) {
@@ -60,7 +73,12 @@ public class DatastorePropertyController: UIViewController {
     }
     
     func registeredViewClass(for value: PropertyValue) -> DatastorePropertyView.Type {
-        guard let type = value.type, let entry = valueViews[type] else {
+        var type = value.type
+        if let entityType = type?.asEntityType, let mapped = typeMap[entityType]?.asPropertyType {
+            type = mapped
+        }
+        
+        guard let entryType = type, let entry = valueViews[entryType] else {
             return GenericPropertyView.self
         }
         
@@ -102,7 +120,7 @@ extension DatastorePropertyController: UITableViewDelegate, UITableViewDataSourc
         let key = section[indexPath.row]
         let item = entity[valueWithKey: key]
         
-        let stack = UIStackView(axis: .horizontal)
+        let stack = UIStackView(axis: .horizontal, alignment: .firstBaseline)
         cell.addSubview(stack)
         stack.stickTo(view: cell)
         stack.spacing = DatastoreKit.spacing
@@ -110,9 +128,19 @@ extension DatastorePropertyController: UITableViewDelegate, UITableViewDataSourc
         let label = UILabel()
         label.text = key.value
         label.setContentHuggingPriority(.defaultHigh, for: .horizontal)
-        label.sizeToFit()
         label.textAlignment = .right
         label.textColor = .gray
+        label.font = labelFont
+        stack.addArrangedSubview(label)
+
+        if let value = item {
+            let viewClass = registeredViewClass(for: value)
+            let valueView = viewClass.init()
+            valueView.setup(value: value, withKey: key, label: label, for: self)
+            stack.addArrangedSubview(valueView)
+        }
+
+        label.sizeToFit()
         let width = label.frame.size.width
         if width > labelWidth {
             labelWidth = width
@@ -121,15 +149,7 @@ extension DatastorePropertyController: UITableViewDelegate, UITableViewDataSourc
         let labelConstraint = label.widthAnchor.constraint(equalToConstant: min(labelWidth, labelMaxWidth))
         labelConstraint.isActive = true
         labelConstraints.append(labelConstraint)
-        stack.addArrangedSubview(label)
 
-        if let value = item {
-            let viewClass = registeredViewClass(for: value)
-            let valueView = viewClass.init()
-            valueView.setup(value: value, withKey: key, for: self)
-            stack.addArrangedSubview(valueView)
-        }
-        
         return cell
     }
     
