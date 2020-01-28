@@ -32,6 +32,10 @@ public class DatastorePropertyController: UIViewController {
     
     var tableView: UITableView!
     
+    var labelConstraints: [NSLayoutConstraint] = []
+    var labelWidth: CGFloat = 0.0
+    var labelMaxWidth: CGFloat = 100.0
+    
     public init(for entity: EntityReference, sections: SectionsList) {
         self.entity = entity
         self.sections = sections
@@ -62,6 +66,22 @@ public class DatastorePropertyController: UIViewController {
         
         return entry
     }
+    
+    func updateLabelConstraints() {
+        for constraint in labelConstraints {
+            constraint.constant = min(labelWidth, labelMaxWidth)
+        }
+    }
+    
+    override public func viewWillLayoutSubviews() {
+        super.viewWillLayoutSubviews()
+        labelMaxWidth = view.frame.width * 0.3
+    }
+    
+    override public func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        updateLabelConstraints()
+    }
 }
 
 extension DatastorePropertyController: UITableViewDelegate, UITableViewDataSource {
@@ -90,6 +110,17 @@ extension DatastorePropertyController: UITableViewDelegate, UITableViewDataSourc
         let label = UILabel()
         label.text = key.value
         label.setContentHuggingPriority(.defaultHigh, for: .horizontal)
+        label.sizeToFit()
+        label.textAlignment = .right
+        label.textColor = .gray
+        let width = label.frame.size.width
+        if width > labelWidth {
+            labelWidth = width
+            updateLabelConstraints()
+        }
+        let labelConstraint = label.widthAnchor.constraint(equalToConstant: min(labelWidth, labelMaxWidth))
+        labelConstraint.isActive = true
+        labelConstraints.append(labelConstraint)
         stack.addArrangedSubview(label)
 
         if let value = item {
