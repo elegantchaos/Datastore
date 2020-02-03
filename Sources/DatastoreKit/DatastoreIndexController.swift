@@ -34,6 +34,14 @@ public class DatastoreIndexController: UIViewController {
     var tableView: UITableView!
     var searchBar: UISearchBar!
     
+    public func clearSelection(animated: Bool) {
+        if let paths = tableView?.indexPathsForSelectedRows {
+            for path in paths {
+                tableView.deselectRow(at: path, animated: animated)
+            }
+        }
+    }
+    
     override public func viewDidLoad() {
         super.viewDidLoad()
 
