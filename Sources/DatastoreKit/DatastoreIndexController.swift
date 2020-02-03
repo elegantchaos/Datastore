@@ -10,13 +10,14 @@ import LayoutExtensions
 import ViewExtensions
 
 public class DatastoreIndexController: UIViewController {
-    public typealias SelectionHandler = (EntityReference) -> ()
+    public typealias SelectionHandler = (EntityReference) -> (Bool)
 
     // MARK: Configuration Properties
     public var labelKey: PropertyKey = .name
     public var sortingKeys: [PropertyKey] = [.name]
     public var filterTypes: [EntityType] = []
     public var onSelect: SelectionHandler?
+    public var showFooter = true
     
     // MARK: Private Properties
     
@@ -53,7 +54,9 @@ public class DatastoreIndexController: UIViewController {
         self.tableView = table
         stack.addArrangedSubview(table)
 
-        setupFooter()
+        if showFooter {
+            setupFooter()
+        }
     }
     
     func setupFooter() {
@@ -86,18 +89,24 @@ public class DatastoreIndexController: UIViewController {
         }
         
         stack.sizeToFit()
-        
-//        tableView.tableFooterView = stack
         rootStack.addArrangedSubview(stack)
     }
     
     public override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        datastore = findStore()
-        requestIndex()
+        
+        if datastore == nil {
+            datastore = findStore()
+            requestIndex()
+        }
     }
         
+    public override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+
+    }
+    
     func toggleSortDirection() {
         sortAscending = !sortAscending
         requestIndex()
@@ -195,7 +204,9 @@ extension DatastoreIndexController: UITableViewDelegate, UITableViewDataSource {
     
     public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let item = items[indexPath.row]
-        onSelect?(item)
+        if let resetSelection = onSelect?(item), resetSelection {
+            tableView.deselectRow(at: indexPath, animated: true)
+        }
     }
 }
 
