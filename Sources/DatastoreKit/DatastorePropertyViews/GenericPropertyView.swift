@@ -10,7 +10,7 @@ import Datastore
 class GenericPropertyView: UILabel, DatastorePropertyView {
     func setup(value: PropertyValue, withKey: PropertyKey, label: UILabel, for controller: DatastorePropertyController) {
         if let actualValue = value.value {
-            let typeConformance = value.typeConformance?.name ?? "<unknown type>"
+            let typeConformance = value.type?.name ?? "<unknown type>"
             text = "\(actualValue) (\(typeConformance))"
         } else {
             text = "<nil>"

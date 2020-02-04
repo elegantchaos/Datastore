@@ -158,11 +158,11 @@ public class DatastoreIndexController: UIViewController {
     }
     
     func filterByType(items: [EntityReference]) -> [EntityReference] {
-        guard let typeConformance = filterType else {
+        guard let type = filterType else {
             return items
         }
         
-        return items.filter({ $0.typeConformance == typeConformance })
+        return items.filter({ $0.type == type })
     }
     
     func requestIndex() {

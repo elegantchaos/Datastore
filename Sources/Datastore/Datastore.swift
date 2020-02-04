@@ -604,7 +604,7 @@ extension Datastore {
     
     /// Returns the list of types that another type conforms to.
     /// - Parameter type: the type to look up
-    func conformances(for type: DatastoreType) -> [DatastoreType] {
+    public func conformances(for type: DatastoreType) -> [DatastoreType] {
         return conformanceMap.conformances(for: type)
     }
     

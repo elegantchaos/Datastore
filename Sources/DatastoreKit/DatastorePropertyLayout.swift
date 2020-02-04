@@ -29,9 +29,11 @@ public class DatastorePropertyLayout {
                   return entry
               }
 
-            if let mapped = store.typeMap[type.asEntityType]?.asDatastoreType, let entry = valueViews[mapped] {
-                  // if we have a view for the mapped value type, use that
+            for conformance in store.conformances(for: type) {
+                // if we have a view for the mapped value type, use that
+                if let entry = valueViews[conformance] {
                   return entry
+                }
               }
           }
           
