@@ -21,7 +21,7 @@ open class EntityReference: Equatable, Hashable, EntityReferenceProtocol {
     public var identifier: String { resolver.identifier }
     
     /// type of the entity this reference represents; may not be known yet if the reference is unresolved
-    public var type: EntityType { resolver.type }
+    public var type: DatastoreType { resolver.type }
     
     /// has this reference been resolved?
     public var isResolved: Bool { resolver.isResolved }
@@ -95,7 +95,7 @@ open class EntityReference: Equatable, Hashable, EntityReferenceProtocol {
         }
     }
     
-    public subscript(_ key: PropertyKey, as type: PropertyType) -> Any? {
+    public subscript(_ key: PropertyKey, as type: DatastoreType) -> Any? {
         get {
             return updates?[key, as: type] ?? properties?[key, as: type]
         }
@@ -106,7 +106,7 @@ open class EntityReference: Equatable, Hashable, EntityReferenceProtocol {
         }
     }
     
-    public subscript(typeWithKey key: PropertyKey) -> PropertyType? {
+    public subscript(typeWithKey key: PropertyKey) -> DatastoreType? {
         get {
             return updates?[typeWithKey: key] ?? properties?[typeWithKey: key]
         }
@@ -153,13 +153,13 @@ open class EntityReference: Equatable, Hashable, EntityReferenceProtocol {
 /// Constructs entity references from various patterns.
 
 public struct Entity {
-    public static func createAs(_ type: EntityType, with properties: PropertyDictionary? = nil) -> EntityReference { // TODO: add test
+    public static func createAs(_ type: DatastoreType, with properties: PropertyDictionary? = nil) -> EntityReference { // TODO: add test
         let newIdentifier = UUID().uuidString // TODO: can we just pass an empty matcher list to always make a new entity?
         let searchers = [MatchByIdentifier(identifier: newIdentifier)]
         return InitialisingReference(MatchingResolver(matchers: searchers), type: type, updates: properties)
     }
 
-    public static func identifiedBy(_ identifier: String, createAs type: EntityType? = nil, with properties: PropertyDictionary? = nil) -> EntityReference {
+    public static func identifiedBy(_ identifier: String, createAs type: DatastoreType? = nil, with properties: PropertyDictionary? = nil) -> EntityReference {
         let searchers = [MatchByIdentifier(identifier: identifier)]
         if let type = type {
             return InitialisingReference(MatchingResolver(matchers: searchers), type: type, updates: properties)
@@ -169,7 +169,7 @@ public struct Entity {
         
     }
     
-    public static func named(_ name: String, createAs type: EntityType? = nil, with properties: PropertyDictionary? = nil) -> EntityReference {
+    public static func named(_ name: String, createAs type: DatastoreType? = nil, with properties: PropertyDictionary? = nil) -> EntityReference {
         let searchers = [MatchByValue(key: .name, value: name)]
         if let type = type {
             return InitialisingReference(MatchingResolver(matchers: searchers), type: type, updates: properties)
@@ -178,7 +178,7 @@ public struct Entity {
         }
     }
 
-    public static func with(identifier: String, orName name: String, createAs type: EntityType? = nil, with properties: PropertyDictionary? = nil) -> EntityReference {
+    public static func with(identifier: String, orName name: String, createAs type: DatastoreType? = nil, with properties: PropertyDictionary? = nil) -> EntityReference {
         let searchers = [MatchByIdentifier(identifier: identifier), MatchByValue(key: .name, value: name)]
         if let type = type {
             return InitialisingReference(MatchingResolver(matchers: searchers), type: type, updates: properties)
@@ -187,7 +187,7 @@ public struct Entity {
         }
     }
 
-    public static func whereKey(_ key: PropertyKey, equals value: String, createAs type: EntityType? = nil, with properties: PropertyDictionary? = nil) -> EntityReference {
+    public static func whereKey(_ key: PropertyKey, equals value: String, createAs type: DatastoreType? = nil, with properties: PropertyDictionary? = nil) -> EntityReference {
         let searchers = [MatchByValue(key: key, value: value)]
         if let type = type {
                 return InitialisingReference(MatchingResolver(matchers: searchers), type: type, updates: properties)

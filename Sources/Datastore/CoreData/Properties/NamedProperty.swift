@@ -11,7 +11,7 @@ public class NamedProperty: NSManagedObject {
     @NSManaged public var typeName: String
     @NSManaged public var owner: EntityRecord
     
-    var type: PropertyType { return PropertyType(typeName) }
+    var type: DatastoreType { return DatastoreType(typeName) }
     
     func propertyValue(for store: Datastore) -> PropertyValue {
         return PropertyValue(nil)

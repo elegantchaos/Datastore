@@ -14,7 +14,7 @@ public protocol EntityResolver {
     func equal(to: EntityResolver) -> Bool
     var object: EntityRecord? { get }
     var identifier: String { get }
-    var type: EntityType { get }
+    var type: DatastoreType { get }
     var isResolved: Bool { get }
 }
 

@@ -15,7 +15,7 @@ public class DatastoreIndexController: UIViewController {
     // MARK: Configuration Properties
     public var labelKey: PropertyKey = .name
     public var sortingKeys: [PropertyKey] = [.name]
-    public var filterTypes: [EntityType] = []
+    public var filterTypes: [DatastoreType] = []
     public var onSelect: SelectionHandler?
     public var showFooter = true
     
@@ -25,7 +25,7 @@ public class DatastoreIndexController: UIViewController {
     var items: [EntityReference] = []
     
     var filterString: String?
-    var filterType: EntityType?
+    var filterType: DatastoreType?
     var sortAscending = true
     var addSortButton = true
     var selfSizing = false
@@ -134,11 +134,11 @@ public class DatastoreIndexController: UIViewController {
         tableView.setNeedsUpdateConstraints()
     }
     
-    public func toggleFilter(for type: EntityType) {
-        if filterType == type {
+    public func toggleFilter(for typeConformance: DatastoreType) {
+        if filterType == typeConformance {
             filterType = nil
         } else {
-            filterType = type
+            filterType = typeConformance
         }
         requestIndex()
     }
@@ -158,11 +158,11 @@ public class DatastoreIndexController: UIViewController {
     }
     
     func filterByType(items: [EntityReference]) -> [EntityReference] {
-        guard let type = filterType else {
+        guard let typeConformance = filterType else {
             return items
         }
         
-        return items.filter({ $0.type == type })
+        return items.filter({ $0.typeConformance == typeConformance })
     }
     
     func requestIndex() {

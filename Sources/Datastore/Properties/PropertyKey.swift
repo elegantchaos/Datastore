@@ -49,6 +49,7 @@ public struct PropertyKey: Equatable, Hashable, ExpressibleByStringLiteral {
 // MARK: - Standard Keys
 
 public extension PropertyKey {
+    static let conformsTo: Self = "conformsTo"
     static let datestamp: Self = "datestamp"
     static let entities: Self = "entities"
     static let identifier: Self = "identifier"

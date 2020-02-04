@@ -102,9 +102,9 @@ internal class MatchByValue: EntityMatcher {
 }
 
 
-extension EntityType {
-    static let unknown: EntityType = "unknown"
-    static let null: EntityType = "null"
+extension DatastoreType {
+    static let unknown: DatastoreType = "unknown"
+    static let null: DatastoreType = "null"
 }
 
 public protocol EntityReferenceProtocol {
@@ -165,7 +165,7 @@ internal struct MatchingResolver: EntityResolver {
     }
     
     var identifier: String { return EntityReference.unresolvedIdentifier } // TODO: try to find this from a matcher or the initial properties
-    var type: EntityType { return .unknown } // TODO: try to find this from a matcher or the initial properties
+    var type: DatastoreType { return .unknown } // TODO: try to find this from a matcher or the initial properties
     
     var isResolved: Bool { return false }
 }

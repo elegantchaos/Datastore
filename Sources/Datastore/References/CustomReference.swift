@@ -7,9 +7,9 @@ import Foundation
 
 
 open class CustomReference: EntityReference {
-    class open func staticType() -> EntityType { return .unknown }
+    class open func staticType() -> DatastoreType { return .unknown }
     
-    override public var type: EntityType { return Swift.type(of: self).staticType() }
+    override public var type: DatastoreType { return Swift.type(of: self).staticType() }
     
     public required init(_ id: EntityResolver, properties: PropertyDictionary? = nil, updates: PropertyDictionary? = nil) {
         super.init(id, properties: properties, updates: updates)
@@ -31,6 +31,6 @@ open class CustomReference: EntityReference {
 }
 
 extension CustomReference: EntityInitialiser {
-    var initialType: EntityType { return type }
+    var initialType: DatastoreType { return type }
     var initialProperties: PropertyDictionary { return updates ?? PropertyDictionary() }
 }

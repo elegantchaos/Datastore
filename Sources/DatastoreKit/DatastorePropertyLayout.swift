@@ -12,7 +12,7 @@ public class DatastorePropertyLayout {
         let viewer: DatastorePropertyView.Type
     }
     
-    var valueViews: [PropertyType : DatastorePropertyView.Type] = [
+    var valueViews: [DatastoreType : DatastorePropertyView.Type] = [
         .boolean: BooleanPropertyView.self,
         .date: DatePropertyView.self,
         .double: DoublePropertyView.self,
@@ -21,13 +21,6 @@ public class DatastorePropertyLayout {
         .string: StringPropertyView.self,
     ]
     
-    var typeMap: [EntityType: EntityType] = [ // TODO: move this into the datastore, build it automatically
-        EntityType("author"): EntityType("entity"),
-        EntityType("publisher"): EntityType("entity"),
-        EntityType("editor"): EntityType("entity"),
-        EntityType("tag"): EntityType("entity")
-    ]
-
     
       func registeredViewClass(for value: PropertyValue) -> DatastorePropertyView.Type {
           if let type = value.type {
@@ -36,7 +29,7 @@ public class DatastorePropertyLayout {
                   return entry
               }
 
-              if let mapped = typeMap[type.asEntityType]?.asPropertyType, let entry = valueViews[mapped] {
+            if let mapped = store.typeMap[type.asEntityType]?.asDatastoreType, let entry = valueViews[mapped] {
                   // if we have a view for the mapped value type, use that
                   return entry
               }

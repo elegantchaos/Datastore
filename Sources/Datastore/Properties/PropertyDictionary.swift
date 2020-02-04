@@ -35,12 +35,12 @@ public struct PropertyDictionary {
         set { values[key] = asValue(newValue) }
     }
     
-    public subscript(_ key: PropertyKey, as type: PropertyType) -> Any? {
+    public subscript(_ key: PropertyKey, as type: DatastoreType) -> Any? {
         get { return values[key]?.value }
         set { values[key] = PropertyValue(newValue, type: type, datestamp: nil) }
     }
     
-    public subscript(typeWithKey key: PropertyKey) -> PropertyType? {
+    public subscript(typeWithKey key: PropertyKey) -> DatastoreType? {
         get { return values[key]?.type }
     }
 
@@ -56,10 +56,10 @@ public struct PropertyDictionary {
     internal func asValue(_ value: Any?) -> PropertyValue {
         if let value = value as? PropertyValue {
             return value
-        } else if let (value, type) = value as? (Any?, PropertyType) {
+        } else if let (value, type) = value as? (Any?, DatastoreType) {
             return PropertyValue(value, type: type, datestamp: nil)
         } else if let (value, type) = value as? (Any?, String) {
-            return PropertyValue(value, type: PropertyType(type), datestamp: nil)
+            return PropertyValue(value, type: DatastoreType(type), datestamp: nil)
         } else {
             return PropertyValue(value, type: nil, datestamp: nil)
         }

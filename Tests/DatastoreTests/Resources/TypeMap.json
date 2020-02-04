@@ -1,0 +1,19 @@
+{
+    "entities" : [
+        {
+            "identifier" : "author",
+            "type" : "typeConformance",
+            "conformsTo" : "person",
+        },
+        {
+            "identifier" : "editor",
+            "type" : "typeConformance",
+            "conformsTo" : "person",
+        },
+        {
+            "identifier" : "person",
+            "type" : "typeConformance",
+            "conformsTo" : "entity",
+        },
+    ]
+}

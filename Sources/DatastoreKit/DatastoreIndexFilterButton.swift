@@ -10,9 +10,9 @@ import Datastore
 
 public class DatastoreIndexFilterButton: PopoverMenuButton {
     let index: DatastoreIndexController?
-    let types: [EntityType]
+    let types: [DatastoreType]
     
-    public init(index: DatastoreIndexController, forTypes entityTypes: [EntityType]) {
+    public init(index: DatastoreIndexController, forTypes entityTypes: [DatastoreType]) {
         self.index = index
         self.types = entityTypes
         super.init(systemIconName: "line.horizontal.3.decrease.circle", label: "filter by:", spacing: DatastoreKit.spacing)
@@ -38,15 +38,15 @@ public class DatastoreIndexFilterButton: PopoverMenuButton {
     }
     
     override open func configure(cell: UITableViewCell, for item: Any) {
-        if let type = item as? EntityType, let index = index {
-            cell.textLabel?.text = type.name
-            cell.accessoryType = index.filterType == type ? .checkmark : .none
+        if let typeConformance = item as? DatastoreType, let index = index {
+            cell.textLabel?.text = typeConformance.name
+            cell.accessoryType = index.filterType == typeConformance ? .checkmark : .none
         }
     }
     
     override open func select(item: Any) {
-        if let type = item as? EntityType, let index = index {
-            index.toggleFilter(for: type)
+        if let typeConformance = item as? DatastoreType, let index = index {
+            index.toggleFilter(for: typeConformance)
             updateIcon()
         }
     }

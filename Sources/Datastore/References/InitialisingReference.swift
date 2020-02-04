@@ -6,27 +6,27 @@
 import Foundation
 
 protocol EntityInitialiser {
-    var initialType: EntityType { get }
+    var initialType: DatastoreType { get }
     var initialProperties: PropertyDictionary { get }
 }
 
 class InitialisingReference: EntityReference {
-    let storedType: EntityType
+    let storedType: DatastoreType
     
-    override var type: EntityType { return storedType }
+    override var type: DatastoreType { return storedType }
     override var identifier: String { return (updates?[.identifier] as? String) ?? super.identifier }
     
     required init(_ id: EntityResolver, properties: PropertyDictionary? = nil, updates: PropertyDictionary? = nil) {
         fatalError("typed reference created without type")
     }
 
-    init(_ id: EntityResolver, type: EntityType, properties: PropertyDictionary? = nil, updates: PropertyDictionary? = nil) {
+    init(_ id: EntityResolver, type: DatastoreType, properties: PropertyDictionary? = nil, updates: PropertyDictionary? = nil) {
         self.storedType = type
         super.init(id, properties: properties, updates: updates)
     }
 }
 
 extension InitialisingReference: EntityInitialiser {
-    var initialType: EntityType { return storedType }
+    var initialType: DatastoreType { return storedType }
     var initialProperties: PropertyDictionary { return updates ?? PropertyDictionary() }
 }

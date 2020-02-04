@@ -11,7 +11,7 @@ class RelationshipPropertyView: UILabel, DatastorePropertyView {
     func setup(value: PropertyValue, withKey: PropertyKey, label: UILabel, for controller: DatastorePropertyController) {
         if let reference = value.value as? EntityReference {
             text = ""
-            label.text = value.type?.name
+            label.text = value.typeConformance?.name
             controller.layout.store.get(properties: ["name"], of: [reference]) { results in
                 DispatchQueue.main.async {
                     if let entity = results.first {

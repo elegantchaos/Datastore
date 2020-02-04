@@ -37,8 +37,15 @@ public class Datastore {
     internal let container: NSPersistentContainer
     internal let context: NSManagedObjectContext
     internal let indexer: NSCoreDataCoreSpotlightDelegate?
-    internal var typeMap: [EntityType:EntityReference.Type]
-    
+    internal var classMap: [DatastoreType:EntityReference.Type]
+
+    public var typeMap: [DatastoreType: [DatastoreType]] = [:] // TODO: move this into the datastore, build it automatically
+//        DatastoreType("author"): DatastoreType("entity"),
+//        DatastoreType("publisher"): DatastoreType("entity"),
+//        DatastoreType("editor"): DatastoreType("entity"),
+//        DatastoreType("tag"): DatastoreType("entity")
+//    ]
+
     class EntityCache {
         var index: [String:EntityRecord] = [:]
         var cacheHits = 0
@@ -48,14 +55,16 @@ public class Datastore {
     
     internal var entityCache: EntityCache?
     internal var notificationsPaused = 0
-    
+
+
+
     public typealias LoadResult = Result<Datastore, Error>
     public typealias SaveResult = Result<Void, Error>
     
     public typealias LoadCompletion = (LoadResult) -> Void
     public typealias SaveCompletion = (SaveResult) -> Void
     public typealias EntitiesCompletion = ([EntityReference]) -> Void
-    public typealias TypesCompletion = ([EntityType]) -> Void
+    public typealias TypesCompletion = ([DatastoreType]) -> Void
     public typealias EntityCompletion = (EntityReference?) -> Void
     public typealias InterchangeCompletion = ([String:Any]) -> Void
     public typealias CountCompletion = ([Int]) -> Void
@@ -104,7 +113,13 @@ public class Datastore {
                 completion(.failure(error))
             } else {
                 let store = Datastore(container: container, indexer: indexer)
-                completion(.success(store))
+                if url != nil {
+                    store.loadTypeMap() {
+                        completion(.success(store))
+                    }
+                } else {
+                    completion(.success(store))
+                }
             }
         }
     }
@@ -119,7 +134,9 @@ public class Datastore {
             switch result {
                 case .success(let store):
                     store.decode(json: json) { result in
-                        completion(result)
+                        store.loadTypeMap {
+                            completion(result)
+                        }
                 }
                 
                 default:
@@ -166,7 +183,7 @@ public class Datastore {
         self.container = container
         self.context = container.newBackgroundContext()
         self.indexer = indexer
-        self.typeMap = [:]
+        self.classMap = [:]
     }
     
     /// Save any outstanding changes to the store
@@ -195,7 +212,7 @@ public class Datastore {
     
     internal func makeReference(for entity: EntityRecord, properties: PropertyDictionary? = nil) -> EntityReference {
         var classToUse = EntityReference.self
-        if let entityType = entity.type, let customType = typeMap[EntityType(entityType)] {
+        if let entityType = entity.type, let customType = classMap[DatastoreType(entityType)] {
             classToUse = customType
         }
         
@@ -204,7 +221,7 @@ public class Datastore {
 
     public func register(classes: [CustomReference.Type]) {
         for classToUse in classes {
-            typeMap[classToUse.staticType()] = classToUse
+            classMap[classToUse.staticType()] = classToUse
         }
     }
     
@@ -253,7 +270,7 @@ public class Datastore {
     ///   - equals: value to check for
     ///   - createIfMissing: should we create the entity if it isn't found?
     ///   - completion: completion block
-    public func get(entityOfType type: EntityType, where key: PropertyKey, equals: String, createIfMissing: Bool = true, completion: @escaping EntityCompletion) {
+    public func get(entityOfType type: DatastoreType, where key: PropertyKey, equals: String, createIfMissing: Bool = true, completion: @escaping EntityCompletion) {
         get(entitiesOfType: type, where: key, contains: [equals], createIfMissing: createIfMissing) { entities in
             completion(entities.first)
         }
@@ -267,7 +284,7 @@ public class Datastore {
     ///   - contains: the values to filter on
     ///   - createIfMissing: create entities for any values we didn't find
     ///   - completion: completion block
-    public func get(entitiesOfType type: EntityType, where key: PropertyKey, contains: Set<String>, createIfMissing: Bool = true, completion: @escaping EntitiesCompletion) {
+    public func get(entitiesOfType type: DatastoreType, where key: PropertyKey, contains: Set<String>, createIfMissing: Bool = true, completion: @escaping EntitiesCompletion) {
         let context = self.context
         
         context.perform {
@@ -309,7 +326,7 @@ public class Datastore {
     /// - Parameters:
     ///   - type: the types to retrieve
     ///   - completion: completion block
-    public func get(allEntitiesOfType type: EntityType, completion: @escaping EntitiesCompletion) {
+    public func get(allEntitiesOfType type: DatastoreType, completion: @escaping EntitiesCompletion) {
         let context = self.context
         context.perform {
             
@@ -327,7 +344,7 @@ public class Datastore {
     /// - Parameters:
     ///   - types: the types to count
     ///   - completion: completion block
-    public func count(entitiesOfTypes types: [EntityType], completion: @escaping CountCompletion) {
+    public func count(entitiesOfTypes types: [DatastoreType], completion: @escaping CountCompletion) {
         let context = self.context
         context.perform {
             var counts: [Int] = []
@@ -368,7 +385,7 @@ public class Datastore {
             let request: NSFetchRequest<EntityRecord> = EntityRecord.fetcher(in: context)
             if let entities = try? context.fetch(request) {
                 let typeNames = Set(entities.compactMap({ $0.type }))
-                completion(Array(typeNames.map({ EntityType($0) })))
+                completion(Array(typeNames.map({ DatastoreType($0) })))
             } else {
                 completion([])
             }
@@ -583,6 +600,61 @@ public class Datastore {
     
     func resumeNotifications() {
         notificationsPaused -= 1
+    }
+}
+
+// MARK: Type Map
+
+extension Datastore {
+    func conformances(for type: DatastoreType) -> [DatastoreType] {
+        if let entries = typeMap[type] {
+            return entries
+        } else {
+            return []
+        }
+    }
+    
+    func loadTypeMap(completion: @escaping () -> Void) {
+        func addConformance(for type: DatastoreType, to otherType: DatastoreType) {
+            let newList: [DatastoreType]
+            if let existing = self.typeMap[type] {
+                newList = existing + [otherType]
+            } else {
+                newList = [otherType]
+            }
+            self.typeMap[type] = newList
+        }
+        
+        func loadConformanceRecords() {
+            get(allEntitiesOfType: .typeConformance) { entities in
+                self.get(properties: [.conformsTo], of: entities) { entities in
+                    for entry in entities {
+                        if let typeConformance = entry[.conformsTo] as? String {
+                            addConformance(for: DatastoreType(entry.identifier), to: DatastoreType(typeConformance))
+                        }
+                    }
+                    
+                    print(self.typeMap)
+                    completion()
+                }
+            }
+        }
+        
+        let context = self.context
+        context.perform {
+            
+            let request: NSFetchRequest<NSDictionary> = NSFetchRequest(entityName: "EntityRecord")
+            request.resultType = .dictionaryResultType
+            request.propertiesToFetch = ["type"]
+            if let entities = try? context.fetch(request), entities.count > 0 {
+                let uniqueTypes = Set(entities.map({$0["type"] as! String}))
+                for type in uniqueTypes {
+                    addConformance(for: DatastoreType(type), to: .entity)
+                }
+            }
+            
+            loadConformanceRecords()
+        }
     }
 }
 

@@ -12,7 +12,7 @@ internal struct NullResolver: EntityResolver {
     func hash(into hasher: inout Hasher) { 0.hash(into: &hasher) }
     func equal(to other: EntityResolver) -> Bool { return other is NullResolver }
     var identifier: String { return EntityReference.nullIdentifier }
-    var type: EntityType { return .null }
+    var type: DatastoreType { return .null }
     var isResolved: Bool { return true }
 }
 

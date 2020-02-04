@@ -8,7 +8,7 @@ import XCTestExtensions
 
 @testable import Datastore
 
-extension EntityType {
+extension DatastoreType {
     static let person: Self = "person"
     static let book: Self = "book"
     static let test: Self = "test"
@@ -29,9 +29,9 @@ class DatastoreTests: DatastoreTestCase {
          let loaded = expectation(description: "loaded")
          loadJSON(name: name, expectation: loaded) { store in
              let expected = ["Person 1": "123 New St", "Person 2": "456 Old St"]
-             store.get(allEntitiesOfType: .test) { (people) in
-                 XCTAssertEqual(people.count, 2)
-                 store.get(properties : ["name", "address", "datestamp", "modified", "owner", "data"], of: people) { results in
+             store.get(allEntitiesOfType: .test) { (items) in
+                 XCTAssertEqual(items.count, 2)
+                 store.get(properties : ["name", "address", "datestamp", "modified", "owner", "data"], of: items) { results in
                      var n = 0
                      for result in results {
                          let name = result["name"] as! String
@@ -52,7 +52,7 @@ class DatastoreTests: DatastoreTestCase {
                          XCTAssertEqual(modified.description, "1963-09-21 01:23:45 +0000")
                          XCTAssertEqual(result[typeWithKey: "modified"], "date")
                          let owner = result["owner"] as! EntityReference
-                         XCTAssertEqual(owner, people[n])
+                         XCTAssertEqual(owner, items[n])
                          XCTAssertEqual(result[typeWithKey: "owner"], "owner")
                          n += 1
                      }
@@ -311,7 +311,7 @@ class DatastoreTests: DatastoreTestCase {
         loadJSON(name: "Relationships", expectation: done) { datastore in
             datastore.getAllEntityTypes { (types) in
                 XCTAssertEqual(types.count, 2)
-                let expected: [EntityType] = ["book", "test"]
+                let expected: [DatastoreType] = ["book", "test"]
                 for type in types {
                     XCTAssertTrue(expected.contains(type), "didn't contain \(type)")
                 }
@@ -458,7 +458,33 @@ class DatastoreTests: DatastoreTestCase {
         checkJSON(name: "Normalized", checkAddressType: true)
     }
     
- 
+ func testImplicitTypeMap() {
+     // test that an entry is added in the type map for every entity type loaded
+     let done = expectation(description: "loaded")
+     loadJSON(name: "Simple", expectation: done) { datastore in
+        XCTAssert(datastore.conformances(for: .person).count > 0)
+        done.fulfill()
+     }
+     wait(for: [done], timeout: 1.0)
+ }
+
+    func testExplicitTypeMap() {
+        // test that an entry is added in the type map for every entity type loaded
+        let done = expectation(description: "loaded")
+        loadJSON(name: "TypeMap", expectation: done) { datastore in
+            let personConformances = datastore.conformances(for: .person)
+            XCTAssert(personConformances.contains("entity"))
+           let authorConformances = datastore.conformances(for: "author")
+           XCTAssert(authorConformances.contains("entity"))
+           XCTAssert(authorConformances.contains("person"))
+           let editorConformances = datastore.conformances(for: "editor")
+           XCTAssert(editorConformances.contains("entity"))
+           XCTAssert(editorConformances.contains("person"))
+           done.fulfill()
+        }
+        wait(for: [done], timeout: 1.0)
+    }
+    
     func testInterchange() {
         // test encoding into a dictionary in interchange format
         let done = expectation(description: "loaded")
@@ -731,7 +757,7 @@ class DatastoreTests: DatastoreTestCase {
 
     func testCreateCustomType() {
         class Person: CustomReference {
-            override class func staticType() -> EntityType { .person }
+            override class func staticType() -> DatastoreType { .person }
         }
         
         // test registering a custom type for an entity, then creating an entity and checking it's the right type

@@ -14,13 +14,13 @@ internal struct CachedResolver: EntityResolver {
     let cached: EntityRecord
     let id: NSManagedObjectID
     let identifier: String
-    let type: EntityType
+    let type: DatastoreType
     
     internal init(_ object: EntityRecord) {
         self.cached = object
         self.id = object.objectID
         self.identifier = object.identifier!
-        self.type = EntityType(object.type!)
+        self.type = DatastoreType(object.type!)
     }
     
     internal func resolve(in store: Datastore, for reference: EntityReference) -> ResolveResult {

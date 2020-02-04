@@ -19,6 +19,22 @@ class DatastoreModel: NSManagedObjectModel {
 
 fileprivate extension DatastoreModel {
     func setupEntities() {
+        let entityRecord = describeEntityRecord()
+
+        self.entities = [
+            entityRecord,
+            describeProperty("Data", type: .binaryDataAttributeType, ownerEntity: entityRecord),
+            describeProperty("Date", type: .dateAttributeType, ownerEntity: entityRecord),
+            describeProperty("Double", type: .doubleAttributeType, ownerEntity: entityRecord),
+            describeProperty("Integer", type: .integer64AttributeType, ownerEntity: entityRecord),
+            describeProperty("Boolean", type: .booleanAttributeType, ownerEntity: entityRecord),
+            describeProperty("String", type: .stringAttributeType, ownerEntity: entityRecord),
+            describeRelationship(ownerEntity: entityRecord),
+        ]
+        
+    }
+    
+    func describeEntityRecord() -> NSEntityDescription {
         let entityRecord = NSEntityDescription()
         entityRecord.name = "EntityRecord"
         entityRecord.managedObjectClassName = "Datastore.EntityRecord"
@@ -44,21 +60,11 @@ fileprivate extension DatastoreModel {
             NSFetchIndexElementDescription(property: type, collationType: .binary),
             NSFetchIndexElementDescription(property: datestamp, collationType: .binary)
         ])]
-
-        self.entities = [
-            entityRecord,
-            makeEntity("Data", type: .binaryDataAttributeType, ownerEntity: entityRecord),
-            makeEntity("Date", type: .dateAttributeType, ownerEntity: entityRecord),
-            makeEntity("Double", type: .doubleAttributeType, ownerEntity: entityRecord),
-            makeEntity("Integer", type: .integer64AttributeType, ownerEntity: entityRecord),
-            makeEntity("Boolean", type: .booleanAttributeType, ownerEntity: entityRecord),
-            makeRelationshipEntity(ownerEntity: entityRecord),
-            makeEntity("String", type: .stringAttributeType, ownerEntity: entityRecord)
-        ]
         
+        return entityRecord
     }
-    
-    func makeEntity(_ entityName: String, type attributeType: NSAttributeType?, ownerEntity: NSEntityDescription) -> NSEntityDescription {
+ 
+    func describeProperty(_ entityName: String, type attributeType: NSAttributeType?, ownerEntity: NSEntityDescription) -> NSEntityDescription {
         let entity = NSEntityDescription()
         entity.name =  "\(entityName)Property"
         entity.managedObjectClassName = "Datastore.\(entityName)Property"
@@ -109,8 +115,8 @@ fileprivate extension DatastoreModel {
         return entity
     }
     
-    func makeRelationshipEntity(ownerEntity: NSEntityDescription) -> NSEntityDescription {
-        let relationship = makeEntity("Relationship", type: nil, ownerEntity: ownerEntity)
+    func describeRelationship(ownerEntity: NSEntityDescription) -> NSEntityDescription {
+        let relationship = describeProperty("Relationship", type: nil, ownerEntity: ownerEntity)
         
         let target = NSRelationshipDescription()
         target.name = "target"
