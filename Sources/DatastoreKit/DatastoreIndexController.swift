@@ -206,7 +206,7 @@ extension DatastoreIndexController: UITableViewDelegate, UITableViewDataSource {
         }
         
         let item = items[indexPath.row]
-        cell.textLabel?.text = (item[labelKey] as? String) ?? "Unknown"
+        cell.textLabel?.text = (item[labelKey] as? String) ?? "<\(item.type.name): \(item.identifier)>"
         return cell
     }
     
