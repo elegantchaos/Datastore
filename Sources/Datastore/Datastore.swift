@@ -8,7 +8,6 @@ import CoreData
 import Logger
 
 let datastoreChannel = Channel("com.elegantchaos.datastore")
-let typeMapChannel = Channel("com.elegantchaos.datastore.typeMap")
 
 public extension Notification.Name {
     static let EntityChangedNotification = NSNotification.Name(rawValue: "EntityChanged")
@@ -39,15 +38,7 @@ public class Datastore {
     internal let context: NSManagedObjectContext
     internal let indexer: NSCoreDataCoreSpotlightDelegate?
     internal var classMap: [DatastoreType:EntityReference.Type]
-
-    internal class TypeSet {
-        var types: Set<DatastoreType> = []
-        init(_ type: DatastoreType) {
-            self.types = [type]
-        }
-    }
-    
-    internal var typeMap: [DatastoreType: TypeSet] = [:]
+    internal var conformanceMap: ConformanceMap
 
     class EntityCache {
         var index: [String:EntityRecord] = [:]
@@ -117,7 +108,7 @@ public class Datastore {
             } else {
                 let store = Datastore(container: container, indexer: indexer)
                 if url != nil {
-                    store.loadTypeMap() {
+                    store.loadConformanceMap() {
                         completion(.success(store))
                     }
                 } else {
@@ -137,7 +128,7 @@ public class Datastore {
             switch result {
                 case .success(let store):
                     store.decode(json: json) { result in
-                        store.loadTypeMap {
+                        store.loadConformanceMap {
                             completion(result)
                         }
                 }
@@ -187,6 +178,7 @@ public class Datastore {
         self.context = container.newBackgroundContext()
         self.indexer = indexer
         self.classMap = [:]
+        self.conformanceMap = ConformanceMap()
     }
     
     /// Save any outstanding changes to the store
@@ -606,27 +598,14 @@ public class Datastore {
     }
 }
 
-// MARK: Type Map
+// MARK: Conformance Map
 
 extension Datastore {
+    
     /// Returns the list of types that another type conforms to.
-    ///
-    /// All entity types that have records in the store are guaranteed to
-    /// conform to at least the type `.entity`.
-    /// Other metadata entries can exist in the database itself, which describe
-    /// either the types of entities, or the types of properties.
-    ///
-    /// For example:
-    /// - the type "author" might conform to "person" and "entity"
-    /// - the type "address" might conform to "string"
-    ///
     /// - Parameter type: the type to look up
     func conformances(for type: DatastoreType) -> [DatastoreType] {
-        if let entries = typeMap[type] {
-            return Array(entries.types)
-        } else {
-            return []
-        }
+        return conformanceMap.conformances(for: type)
     }
     
     /// Build the conformance map from the datastore.
@@ -639,50 +618,10 @@ extension Datastore {
     /// to sub-types.
     ///
     /// - Parameter completion: block to run when finished
-    func loadTypeMap(completion: @escaping () -> Void) {
-        
-        /// Mark a type as conforming to another type.
-        /// - Parameters:
-        ///   - type: type to mark
-        ///   - otherType: type it conforms to
-        func addConformance(for type: DatastoreType, to otherType: DatastoreType) {
-            if let set = typeMap[type] {
-                set.types.insert(otherType)
-            } else {
-                typeMap[type] = TypeSet(otherType)
-            }
-        }
-        
-        /// For every type in the map, we merge in the entries of any types that
-        /// it conforms to, so that the entry for each type contains the full list
-        /// of types it conforms to.
-        ///
-        /// By way of an example, it will transform a map
-        ///  from: A -> [B], B -> [C], C -> [D]
-        ///    to: A -> [B,C,D], B -> [C, D], C -> [D]
-        
-        func expandConformanceRecords() {
-            var changed: Bool
-            repeat {
-                changed = false
-                for (type, values) in typeMap {
-                    for subtype in values.types {
-                        if let subValues = typeMap[subtype]?.types {
-                            let count = values.types.count
-                            values.types.formUnion(subValues)
-                            if values.types.count > count {
-                                typeMapChannel.log("Merged conformances \(subValues.map { $0.name }) from \(subtype.name) into \(type.name).")
-                                changed = true
-                            }
-                        }
-                    }
-                }
-            } while (changed)
-            typeMapChannel.log("Resolved type map: \(typeMap)")
-        }
+    func loadConformanceMap(completion: @escaping () -> Void) {
         
         /// Add an entry to the conformance map for the type of every EntityRecord that we find in the database.
-        func addConformanceRecordsForAllEntities(in context: NSManagedObjectContext) {
+        func loadConformanceForEntityRecords(in context: NSManagedObjectContext) {
             let request: NSFetchRequest<NSDictionary> = NSFetchRequest(entityName: "EntityRecord")
             request.resultType = .dictionaryResultType
             request.propertiesToFetch = ["type"]
@@ -690,7 +629,7 @@ extension Datastore {
                 let uniqueTypes = Set(entities.map({DatastoreType($0["type"] as! String)}))
                 for type in uniqueTypes {
                     if type != .entity {
-                        addConformance(for: type, to: .entity)
+                        conformanceMap.addConformance(for: type, to: .entity)
                     }
                 }
             }
@@ -698,15 +637,16 @@ extension Datastore {
         
         /// Update the conformance map with any conformance records in the database itself.
         func loadConformanceMetadata() {
+            let typeMap = self.conformanceMap
             get(allEntitiesOfType: .typeConformance) { entities in
                 self.get(properties: [.conformsTo], of: entities) { entities in
                     for entry in entities {
                         if let typeConformance = entry[.conformsTo] as? String {
-                            addConformance(for: DatastoreType(entry.identifier), to: DatastoreType(typeConformance))
+                            typeMap.addConformance(for: DatastoreType(entry.identifier), to: DatastoreType(typeConformance))
                         }
                     }
         
-                    expandConformanceRecords()
+                    typeMap.expandConformanceRecords()
                     completion()
                 }
             }
@@ -714,7 +654,7 @@ extension Datastore {
         
         let context = self.context
         context.perform {
-            addConformanceRecordsForAllEntities(in: context)
+            loadConformanceForEntityRecords(in: context)
             loadConformanceMetadata()
         }
     }
