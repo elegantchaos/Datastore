@@ -10,33 +10,13 @@ import LayoutExtensions
 import ViewExtensions
 
 public class DatastorePropertyController: UIViewController {
-    public typealias SectionOrder = [PropertyKey]
-    public typealias SectionsList = [SectionOrder]
     
     // MARK: Configuration Properties
     public var selfSizing = false
 
     // MARK: Private Properties
     
-    var entity: EntityReference
-    var sections: SectionsList
-    let store: Datastore
-    
-    var valueViews: [PropertyType : DatastorePropertyView.Type] = [
-        .boolean: BooleanPropertyView.self,
-        .date: DatePropertyView.self,
-        .double: DoublePropertyView.self,
-        .entity: RelationshipPropertyView.self,
-        .integer: IntegerPropertyView.self,
-        .string: StringPropertyView.self,
-    ]
-    
-    var typeMap: [EntityType: EntityType] = [ // TODO: move this into the datastore, build it automatically
-        EntityType("author"): EntityType("entity"),
-        EntityType("publisher"): EntityType("entity"),
-        EntityType("editor"): EntityType("entity"),
-        EntityType("tag"): EntityType("entity")
-    ]
+    var layout: DatastorePropertyLayout
 
     var tableView: UITableView!
     
@@ -45,10 +25,8 @@ public class DatastorePropertyController: UIViewController {
     var labelMaxWidth: CGFloat = 100.0
     var labelFont: UIFont!
     
-    public init(for entity: EntityReference, sections: SectionsList, store: Datastore) {
-        self.entity = entity
-        self.sections = sections
-        self.store = store
+    public init(layout: DatastorePropertyLayout) {
+        self.layout = layout
         
         super.init(nibName: nil, bundle: nil)
 
@@ -74,23 +52,7 @@ public class DatastorePropertyController: UIViewController {
         view.addSubview(table)
         table.stickTo(view: view)
     }
-    
-    func registeredViewClass(for value: PropertyValue) -> DatastorePropertyView.Type {
-        if let type = value.type {
-            if let entry = valueViews[type] {
-                // if we have a specific view for the value type, use it
-                return entry
-            }
-
-            if let mapped = typeMap[type.asEntityType]?.asPropertyType, let entry = valueViews[mapped] {
-                // if we have a view for the mapped value type, use that
-                return entry
-            }
-        }
-        
-        return GenericPropertyView.self
-    }
-    
+      
     func updateLabelConstraints() {
         for constraint in labelConstraints {
             constraint.constant = min(labelWidth, labelMaxWidth)
@@ -110,10 +72,10 @@ public class DatastorePropertyController: UIViewController {
 
 extension DatastorePropertyController: UITableViewDelegate, UITableViewDataSource {
     public func numberOfSections(in tableView: UITableView) -> Int {
-        return sections.count
+        return layout.sections.count
     }
     public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return sections[section].count
+        return layout.sections[section].count
     }
     
     public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -122,9 +84,8 @@ extension DatastorePropertyController: UITableViewDelegate, UITableViewDataSourc
             cell = UITableViewCell(style: .default, reuseIdentifier: "cell")
         }
         
-        let section = sections[indexPath.section]
-        let key = section[indexPath.row]
-        let item = entity[valueWithKey: key]
+        let section = layout.sections[indexPath.section]
+        let entry = section[indexPath.row]
         
         let stack = UIStackView(axis: .horizontal, alignment: .firstBaseline)
         cell.addSubview(stack)
@@ -132,19 +93,16 @@ extension DatastorePropertyController: UITableViewDelegate, UITableViewDataSourc
         stack.spacing = DatastoreKit.spacing
 
         let label = UILabel()
-        label.text = key.value
+        label.text = entry.key.value
         label.setContentHuggingPriority(.defaultHigh, for: .horizontal)
         label.textAlignment = .right
         label.textColor = .gray
         label.font = labelFont
         stack.addArrangedSubview(label)
 
-        if let value = item {
-            let viewClass = registeredViewClass(for: value)
-            let valueView = viewClass.init()
-            valueView.setup(value: value, withKey: key, label: label, for: self)
-            stack.addArrangedSubview(valueView)
-        }
+        let valueView = entry.viewer.init()
+        valueView.setup(value: entry.value, withKey: entry.key, label: label, for: self)
+        stack.addArrangedSubview(valueView)
 
         label.sizeToFit()
         let width = label.frame.size.width

@@ -12,7 +12,7 @@ class RelationshipPropertyView: UILabel, DatastorePropertyView {
         if let reference = value.value as? EntityReference {
             text = ""
             label.text = value.type?.name
-            controller.store.get(properties: ["name"], of: [reference]) { results in
+            controller.layout.store.get(properties: ["name"], of: [reference]) { results in
                 DispatchQueue.main.async {
                     if let entity = results.first {
                         self.text = entity["name"] as? String
