@@ -5,6 +5,7 @@
 
 import Datastore
 
+#if targetEnvironment(macCatalyst) || !os(macOS)
 public class DatastorePropertyLayout {
     public struct SectionEntry {
         let key: PropertyKey
@@ -62,3 +63,4 @@ public class DatastorePropertyLayout {
         sections.append(section)
     }
 }
+#endif
