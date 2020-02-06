@@ -62,9 +62,23 @@ public class Datastore {
     public typealias ApplyResult = Result<Void, Error>
     
     static let specialProperties: [PropertyKey] = [.identifier, .datestamp, .type]
-    
+    static var persistentStoreType: String { return NSSQLiteStoreType }
+
     public var url: URL { context.persistentStoreCoordinator!.persistentStores.first!.url! }
     
+    internal class func storeOptions(withIndexer indexer: NSCoreDataCoreSpotlightDelegate? = nil) -> [String : NSObject] {
+        let YES = true as NSValue
+        var options: [String : NSObject] = [
+            NSMigratePersistentStoresAutomaticallyOption: YES,
+            NSInferMappingModelAutomaticallyOption: YES
+        ]
+
+        if let indexer = indexer {
+            options[NSCoreDataCoreSpotlightExporter] = indexer
+        }
+
+        return options
+    }
     
     /// Create a store instance, with a given container and indexer.
     /// - Parameters:

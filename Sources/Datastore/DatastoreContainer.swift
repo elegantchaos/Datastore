@@ -3,7 +3,6 @@
 //  All code (c) 2020 - present day, Elegant Chaos Limited.
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-
 import CoreData
 import Foundation
 
@@ -42,19 +41,12 @@ class DatastoreContainer {
              description.url = URL(fileURLWithPath: "/dev/null")
          }
          
-         description.setOption(true as NSValue, forKey: NSMigratePersistentStoresAutomaticallyOption)
-         description.setOption(true as NSValue, forKey: NSInferMappingModelAutomaticallyOption)
-         description.type = NSSQLiteStoreType
-         //        description.setOption(true as NSValue, forKey: NSPersistentHistoryTrackingKey)
-         //        description.shouldAddStoreAsynchronously = true
-         
-         var indexer: NSCoreDataCoreSpotlightDelegate? = nil
-         if indexed {
-            indexer = NSCoreDataCoreSpotlightDelegate(forStoreWith: description, model: DatastoreModel.sharedInstance)
-             description.setOption(indexer, forKey:NSCoreDataCoreSpotlightExporter)
-         }
-         
-         container.loadPersistentStores { (description, error) in
+        let indexer: NSCoreDataCoreSpotlightDelegate? = indexed ? NSCoreDataCoreSpotlightDelegate(forStoreWith: description, model: DatastoreModel.sharedInstance) : nil
+        for option in Datastore.storeOptions(withIndexer: indexer) {
+            description.setOption(option.value, forKey: option.key)
+        }
+
+        container.loadPersistentStores { (description, error) in
              if let error = error {
                  completion(.failure(error))
              } else {
