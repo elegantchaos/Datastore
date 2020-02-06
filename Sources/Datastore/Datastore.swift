@@ -65,7 +65,7 @@ public class Datastore {
 
     public var url: URL { context.persistentStoreCoordinator!.persistentStores.first!.url! }
     
-    public class func storeOptions(withIndexer indexer: NSCoreDataCoreSpotlightDelegate? = nil) -> [String : NSObject] {
+    public class func storeOptions(withIndexer indexer: NSCoreDataCoreSpotlightDelegate? = nil) -> [AnyHashable : Any] {
         let YES = true as NSValue
         var options: [String : NSObject] = [
             NSMigratePersistentStoresAutomaticallyOption: YES,

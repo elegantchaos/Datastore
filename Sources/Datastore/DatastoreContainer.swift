@@ -52,7 +52,7 @@ public class DatastoreContainer: NSPersistentContainer, ContainerWithStore {
         }
         
         for option in Datastore.storeOptions(withIndexer: container.indexer) {
-            description.setOption(option.value, forKey: option.key)
+            description.setOption(option.value as? NSObject, forKey: option.key as! String)
         }
 
         container.loadPersistentStores { (description, error) in
