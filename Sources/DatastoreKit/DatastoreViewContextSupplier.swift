@@ -7,14 +7,14 @@
 import UIKit
 import Datastore
 
-public protocol DatastoreViewContextSupplier {
-    var viewDatastore: Datastore { get }
+public protocol DatastoreSupplier {
+    var suppliedDatastore: Datastore { get }
 }
 
 extension UIViewController {
     func findStore() -> Datastore? {
-        if let supplier = self as? DatastoreViewContextSupplier {
-            return supplier.viewDatastore
+        if let supplier = self as? DatastoreSupplier {
+            return supplier.suppliedDatastore
         } else {
             return parent?.findStore()
         }

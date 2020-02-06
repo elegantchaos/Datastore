@@ -39,4 +39,14 @@ open class DatastoreDocument: UIManagedDocument {
     }
     
 }
+
+public protocol DatastoreSupplierDocument: UIDocument, DatastoreSupplier {
+}
+
+extension DatastoreDocument: DatastoreSupplierDocument {
+    public var suppliedDatastore: Datastore {
+        return store!
+    }
+}
+
 #endif
