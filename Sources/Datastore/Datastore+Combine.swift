@@ -8,10 +8,10 @@
 import Combine
 import Foundation
 
-extension Datastore {
+extension DatastoreContainer {
     
-    @available(macOS 10.15, *) public class func loadCombine(name: String, url: URL? = nil) -> Future<Datastore, Error> {
-        let future = Future<Datastore, Error>() { promise in
+    @available(macOS 10.15, *) public class func loadCombine(name: String, url: URL? = nil) -> Future<ContainerWithStore, Error> {
+        let future = Future<ContainerWithStore, Error>() { promise in
             load(name: name, url: url) { result in
                 promise(result)
             }

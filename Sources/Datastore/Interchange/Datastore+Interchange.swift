@@ -9,6 +9,12 @@ import Logger
 
 let InterchangeChannel = Channel("com.elegantchaos.datastore.Interchange")
 
+typealias SimpleResult = Result<Void, Error>
+extension SimpleResult {
+    static var ok: SimpleResult {
+        return .success(())
+    }
+}
 
 public struct Profiler { // TODO: move this to a different package
     let start = clock_gettime_nsec_np(CLOCK_UPTIME_RAW)
@@ -26,8 +32,9 @@ public struct Profiler { // TODO: move this to a different package
 
 
 extension Datastore {
+    public typealias DecodeResult = Result<Void, Error>
     
-    public func decode(json: String, completion: @escaping (LoadResult) -> Void) {
+    public func decode(json: String, completion: @escaping (DecodeResult) -> Void) {
         let jsonTimer = Profiler()
         guard let data = json.data(using: .utf8) else {
             completion(.failure(InvalidJSONError()))
@@ -46,12 +53,12 @@ extension Datastore {
         }
     }
     
-    public func decode(interchange: [String:Any], decoder: InterchangeDecoder, completion: @escaping (LoadResult) -> Void) {
+    public func decode(interchange: [String:Any], decoder: InterchangeDecoder, completion: @escaping (DecodeResult) -> Void) {
         decodeEntities(from: interchange, with: decoder)
         save() { result in
             switch result {
                 case .success():
-                    completion(.success(self))
+                    completion(.ok)
 
                 case .failure(let error):
                     completion(.failure(error))

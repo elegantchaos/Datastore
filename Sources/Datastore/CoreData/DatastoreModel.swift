@@ -6,6 +6,8 @@
 import CoreData
 
 class DatastoreModel: NSManagedObjectModel {
+    static let sharedInstance = DatastoreModel()
+    
     override init() {
         super.init()
         setupEntities()

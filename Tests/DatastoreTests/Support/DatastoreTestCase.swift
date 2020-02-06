@@ -11,28 +11,32 @@ import XCTestExtensions
 // MARK: - Test Support
 
 class DatastoreTestCase: XCTestCase {
+    var container: ContainerWithStore? = nil
+    
     func loadAndCheck(url: URL? = nil, completion: @escaping (Datastore) -> Void) {
-        Datastore.load(name: "Test", url: url) { (result) in
+        DatastoreContainer.load(name: "Test", url: url) { (result) in
             switch result {
             case .failure(let error):
                 XCTFail("\(error)")
                 
-            case .success(let store):
-                completion(store)
+            case .success(let container):
+                self.container = container
+                completion(container.store)
             }
         }
     }
     
     func loadJSON(name: String, expectation: XCTestExpectation, completion: @escaping (Datastore) -> Void) {
         let json = testString(named: name, withExtension: "json")
-        Datastore.load(name: name, json: json) { (result) in
+        DatastoreContainer.load(name: name, json: json) { (result) in
             switch result {
             case .failure(let error):
                 XCTFail("\(error)")
                 expectation.fulfill()
                 
-            case .success(let store):
-                completion(store)
+            case .success(let container):
+                self.container = container
+                completion(container.store)
             }
         }
     }

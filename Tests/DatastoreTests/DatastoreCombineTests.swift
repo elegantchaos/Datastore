@@ -29,7 +29,7 @@ import Combine
     }
 
     func testLoadFuture() {
-        let future = Datastore.loadCombine(name: "test")
+        let future = DatastoreContainer.loadCombine(name: "test")
         check(action: "load", future: future)
     }
 }
