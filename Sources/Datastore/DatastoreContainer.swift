@@ -6,30 +6,36 @@
 import CoreData
 import Foundation
 
-protocol ContainerWithStore: NSPersistentContainer {
+public protocol ContainerWithStore: NSPersistentContainer {
     var store: Datastore { get set }
+    var indexer: NSCoreDataCoreSpotlightDelegate? { get set }
 }
 
-class SimpleContainerWithStore: NSPersistentContainer, ContainerWithStore {
-    var _store: Datastore!
-    var store: Datastore {
-        get { return _store }
-        set { _store = newValue }
-    }
-}
-
-class DatastoreContainer {
+public class DatastoreContainer: NSPersistentContainer, ContainerWithStore {
     public typealias LoadResult = Result<ContainerWithStore, Error>
     public typealias LoadCompletion = (LoadResult) -> Void
 
-     /// Load a store.
+    internal var _store: Datastore?
+    internal var _indexer: NSCoreDataCoreSpotlightDelegate?
+    
+    public var store: Datastore {
+        get { return _store! }
+        set { _store = newValue }
+    }
+
+    public var indexer: NSCoreDataCoreSpotlightDelegate? {
+        get { return _indexer }
+        set { _indexer = newValue }
+    }
+
+    /// Load a store.
      /// - Parameters:
      ///   - name: name to use for the store
      ///   - url: location of the store; if not supplied, the store will be created in memory
      ///   - container: persistent container class to use
      ///   - indexed: spotlight indexer to use, if required
      ///   - completion: completion block
-    public class func load(name: String, url: URL? = nil, container: ContainerWithStore.Type = SimpleContainerWithStore.self, indexed: Bool = false, completion: @escaping LoadCompletion) {
+    public class func load(name: String, url: URL? = nil, container: ContainerWithStore.Type = DatastoreContainer.self, indexed: Bool = false, completion: @escaping LoadCompletion) {
         
         let container = container.init(name: name, managedObjectModel: DatastoreModel.sharedInstance)
          let description = container.persistentStoreDescriptions[0]
@@ -41,8 +47,11 @@ class DatastoreContainer {
              description.url = URL(fileURLWithPath: "/dev/null")
          }
          
-        let indexer: NSCoreDataCoreSpotlightDelegate? = indexed ? NSCoreDataCoreSpotlightDelegate(forStoreWith: description, model: DatastoreModel.sharedInstance) : nil
-        for option in Datastore.storeOptions(withIndexer: indexer) {
+        if indexed {
+            container.indexer = NSCoreDataCoreSpotlightDelegate(forStoreWith: description, model: DatastoreModel.sharedInstance)
+        }
+        
+        for option in Datastore.storeOptions(withIndexer: container.indexer) {
             description.setOption(option.value, forKey: option.key)
         }
 
@@ -51,7 +60,7 @@ class DatastoreContainer {
                  completion(.failure(error))
              } else {
                 let context = container.newBackgroundContext()
-                let store = Datastore(context: context, indexer: indexer)
+                let store = Datastore(context: context)
                  if url != nil {
                      store.loadConformanceMap() {
                         container.store = store

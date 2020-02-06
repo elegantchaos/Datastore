@@ -32,7 +32,6 @@ public struct EntityChanges {
 
 public class Datastore {
     internal let context: NSManagedObjectContext
-    internal let indexer: NSCoreDataCoreSpotlightDelegate?
     internal var classMap: [DatastoreType:EntityReference.Type]
     internal var conformanceMap: ConformanceMap
 
@@ -62,11 +61,11 @@ public class Datastore {
     public typealias ApplyResult = Result<Void, Error>
     
     static let specialProperties: [PropertyKey] = [.identifier, .datestamp, .type]
-    static var persistentStoreType: String { return NSSQLiteStoreType }
+    public static var persistentStoreType: String { return NSSQLiteStoreType }
 
     public var url: URL { context.persistentStoreCoordinator!.persistentStores.first!.url! }
     
-    internal class func storeOptions(withIndexer indexer: NSCoreDataCoreSpotlightDelegate? = nil) -> [String : NSObject] {
+    public class func storeOptions(withIndexer indexer: NSCoreDataCoreSpotlightDelegate? = nil) -> [String : NSObject] {
         let YES = true as NSValue
         var options: [String : NSObject] = [
             NSMigratePersistentStoresAutomaticallyOption: YES,
@@ -80,13 +79,11 @@ public class Datastore {
         return options
     }
     
-    /// Create a store instance, with a given container and indexer.
+    /// Create a store instance, using a given context.
     /// - Parameters:
     ///   - container: backing container
-    ///   - indexer: spotlight indexer, if required
-    internal init(context: NSManagedObjectContext, indexer: NSCoreDataCoreSpotlightDelegate?) {
+    public init(context: NSManagedObjectContext) {
         self.context = context
-        self.indexer = indexer
         self.classMap = [:]
         self.conformanceMap = ConformanceMap()
     }

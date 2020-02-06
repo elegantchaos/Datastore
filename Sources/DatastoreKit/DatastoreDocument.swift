@@ -7,6 +7,7 @@
 import CoreData
 import Foundation
 import UIKit
+import Datastore
 
 class DatastoreDocument: UIManagedDocument {
     var store: Datastore!
@@ -28,11 +29,12 @@ class DatastoreDocument: UIManagedDocument {
     override func open(completionHandler: ((Bool) -> Void)? = nil) {
         super.open() { result in
             if result {
-                let store = Datastore(context: self.managedObjectContext, indexer: nil)
+                let store = Datastore(context: self.managedObjectContext)
                 self.store = store
             }
             completionHandler?(result)
         }
     }
+    
 }
 #endif

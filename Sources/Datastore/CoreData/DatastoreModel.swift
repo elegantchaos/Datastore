@@ -5,8 +5,8 @@
 
 import CoreData
 
-class DatastoreModel: NSManagedObjectModel {
-    static let sharedInstance = DatastoreModel()
+public class DatastoreModel: NSManagedObjectModel {
+    public static let sharedInstance = DatastoreModel()
     
     override init() {
         super.init()
