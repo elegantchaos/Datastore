@@ -15,15 +15,17 @@ let package = Package(
         .package(url: "https://github.com/elegantchaos/Logger.git", from: "1.3.6"),
         .package(url: "https://github.com/elegantchaos/LayoutExtensions.git", from: "1.0.3"),
         .package(url: "https://github.com/elegantchaos/ViewExtensions.git", from: "1.0.3"),
+        .package(url: "https://github.com/elegantchaos/CollectionExtensions.git", from: "1.0.0"),
         .package(url: "https://github.com/elegantchaos/XCTestExtensions.git", from: "1.0.7"),
+        .package(url: "https://github.com/elegantchaos/Performance.git", from: "1.0.1"),
     ],
     targets: [
         .target(
             name: "Datastore",
-            dependencies: ["Logger"]),
+            dependencies: ["Logger", "Performance"]),
         .target(
             name: "DatastoreKit",
-            dependencies: ["Datastore", "LayoutExtensions", "ViewExtensions", "Logger"]),
+            dependencies: ["CollectionExtensions", "Datastore", "LayoutExtensions", "Logger", "ViewExtensions"]),
         .testTarget(
             name: "DatastoreTests",
             dependencies: ["Datastore", "XCTestExtensions"]),

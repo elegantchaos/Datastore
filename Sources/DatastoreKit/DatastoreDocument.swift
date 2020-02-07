@@ -4,10 +4,11 @@
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 #if targetEnvironment(macCatalyst) || !os(macOS)
+import CollectionExtensions
 import CoreData
+import Datastore
 import Foundation
 import UIKit
-import Datastore
 
 open class DatastoreDocument: UIManagedDocument {
     public var store: Datastore!

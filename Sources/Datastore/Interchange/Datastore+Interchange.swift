@@ -6,6 +6,7 @@
 import Foundation
 import CoreData
 import Logger
+import Performance
 
 let InterchangeChannel = Channel("com.elegantchaos.datastore.Interchange")
 
@@ -13,20 +14,6 @@ typealias SimpleResult = Result<Void, Error>
 extension SimpleResult {
     static var ok: SimpleResult {
         return .success(())
-    }
-}
-
-public struct Profiler { // TODO: move this to a different package
-    let start = clock_gettime_nsec_np(CLOCK_UPTIME_RAW)
-    
-    var elapsedNanoseconds: UInt {
-        let finish = clock_gettime_nsec_np(CLOCK_UPTIME_RAW)
-        return UInt(finish - start)
-    }
-    
-    var elapsed: Double {
-        let finish = clock_gettime_nsec_np(CLOCK_UPTIME_RAW)
-        return Double(finish - start) / 1000000000.0
     }
 }
 
