@@ -371,18 +371,21 @@ public class Datastore {
             var keys: Set<PropertyKey> = []
             for entityID in properties {
                 if let (entity, wasCreated) = entityID.resolve(in: self) {
-                    let values = entityID.updates ?? PropertyDictionary()
-                    let addedByRelationships = values.add(to: entity, store: self)
-                    if addedByRelationships.count > 0 {
-                        added.formUnion(addedByRelationships.map({ self.makeReference(for: $0) }))
-                    }
                     let reference = self.makeReference(for: entity)
-                    
-                    if wasCreated.count == 0 {
+                    let entityWasCreated = wasCreated.contains(entity)
+                    if entityWasCreated {
+                        // if the entity was created during resolution, then the properties
+                        // we want to add will have been set already during creation
+                        added.formUnion(wasCreated.map({ self.makeReference(for: $0) }))
+                    } else {
+                        // if not, we need to add them now...
+                        let values = entityID.updates ?? PropertyDictionary()
+                        let addedByRelationships = values.add(to: entity, store: self)
+                        if addedByRelationships.count > 0 {
+                            added.formUnion(addedByRelationships.map({ self.makeReference(for: $0) }))
+                        }
                         changed.insert(reference)
                         keys.formUnion(values.values.keys)
-                    } else {
-                        added.formUnion(wasCreated.map({ self.makeReference(for: $0) }))
                     }
                 }
             }
