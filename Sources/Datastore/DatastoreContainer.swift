@@ -11,7 +11,7 @@ public protocol ContainerWithStore: NSPersistentContainer {
     var indexer: NSCoreDataCoreSpotlightDelegate? { get set }
 }
 
-public class DatastoreContainer: NSPersistentContainer, ContainerWithStore {
+open class DatastoreContainer: NSPersistentContainer, ContainerWithStore {
     public typealias LoadResult = Result<ContainerWithStore, Error>
     public typealias LoadCompletion = (LoadResult) -> Void
 
