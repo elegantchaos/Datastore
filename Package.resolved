@@ -2,6 +2,15 @@
   "object": {
     "pins": [
       {
+        "package": "CollectionExtensions",
+        "repositoryURL": "https://github.com/elegantchaos/CollectionExtensions.git",
+        "state": {
+          "branch": null,
+          "revision": "ad0cd0c0782fe49ea9041fa1265378f03d1327cc",
+          "version": "1.0.0"
+        }
+      },
+      {
         "package": "LayoutExtensions",
         "repositoryURL": "https://github.com/elegantchaos/LayoutExtensions.git",
         "state": {
@@ -17,6 +26,15 @@
           "branch": null,
           "revision": "c101ca48876adabeb25848f5fe0efba748c24d73",
           "version": "1.3.7"
+        }
+      },
+      {
+        "package": "Performance",
+        "repositoryURL": "https://github.com/elegantchaos/Performance.git",
+        "state": {
+          "branch": null,
+          "revision": "ee895c9b5cfbc12ed2ab6fd73e927f48c75e3994",
+          "version": "1.0.2"
         }
       },
       {
